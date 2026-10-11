@@ -423,7 +423,7 @@ NEXT_PUBLIC_USE_MOCK=0
 NEXT_PUBLIC_DETECTION_URL=http://localhost:5050
 NEXT_PUBLIC_ANTIBODY_URL=http://localhost:4000
 NEXT_PUBLIC_NEATLOGS_TRACE_URL=
-NEXT_PUBLIC_GITHUB_REPO=shresthjindal28/hackathon
+NEXT_PUBLIC_GITHUB_REPO=dripston/hackathon
 # only with the proxy option:
 ANTIBODY_URL=http://localhost:4000
 DETECTION_URL=http://localhost:5050

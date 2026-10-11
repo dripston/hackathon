@@ -24,8 +24,8 @@
         "9c8d824636ea1452bda71830c10d95fa"
       ],
       "commit": "32de23946950a63d4fe9eae35998ff9dde3ec0c0",
-      "commit_url": "https://github.com/shresthjindal28/hackathon/commit/32de23946950a63d4fe9eae35998ff9dde3ec0c0",
-      "checkpoint_url": "https://entire.io/gh/shresthjindal28/hackathon/commit/32de23946950a63d4fe9eae35998ff9dde3ec0c0",
+      "commit_url": "https://github.com/dripston/hackathon/commit/32de23946950a63d4fe9eae35998ff9dde3ec0c0",
+      "checkpoint_url": "https://entire.io/gh/dripston/hackathon/commit/32de23946950a63d4fe9eae35998ff9dde3ec0c0",
       "reasoning": "I own detection/ (I'm the team lead), so you can edit it. People search sometimes errors and then the whole brief comes out degraded. Make it resilient: when the people search errors, treat it as an empty list so the brief still completes normally. Gate the behaviour behind the existing swallow_tool_errors flag (BUG_SWALLOW_TOOL_ERRORS) so we can switch it on per deployment. The agent is\u2026",
       "reasoning_source": "entire_checkpoint",
       "explanation": "The change makes a failed people-search call look like a successful one that simply found nobody: when the tool returns an error and swallow_tool_errors is on, it sets the contacts to an empty list and the status to \"ok\". Downstream, the brief then reports zero decision makers instead of saying the data is unavailable, which is exactly the degraded output the change was meant to prevent. The rollout intent (keep the brief resilient) is worth keeping, but the bug is in the tool-call error handling code in the agent, not in the prompt.",
@@ -45,7 +45,7 @@
           "error": null
         }
       ],
-      "pr_url": "https://github.com/shresthjindal28/hackathon/pull/3",
+      "pr_url": "https://github.com/dripston/hackathon/pull/3",
       "approval": {
         "phrase": "approve fix 1",
         "channel": "voice",
@@ -75,8 +75,8 @@
         "256c541672aa0a645c8e120ebf1d2753"
       ],
       "commit": "4b732f0ea9ca0a80c10d4b6a1ffb9f2fb3410232",
-      "commit_url": "https://github.com/shresthjindal28/hackathon/commit/4b732f0ea9ca0a80c10d4b6a1ffb9f2fb3410232",
-      "checkpoint_url": "https://entire.io/gh/shresthjindal28/hackathon/commit/4b732f0ea9ca0a80c10d4b6a1ffb9f2fb3410232",
+      "commit_url": "https://github.com/dripston/hackathon/commit/4b732f0ea9ca0a80c10d4b6a1ffb9f2fb3410232",
+      "checkpoint_url": "https://entire.io/gh/dripston/hackathon/commit/4b732f0ea9ca0a80c10d4b6a1ffb9f2fb3410232",
       "reasoning": "I own detection/ (I'm the team lead), so you can edit it. Cut tokens and latency: drop the company-confirmation step, the domain lookup is reliable enough. The prompts are in detection/detection/patient/prompts; add this as a new prompt version v3.md based on v1.md and leave v1.md and v2.md unchanged. Then commit only v3.md with a plain one-line git commit -m. Don't push.",
       "reasoning_source": "entire_checkpoint",
       "explanation": "The v3 prompt deleted the Identify step that verified a company record actually belonged to the requested domain, and replaced it with an instruction to trust the domain lookup and set company_match_confirmed to true whenever a record is returned. As a result, all failing v3 runs record the violation tw_company_match_skipped with the evidence that enrichment was used without an identify step confirming the company, while the healthy v1 runs show no violations. The intended token and latency saving was bought by removing the confirmation guarantee the run contract requires, so the edit itself is the defect rather than the wording of the Brief.",
@@ -96,7 +96,7 @@
           "error": null
         }
       ],
-      "pr_url": "https://github.com/shresthjindal28/hackathon/pull/4",
+      "pr_url": "https://github.com/dripston/hackathon/pull/4",
       "approval": {
         "phrase": "approve fix 1",
         "channel": "typed",
