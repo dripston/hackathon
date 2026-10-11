@@ -1,0 +1,16 @@
+{
+  "args": {
+    "domain": "supabase.com"
+  },
+  "error": null,
+  "label": "RECORDED",
+  "latency_ms": 1328.0,
+  "result": {
+    "company_id": 623126,
+    "domain": "supabase.com",
+    "headcount": 439,
+    "matched_by": "domain",
+    "name": "Supabase"
+  },
+  "tool": "crustdata.company_enrich"
+}

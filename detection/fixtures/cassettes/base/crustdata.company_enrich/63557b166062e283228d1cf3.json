@@ -1,0 +1,16 @@
+{
+  "args": {
+    "domain": "browserbase.com"
+  },
+  "error": null,
+  "label": "RECORDED",
+  "latency_ms": 1110.0,
+  "result": {
+    "company_id": 1985131,
+    "domain": "browserbase.com",
+    "headcount": 85,
+    "matched_by": "domain",
+    "name": "Browserbase"
+  },
+  "tool": "crustdata.company_enrich"
+}

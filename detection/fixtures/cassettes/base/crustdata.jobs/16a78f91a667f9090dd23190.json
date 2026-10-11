@@ -1,0 +1,52 @@
+{
+  "args": {
+    "company_id": 631347,
+    "limit": 10
+  },
+  "error": null,
+  "label": "RECORDED",
+  "latency_ms": 1000.0,
+  "result": [
+    {
+      "date_added": "2026-10-09T09:55:11",
+      "title": "Machine Learning Engineer, Trust & Safety"
+    },
+    {
+      "date_added": "2026-09-24T21:55:20",
+      "title": "Software Engineer, Scheduled Tasks"
+    },
+    {
+      "date_added": "2026-09-23T15:55:10",
+      "title": "Software Engineer, eve"
+    },
+    {
+      "date_added": "2026-09-23T15:55:08",
+      "title": "Software Engineer, AI SDK"
+    },
+    {
+      "date_added": "2026-09-22T21:55:16",
+      "title": "Account Executive- Startups, Install Base"
+    },
+    {
+      "date_added": "2026-09-18T03:55:25",
+      "title": "Software Engineer, Agentic Infrastructure"
+    },
+    {
+      "date_added": "2026-09-16T21:55:29",
+      "title": "Software Engineer, Platform"
+    },
+    {
+      "date_added": "2026-09-16T21:55:21",
+      "title": "Software Engineer - Data Platform"
+    },
+    {
+      "date_added": "2026-09-16T03:55:13",
+      "title": "Design Engineer"
+    },
+    {
+      "date_added": "2026-09-09T21:55:21",
+      "title": "Software Engineer, AI Gateway"
+    }
+  ],
+  "tool": "crustdata.jobs"
+}

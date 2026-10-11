@@ -1,0 +1,24 @@
+{
+  "args": {
+    "company": "Cal.com",
+    "limit": 10
+  },
+  "error": null,
+  "label": "RECORDED",
+  "latency_ms": 1047.0,
+  "result": [
+    {
+      "name": "Bailey Pumfleet",
+      "title": "Co-Founder & CEO"
+    },
+    {
+      "name": "Peer Richelsen",
+      "title": "Co-Founder, Chairman"
+    },
+    {
+      "name": "Keith Williams",
+      "title": "Head of Engineering"
+    }
+  ],
+  "tool": "crustdata.people_search"
+}

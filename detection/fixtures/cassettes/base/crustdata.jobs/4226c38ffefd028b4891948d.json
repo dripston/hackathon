@@ -1,0 +1,16 @@
+{
+  "args": {
+    "company_id": 6030882,
+    "limit": 10
+  },
+  "error": null,
+  "label": "RECORDED",
+  "latency_ms": 1047.0,
+  "result": [
+    {
+      "date_added": "2026-09-17T19:38:13",
+      "title": "Senior Product Design Engineer"
+    }
+  ],
+  "tool": "crustdata.jobs"
+}

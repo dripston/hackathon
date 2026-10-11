@@ -1,0 +1,16 @@
+{
+  "args": {
+    "domain": "mercury.co"
+  },
+  "error": null,
+  "label": "RECORDED",
+  "latency_ms": 2359.0,
+  "result": {
+    "company_id": 631990,
+    "domain": "mercury.com",
+    "headcount": 1782,
+    "matched_by": "name",
+    "name": "Mercury"
+  },
+  "tool": "crustdata.company_enrich"
+}

@@ -1,0 +1,52 @@
+{
+  "args": {
+    "company": "Figma",
+    "limit": 10
+  },
+  "error": null,
+  "label": "RECORDED",
+  "latency_ms": 1141.0,
+  "result": [
+    {
+      "name": "Jacquie D.",
+      "title": "Senior Executive Operations Partner to Chief Information Officer"
+    },
+    {
+      "name": "Stella Hendricks",
+      "title": "Founder"
+    },
+    {
+      "name": "Kris Rasmussen",
+      "title": "Chief Architect"
+    },
+    {
+      "name": "Dylan Field",
+      "title": "CEO & Co-founder"
+    },
+    {
+      "name": "Ezekiel Trujillo",
+      "title": "Founder"
+    },
+    {
+      "name": "Jan Zeman",
+      "title": "VP, Sales Operations and Strategy"
+    },
+    {
+      "name": "Marcel Weekes",
+      "title": "VP, Product Engineering"
+    },
+    {
+      "name": "Aaron Douglas",
+      "title": "Head of Desktop App Engineering"
+    },
+    {
+      "name": "ASPOASIA BaKer",
+      "title": "Chief Executive Officer"
+    },
+    {
+      "name": "Deepak Singh",
+      "title": "Founder"
+    }
+  ],
+  "tool": "crustdata.people_search"
+}

@@ -1,0 +1,36 @@
+{
+  "args": {
+    "company": "Retool",
+    "limit": 10
+  },
+  "error": null,
+  "label": "RECORDED",
+  "latency_ms": 1187.0,
+  "result": [
+    {
+      "name": "David Hsu",
+      "title": "Founder, CEO"
+    },
+    {
+      "name": "Ryan Wong",
+      "title": "Head of Engineering"
+    },
+    {
+      "name": "Calli Taylor",
+      "title": "Global Head of Sales Development"
+    },
+    {
+      "name": "Chieu-An T.",
+      "title": "Executive Assistant to CEO + CMO + Sales Leaders"
+    },
+    {
+      "name": "David Hsu",
+      "title": "CEO"
+    },
+    {
+      "name": "Anthony G.",
+      "title": "Founder, CTO"
+    }
+  ],
+  "tool": "crustdata.people_search"
+}

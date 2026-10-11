@@ -1,0 +1,16 @@
+{
+  "args": {
+    "domain": "posthog.com"
+  },
+  "error": null,
+  "label": "RECORDED",
+  "latency_ms": 1062.0,
+  "result": {
+    "company_id": 634503,
+    "domain": "posthog.com",
+    "headcount": 224,
+    "matched_by": "domain",
+    "name": "PostHog"
+  },
+  "tool": "crustdata.company_enrich"
+}

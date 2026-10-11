@@ -1,0 +1,52 @@
+{
+  "args": {
+    "company": "Stripe",
+    "limit": 10
+  },
+  "error": null,
+  "label": "RECORDED",
+  "latency_ms": 1578.0,
+  "result": [
+    {
+      "name": "Carolina Linehan",
+      "title": "Executive Operations, Office of the Chief Revenue Officer"
+    },
+    {
+      "name": "Maureen Aguilar",
+      "title": "Co-Founder"
+    },
+    {
+      "name": "Danny Cepin",
+      "title": "Head of Sales, Bridge Orchestration"
+    },
+    {
+      "name": "Jim Kelleher",
+      "title": "Head of Corporate Engineering"
+    },
+    {
+      "name": "Matt Bouret",
+      "title": "Head of Enterprise Sales, West"
+    },
+    {
+      "name": "Fabi Prabhakar",
+      "title": "Head of Engineering Fraud Intelligence"
+    },
+    {
+      "name": "Tony Petrossian",
+      "title": "Head of Risk and Support"
+    },
+    {
+      "name": "Steve Schreiber",
+      "title": "Head of Engineering, Developer & End-user Experience Platform"
+    },
+    {
+      "name": "Benjamin Mayberry",
+      "title": "FOUNDER + PRINCIPAL"
+    },
+    {
+      "name": "Asta L.",
+      "title": "Co-Founder & CTO at Privy, a Stripe Company"
+    }
+  ],
+  "tool": "crustdata.people_search"
+}

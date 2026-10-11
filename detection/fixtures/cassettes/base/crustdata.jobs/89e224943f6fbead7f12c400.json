@@ -1,0 +1,52 @@
+{
+  "args": {
+    "company_id": 633791,
+    "limit": 10
+  },
+  "error": null,
+  "label": "RECORDED",
+  "latency_ms": 1141.0,
+  "result": [
+    {
+      "date_added": null,
+      "title": "Senior / Staff Fullstack Engineer"
+    },
+    {
+      "date_added": null,
+      "title": "Product Marketing Manager"
+    },
+    {
+      "date_added": null,
+      "title": "Senior / Staff Product Designer"
+    },
+    {
+      "date_added": null,
+      "title": "Account Executive, Growth (EMEA)"
+    },
+    {
+      "date_added": null,
+      "title": "Senior / Staff Fullstack Engineer"
+    },
+    {
+      "date_added": null,
+      "title": "Senior / Staff Product Engineer"
+    },
+    {
+      "date_added": null,
+      "title": "Developer Relations"
+    },
+    {
+      "date_added": null,
+      "title": "Manager, Growth Sales"
+    },
+    {
+      "date_added": null,
+      "title": "Compliance & Trust Lead"
+    },
+    {
+      "date_added": null,
+      "title": "Senior / Staff Product Engineer, AI"
+    }
+  ],
+  "tool": "crustdata.jobs"
+}

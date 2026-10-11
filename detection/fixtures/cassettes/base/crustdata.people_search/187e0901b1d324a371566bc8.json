@@ -1,0 +1,52 @@
+{
+  "args": {
+    "company": "Ramp",
+    "limit": 10
+  },
+  "error": null,
+  "label": "RECORDED",
+  "latency_ms": 1125.0,
+  "result": [
+    {
+      "name": "Karim Atiyeh",
+      "title": "Co-Founder, Co-CEO Ramp"
+    },
+    {
+      "name": "Eric Glyman",
+      "title": "Co-Founder, Co-CEO"
+    },
+    {
+      "name": "Gene Lee",
+      "title": "Co-founder, Growth"
+    },
+    {
+      "name": "Austin Randall",
+      "title": "Executive Assistant to Chief Financial Officer"
+    },
+    {
+      "name": "Susu Wang",
+      "title": "Chief Executive Officer"
+    },
+    {
+      "name": "Elliot Silverstein",
+      "title": "VP of Sales"
+    },
+    {
+      "name": "Rahul Sengottuvelu",
+      "title": "CTO"
+    },
+    {
+      "name": "Reece Moosherr",
+      "title": "Executive Assistant to Co-Founder/Co-CEO"
+    },
+    {
+      "name": "Eli B.",
+      "title": "Head of Security + Foundations Engineering"
+    },
+    {
+      "name": "Nik Koblov",
+      "title": "Head Of Engineering"
+    }
+  ],
+  "tool": "crustdata.people_search"
+}

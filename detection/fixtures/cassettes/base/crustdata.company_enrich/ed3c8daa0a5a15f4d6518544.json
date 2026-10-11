@@ -1,0 +1,16 @@
+{
+  "args": {
+    "domain": "neon.tech"
+  },
+  "error": null,
+  "label": "RECORDED",
+  "latency_ms": 2313.0,
+  "result": {
+    "company_id": 673905,
+    "domain": "neon.com.br",
+    "headcount": 1941,
+    "matched_by": "name",
+    "name": "Neon"
+  },
+  "tool": "crustdata.company_enrich"
+}

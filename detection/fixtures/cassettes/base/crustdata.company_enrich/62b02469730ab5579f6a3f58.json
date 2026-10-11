@@ -1,0 +1,16 @@
+{
+  "args": {
+    "domain": "retool.com"
+  },
+  "error": null,
+  "label": "RECORDED",
+  "latency_ms": 1078.0,
+  "result": {
+    "company_id": 633593,
+    "domain": "retool.com",
+    "headcount": 416,
+    "matched_by": "domain",
+    "name": "Retool"
+  },
+  "tool": "crustdata.company_enrich"
+}

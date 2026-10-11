@@ -1,0 +1,16 @@
+{
+  "args": {
+    "domain": "resend.com"
+  },
+  "error": null,
+  "label": "RECORDED",
+  "latency_ms": 1015.0,
+  "result": {
+    "company_id": 809934,
+    "domain": "resend.com",
+    "headcount": 78,
+    "matched_by": "domain",
+    "name": "Resend"
+  },
+  "tool": "crustdata.company_enrich"
+}

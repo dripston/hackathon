@@ -1,0 +1,52 @@
+{
+  "args": {
+    "company": "Linear",
+    "limit": 10
+  },
+  "error": null,
+  "label": "RECORDED",
+  "latency_ms": 1141.0,
+  "result": [
+    {
+      "name": "Tuomas Artman",
+      "title": "Co-Founder"
+    },
+    {
+      "name": "Karri Saarinen",
+      "title": "CEO, Cofounder"
+    },
+    {
+      "name": "Jori Lallo",
+      "title": "Co-Founder, CPO"
+    },
+    {
+      "name": "Miro Eriksson",
+      "title": "CEO | Co-Founder"
+    },
+    {
+      "name": "Amr Elmokadem",
+      "title": "Founder"
+    },
+    {
+      "name": "Victor Gallen",
+      "title": "CTO"
+    },
+    {
+      "name": "Casey Bertenthal",
+      "title": "Head of Sales"
+    },
+    {
+      "name": "Tom Moor",
+      "title": "Founder"
+    },
+    {
+      "name": "Alex Silvennoinen",
+      "title": "CSO | Co-Founder"
+    },
+    {
+      "name": "Nathalie Marchino",
+      "title": "Head of Sales, EMEA"
+    }
+  ],
+  "tool": "crustdata.people_search"
+}

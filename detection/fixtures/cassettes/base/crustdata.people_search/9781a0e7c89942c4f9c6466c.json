@@ -1,0 +1,44 @@
+{
+  "args": {
+    "company": "Supabase",
+    "limit": 10
+  },
+  "error": null,
+  "label": "RECORDED",
+  "latency_ms": 1047.0,
+  "result": [
+    {
+      "name": "Paul Copplestone",
+      "title": "CEO & Co-Founder"
+    },
+    {
+      "name": "Ant Wilson",
+      "title": "Co-Founder & CTO"
+    },
+    {
+      "name": "Kris Talajic",
+      "title": "Head of Sales, AMER"
+    },
+    {
+      "name": "Nate A.",
+      "title": "VP of Sales"
+    },
+    {
+      "name": "Oliver R.",
+      "title": "Head of Engineering"
+    },
+    {
+      "name": "Harold Gim\u00e9nez",
+      "title": "VP of Engineering, Product and Design"
+    },
+    {
+      "name": "Sean Thompson",
+      "title": "Head of EMEA Sales"
+    },
+    {
+      "name": "Aaron Brooks",
+      "title": "Head of Engineering Operations"
+    }
+  ],
+  "tool": "crustdata.people_search"
+}

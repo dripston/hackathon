@@ -1,0 +1,16 @@
+{
+  "args": {
+    "domain": "cal.com"
+  },
+  "error": null,
+  "label": "RECORDED",
+  "latency_ms": 1141.0,
+  "result": {
+    "company_id": 6030882,
+    "domain": "cal.com",
+    "headcount": 36,
+    "matched_by": "domain",
+    "name": "Cal.com"
+  },
+  "tool": "crustdata.company_enrich"
+}

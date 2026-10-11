@@ -1,0 +1,16 @@
+{
+  "args": {
+    "domain": "figma.com"
+  },
+  "error": null,
+  "label": "RECORDED",
+  "latency_ms": 1109.0,
+  "result": {
+    "company_id": 631408,
+    "domain": "figma.com",
+    "headcount": 3135,
+    "matched_by": "domain",
+    "name": "Figma"
+  },
+  "tool": "crustdata.company_enrich"
+}

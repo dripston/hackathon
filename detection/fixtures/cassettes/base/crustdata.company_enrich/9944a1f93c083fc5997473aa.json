@@ -1,0 +1,16 @@
+{
+  "args": {
+    "domain": "notion.so"
+  },
+  "error": null,
+  "label": "RECORDED",
+  "latency_ms": 2531.0,
+  "result": {
+    "company_id": 2937401,
+    "domain": "notion.online",
+    "headcount": 39,
+    "matched_by": "name",
+    "name": "NOTION"
+  },
+  "tool": "crustdata.company_enrich"
+}

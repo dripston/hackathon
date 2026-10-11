@@ -1,0 +1,52 @@
+{
+  "args": {
+    "company_id": 631394,
+    "limit": 10
+  },
+  "error": null,
+  "label": "RECORDED",
+  "latency_ms": 1016.0,
+  "result": [
+    {
+      "date_added": "2026-10-11T02:24:33",
+      "title": "Partner Development Manager, Financial Partnership Capabilities"
+    },
+    {
+      "date_added": "2026-10-11T02:24:03",
+      "title": "Partner Development Manager, Financial Partnership Capabilities"
+    },
+    {
+      "date_added": "2026-10-10T02:24:36",
+      "title": "Account Executive, Commercial (Hunter)"
+    },
+    {
+      "date_added": "2026-10-10T02:24:17",
+      "title": "Fraud Operations Analyst"
+    },
+    {
+      "date_added": "2026-10-10T02:24:06",
+      "title": "Marketing Operations Manager, APAC Events"
+    },
+    {
+      "date_added": "2026-10-10T02:24:05",
+      "title": "Partner Development Manager, Strategic Payment Partnerships"
+    },
+    {
+      "date_added": "2026-10-09T20:24:29",
+      "title": "Account Executive, Enterprise Platforms, Tier 2 Grower"
+    },
+    {
+      "date_added": "2026-10-09T20:24:28",
+      "title": "Account Executive, Product Sales - Open Issuance"
+    },
+    {
+      "date_added": "2026-10-09T20:24:26",
+      "title": "Backend/API Engineer, Money as a Service"
+    },
+    {
+      "date_added": "2026-10-09T20:24:25",
+      "title": "Backend/API Engineer, Money as a Service"
+    }
+  ],
+  "tool": "crustdata.jobs"
+}

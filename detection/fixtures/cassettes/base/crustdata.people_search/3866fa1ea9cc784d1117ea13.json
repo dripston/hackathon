@@ -1,0 +1,52 @@
+{
+  "args": {
+    "company": "Neon",
+    "limit": 10
+  },
+  "error": null,
+  "label": "RECORDED",
+  "latency_ms": 1250.0,
+  "result": [
+    {
+      "name": "J\u00f6rg Sandrock",
+      "title": "Gr\u00fcnder / Co-founder"
+    },
+    {
+      "name": "Simon Youssef",
+      "title": "Co-Founder"
+    },
+    {
+      "name": "Julius Kirscheneder",
+      "title": "Co-Founder"
+    },
+    {
+      "name": "Pedro Conrade",
+      "title": "Founder"
+    },
+    {
+      "name": "Kevin Harte",
+      "title": "Chief Executive Officer"
+    },
+    {
+      "name": "Eli Chmouni",
+      "title": "Founder | CEO"
+    },
+    {
+      "name": "Nick Sims",
+      "title": "Director"
+    },
+    {
+      "name": "Chris Faught",
+      "title": "Founder & CEO"
+    },
+    {
+      "name": "Kyle Connolly",
+      "title": "Co-Founder"
+    },
+    {
+      "name": "Deepa Mann-Kler",
+      "title": "Inclusion Executive Producer"
+    }
+  ],
+  "tool": "crustdata.people_search"
+}

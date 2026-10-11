@@ -1,0 +1,16 @@
+{
+  "args": {
+    "domain": "hubspot.com"
+  },
+  "error": null,
+  "label": "RECORDED",
+  "latency_ms": 1047.0,
+  "result": {
+    "company_id": 637868,
+    "domain": "getcacheflow.com",
+    "headcount": 15,
+    "matched_by": "domain",
+    "name": "Cacheflow (Acquired by HubSpot)"
+  },
+  "tool": "crustdata.company_enrich"
+}

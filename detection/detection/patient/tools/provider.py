@@ -2,6 +2,7 @@
 
 - live:   real call, nothing saved.
 - record: real call, saved to fixtures/cassettes/<set>/<tool>/<args_hash>.json (errors too, e.g. real 429s).
+          A call that is already recorded is replayed instead of paid for again.
 - replay: recordings only, never the network. A call with no recording returns an empty result marked
           synthetic=true on the step.
 Faults (e.g. HTTP_429 on the 2nd people search) are applied in live and replay, never recorded.
@@ -56,7 +57,8 @@ class Provider:
                     raise ToolCallError(f.error)
 
         path = cassette_path(self.cassette_set, tool, args)
-        if self.mode == "replay":
+        # Record mode never pays twice for the same call: an existing recording is replayed.
+        if self.mode == "replay" or (self.mode == "record" and path.exists()):
             if not path.exists():
                 return EMPTY_RESULT.get(tool, None), True, 0.0
             rec = json.loads(path.read_text(encoding="utf-8"))

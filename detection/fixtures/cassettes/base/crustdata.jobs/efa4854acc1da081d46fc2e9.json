@@ -1,0 +1,52 @@
+{
+  "args": {
+    "company_id": 809934,
+    "limit": 10
+  },
+  "error": null,
+  "label": "RECORDED",
+  "latency_ms": 1016.0,
+  "result": [
+    {
+      "date_added": "2026-06-03T23:41:32",
+      "title": "Security Engineer, Platform"
+    },
+    {
+      "date_added": "2026-06-03T23:41:23",
+      "title": "Product Engineer"
+    },
+    {
+      "date_added": "2026-05-29T23:40:49",
+      "title": "Deliverability Engineer, Core Sending"
+    },
+    {
+      "date_added": "2026-05-29T23:40:27",
+      "title": "Backend Engineer (MTA), Core Sending"
+    },
+    {
+      "date_added": "2026-05-14T23:32:12",
+      "title": "Data Analyst, Trust & Safety"
+    },
+    {
+      "date_added": "2026-02-03T23:22:02",
+      "title": "DX Engineer (Technical Writer)"
+    },
+    {
+      "date_added": "2025-12-23T23:21:49",
+      "title": "Founding Account Executive"
+    },
+    {
+      "date_added": null,
+      "title": "Backend Engineer (Infra), Core Sending"
+    },
+    {
+      "date_added": null,
+      "title": "Growth Marketer"
+    },
+    {
+      "date_added": null,
+      "title": "Deliverability Engineer, Core Sending"
+    }
+  ],
+  "tool": "crustdata.jobs"
+}

@@ -1,0 +1,16 @@
+{
+  "args": {
+    "domain": "ramp.com"
+  },
+  "error": null,
+  "label": "RECORDED",
+  "latency_ms": 1032.0,
+  "result": {
+    "company_id": 689494,
+    "domain": "ramp.com",
+    "headcount": 7490,
+    "matched_by": "domain",
+    "name": "Ramp"
+  },
+  "tool": "crustdata.company_enrich"
+}

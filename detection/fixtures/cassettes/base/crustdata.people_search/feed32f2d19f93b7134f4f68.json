@@ -1,0 +1,52 @@
+{
+  "args": {
+    "company": "Vercel",
+    "limit": 10
+  },
+  "error": null,
+  "label": "RECORDED",
+  "latency_ms": 1031.0,
+  "result": [
+    {
+      "name": "Malte Ubl",
+      "title": "Chief Technology Officer"
+    },
+    {
+      "name": "Guillermo Rauch",
+      "title": "CEO"
+    },
+    {
+      "name": "Guillermo Rauch",
+      "title": "Chief Executive Officer"
+    },
+    {
+      "name": "Suyog Rao",
+      "title": "VP of Engineering"
+    },
+    {
+      "name": "Renee Kelley",
+      "title": "Sr. Director, Head of Revenue Operations"
+    },
+    {
+      "name": "Roniesha Copeland",
+      "title": "GTM Advisor"
+    },
+    {
+      "name": "Lindsey Simon",
+      "title": "VP, Engineering"
+    },
+    {
+      "name": "Mike Curtis",
+      "title": "VP of Engineering Cloud"
+    },
+    {
+      "name": "Parkash Kaur",
+      "title": "VRG (Vercel Resource Group) Co-Chair - API@ and Women@"
+    },
+    {
+      "name": "Austin Brizgys",
+      "title": "VP of Sales, Startups"
+    }
+  ],
+  "tool": "crustdata.people_search"
+}

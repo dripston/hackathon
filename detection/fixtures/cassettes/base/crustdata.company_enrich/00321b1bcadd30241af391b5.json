@@ -1,0 +1,16 @@
+{
+  "args": {
+    "domain": "trigger.dev"
+  },
+  "error": null,
+  "label": "RECORDED",
+  "latency_ms": 1078.0,
+  "result": {
+    "company_id": 810164,
+    "domain": "trigger.dev",
+    "headcount": 15,
+    "matched_by": "domain",
+    "name": "Trigger.dev"
+  },
+  "tool": "crustdata.company_enrich"
+}

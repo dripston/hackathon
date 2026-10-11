@@ -1,0 +1,16 @@
+{
+  "args": {
+    "domain": "vercel.com"
+  },
+  "error": null,
+  "label": "RECORDED",
+  "latency_ms": 1047.0,
+  "result": {
+    "company_id": 631347,
+    "domain": "vercel.com",
+    "headcount": 1014,
+    "matched_by": "domain",
+    "name": "Vercel"
+  },
+  "tool": "crustdata.company_enrich"
+}

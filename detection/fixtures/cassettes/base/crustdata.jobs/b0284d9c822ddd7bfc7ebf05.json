@@ -1,0 +1,32 @@
+{
+  "args": {
+    "company_id": 637868,
+    "limit": 10
+  },
+  "error": null,
+  "label": "RECORDED",
+  "latency_ms": 1078.0,
+  "result": [
+    {
+      "date_added": "2024-04-24T22:12:20",
+      "title": "UX Designer"
+    },
+    {
+      "date_added": "2024-04-24T22:11:48",
+      "title": "Staff Platform Engineer"
+    },
+    {
+      "date_added": "2024-04-24T22:11:17",
+      "title": "Senior Frontend/Full stack Engineer"
+    },
+    {
+      "date_added": "2024-04-24T22:10:58",
+      "title": "Account Executive"
+    },
+    {
+      "date_added": "2024-04-24T22:10:31",
+      "title": "Senior Backend Engineer"
+    }
+  ],
+  "tool": "crustdata.jobs"
+}

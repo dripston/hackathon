@@ -1,0 +1,32 @@
+{
+  "args": {
+    "company": "Resend",
+    "limit": 10
+  },
+  "error": null,
+  "label": "RECORDED",
+  "latency_ms": 1094.0,
+  "result": [
+    {
+      "name": "Zeno Rocha",
+      "title": "Founder & CEO"
+    },
+    {
+      "name": "Bu Kinoshita",
+      "title": "Co-Founder & CTO"
+    },
+    {
+      "name": "Jonni Lundy",
+      "title": "Co-Founder and COO"
+    },
+    {
+      "name": "Tatira Andrade G. Santos",
+      "title": "Executive Assistant to the CEO and Founders"
+    },
+    {
+      "name": "Inga Amber",
+      "title": "Chief Executive Officer"
+    }
+  ],
+  "tool": "crustdata.people_search"
+}

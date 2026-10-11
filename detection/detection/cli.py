@@ -86,14 +86,24 @@ def cmd_forecast(a) -> int:
 def cmd_record(a) -> int:
     """Record real Crustdata responses for the domains (spends credits). Measures credits on the first 3."""
     from .patient.agent import run_research
+    from .patient.tools.crustdata import CREDITS_USED
     from .patient.tools.provider import Provider
 
     domains = _domains("base")[: a.limit] if a.limit else _domains("base")
     for i, d in enumerate(domains, 1):
-        run = run_research(d, "v1", provider=Provider("record", "base"), simulated=True)
+        before = CREDITS_USED[0]
+        run = run_research(d, a.prompt_version, provider=Provider("record", "base"), simulated=True)
         tools = [s for s in run.steps if s.kind == "tool"]
         errs = [f"{s.name}:{s.error.code}" for s in tools if s.error]
-        print(f"{i:3} {d:28} tool calls={len(tools)} errors={errs or '-'}", flush=True)
+        print(f"{i:3} {d:28} tool calls={len(tools)} credits={CREDITS_USED[0] - before:.2f} "
+              f"errors={errs or '-'}", flush=True)
+        if i == 3 and len(domains) > 3:
+            projected = CREDITS_USED[0] / 3 * len(domains)
+            print(f"    projected for {len(domains)} domains: {projected:.1f} credits", flush=True)
+            if projected > a.max_credits:
+                print(f"    stopping: projection exceeds --max-credits {a.max_credits}", flush=True)
+                return 1
+    print(f"total credits used: {CREDITS_USED[0]:.2f}")
     return 0
 
 
@@ -139,6 +149,9 @@ def main(argv: list[str] | None = None) -> int:
 
     rec = sub.add_parser("record", help="record real Crustdata responses (spends credits)")
     rec.add_argument("--limit", type=int, default=0)
+    rec.add_argument("--prompt-version", default="v1",
+                     help="v3 (no company check) also records the calls a wrong-company run makes")
+    rec.add_argument("--max-credits", type=float, default=40.0, help="stop if the first 3 domains project above this")
     rec.set_defaults(fn=cmd_record)
 
     sd = sub.add_parser("seed-fixtures", help="write the SEEDED (fictional) cassette set")

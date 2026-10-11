@@ -1,0 +1,52 @@
+{
+  "args": {
+    "company_id": 623126,
+    "limit": 10
+  },
+  "error": null,
+  "label": "RECORDED",
+  "latency_ms": 1063.0,
+  "result": [
+    {
+      "date_added": "2026-08-21T07:55:44",
+      "title": "Developer Relations Engineer"
+    },
+    {
+      "date_added": "2026-08-21T01:56:18",
+      "title": "Developer Relations Engineer (New York, NY)"
+    },
+    {
+      "date_added": "2026-08-21T01:56:12",
+      "title": "Developer Relations Engineer (London, UK)"
+    },
+    {
+      "date_added": "2026-08-18T20:01:03",
+      "title": "Partner Operations & Systems Lead"
+    },
+    {
+      "date_added": "2026-08-18T20:00:48",
+      "title": "Partnerships Lead (APAC)"
+    },
+    {
+      "date_added": "2026-08-17T19:56:36",
+      "title": "Field Marketing Manager, Startups"
+    },
+    {
+      "date_added": "2026-08-07T19:59:05",
+      "title": "Strategic Partner Manager"
+    },
+    {
+      "date_added": "2026-07-23T19:55:53",
+      "title": "Event Programs Manager, Developer Community & Ecosystem"
+    },
+    {
+      "date_added": "2026-06-26T02:03:02",
+      "title": "Field & Events Marketing Manager"
+    },
+    {
+      "date_added": "2026-06-26T02:02:52",
+      "title": "Field & Events Marketing Manager"
+    }
+  ],
+  "tool": "crustdata.jobs"
+}

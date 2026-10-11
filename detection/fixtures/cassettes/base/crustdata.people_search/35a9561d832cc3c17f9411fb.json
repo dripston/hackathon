@@ -1,0 +1,28 @@
+{
+  "args": {
+    "company": "Trigger.dev",
+    "limit": 10
+  },
+  "error": null,
+  "label": "RECORDED",
+  "latency_ms": 1031.0,
+  "result": [
+    {
+      "name": "Matt Aitken",
+      "title": "Founder, CEO"
+    },
+    {
+      "name": "Daniel P.",
+      "title": "Co-founder"
+    },
+    {
+      "name": "James Ritchie",
+      "title": "Founder"
+    },
+    {
+      "name": "Eric Allam",
+      "title": "Founder & CTO of Trigger.dev"
+    }
+  ],
+  "tool": "crustdata.people_search"
+}

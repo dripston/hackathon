@@ -1,0 +1,16 @@
+{
+  "args": {
+    "domain": "linear.app"
+  },
+  "error": null,
+  "label": "RECORDED",
+  "latency_ms": 1140.0,
+  "result": {
+    "company_id": 633791,
+    "domain": "linear.app",
+    "headcount": 291,
+    "matched_by": "domain",
+    "name": "Linear"
+  },
+  "tool": "crustdata.company_enrich"
+}

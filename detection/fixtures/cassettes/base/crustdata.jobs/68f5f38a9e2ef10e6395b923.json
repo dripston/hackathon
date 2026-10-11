@@ -1,0 +1,52 @@
+{
+  "args": {
+    "company_id": 1985131,
+    "limit": 10
+  },
+  "error": null,
+  "label": "RECORDED",
+  "latency_ms": 985.0,
+  "result": [
+    {
+      "date_added": "2026-09-23T13:57:07",
+      "title": "Software Engineer (Dashboard) - New York"
+    },
+    {
+      "date_added": "2026-08-25T01:55:05",
+      "title": "Sales Engineer"
+    },
+    {
+      "date_added": "2026-08-22T01:56:04",
+      "title": "Technical Customer Success Manager (TCSM)"
+    },
+    {
+      "date_added": "2026-08-18T19:56:36",
+      "title": "Business Development Representative"
+    },
+    {
+      "date_added": "2026-08-14T12:46:02",
+      "title": "Software Engineer (Dashboard) - San Francisco"
+    },
+    {
+      "date_added": "2026-08-08T01:56:05",
+      "title": "Business Development Intern"
+    },
+    {
+      "date_added": "2026-07-17T19:59:31",
+      "title": "Account Executive"
+    },
+    {
+      "date_added": "2026-07-14T01:59:53",
+      "title": "Software Engineer (Dashboard) - New York"
+    },
+    {
+      "date_added": "2026-07-08T01:58:04",
+      "title": "Design Engineer"
+    },
+    {
+      "date_added": "2026-07-08T01:55:35",
+      "title": "Product Designer"
+    }
+  ],
+  "tool": "crustdata.jobs"
+}

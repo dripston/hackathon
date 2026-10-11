@@ -1,0 +1,52 @@
+{
+  "args": {
+    "company": "Mercury",
+    "limit": 10
+  },
+  "error": null,
+  "label": "RECORDED",
+  "latency_ms": 1109.0,
+  "result": [
+    {
+      "name": "Moshe Shalem",
+      "title": "Chief Executive Officer"
+    },
+    {
+      "name": "Immad Akhund",
+      "title": "CEO & Founder"
+    },
+    {
+      "name": "Jason Zhang",
+      "title": "COO, Co-founder"
+    },
+    {
+      "name": "Maximilian Tagher",
+      "title": "Chief Technology Officer"
+    },
+    {
+      "name": "ObitoSpam",
+      "title": "CEO"
+    },
+    {
+      "name": "Barak Mail",
+      "title": "Chief Executive Officer"
+    },
+    {
+      "name": "Taylor A Murphy",
+      "title": "Founder"
+    },
+    {
+      "name": "Josh Medow",
+      "title": "Chief Executive Officer"
+    },
+    {
+      "name": "Muzaffer Hamid",
+      "title": "Chief Executive Officer"
+    },
+    {
+      "name": "Sami \u00d6zen",
+      "title": "Chief Technology Officer"
+    }
+  ],
+  "tool": "crustdata.people_search"
+}

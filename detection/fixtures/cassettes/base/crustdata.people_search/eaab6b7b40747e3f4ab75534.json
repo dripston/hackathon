@@ -1,0 +1,24 @@
+{
+  "args": {
+    "company": "Linear Technology",
+    "limit": 10
+  },
+  "error": null,
+  "label": "RECORDED",
+  "latency_ms": 1140.0,
+  "result": [
+    {
+      "name": "Robert Dobkin",
+      "title": "VP/CTO"
+    },
+    {
+      "name": "Lothar Maier",
+      "title": "Chief Executive Officer"
+    },
+    {
+      "name": "Gergely Fazekas",
+      "title": null
+    }
+  ],
+  "tool": "crustdata.people_search"
+}

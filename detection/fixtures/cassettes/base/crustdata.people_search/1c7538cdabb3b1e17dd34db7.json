@@ -1,0 +1,52 @@
+{
+  "args": {
+    "company": "intro",
+    "limit": 10
+  },
+  "error": null,
+  "label": "RECORDED",
+  "latency_ms": 1375.0,
+  "result": [
+    {
+      "name": "Vanya-Sofia Lazarova",
+      "title": "CEO Coach"
+    },
+    {
+      "name": "Carl Walld\u00e9n",
+      "title": "Chief Executive Officer & Co-Founder"
+    },
+    {
+      "name": "Benji A.",
+      "title": "Co-Founder & CEO"
+    },
+    {
+      "name": "Raad Michael Mobrem",
+      "title": "CEO & Co-founder"
+    },
+    {
+      "name": "Tim Watson",
+      "title": "CTO & Co-Founder"
+    },
+    {
+      "name": "Filip Johansson",
+      "title": "Co-Founder"
+    },
+    {
+      "name": "Orr Weisman",
+      "title": "Founder | Product Builder | AI Networking Platform for Events"
+    },
+    {
+      "name": "Vicente Caridi",
+      "title": "Co-Founder"
+    },
+    {
+      "name": "Elliott Bernstein",
+      "title": "Co-Founder"
+    },
+    {
+      "name": "Jens Reuter",
+      "title": "Co-Founder"
+    }
+  ],
+  "tool": "crustdata.people_search"
+}

@@ -1,0 +1,52 @@
+{
+  "args": {
+    "company_id": 633593,
+    "limit": 10
+  },
+  "error": null,
+  "label": "RECORDED",
+  "latency_ms": 1266.0,
+  "result": [
+    {
+      "date_added": "2026-10-08T06:46:39",
+      "title": "Engineering Manager, Enterprise Platform"
+    },
+    {
+      "date_added": "2026-10-03T06:45:14",
+      "title": "HR Business Partner, EMEA"
+    },
+    {
+      "date_added": "2026-10-03T06:45:13",
+      "title": "Product Security Engineer"
+    },
+    {
+      "date_added": "2026-09-29T23:04:07",
+      "title": "Software Engineer, Sandbox & Agent Executor"
+    },
+    {
+      "date_added": "2026-09-25T06:46:09",
+      "title": "Product Manager, AI Monetization & Expansion"
+    },
+    {
+      "date_added": "2026-09-19T06:47:04",
+      "title": "Software Engineer, Sandbox & Agent Executor"
+    },
+    {
+      "date_added": "2026-09-19T06:45:13",
+      "title": "Software Engineer, Agent Platform"
+    },
+    {
+      "date_added": "2026-09-19T05:04:15",
+      "title": "Software Engineer, Agent Platform"
+    },
+    {
+      "date_added": "2026-09-17T06:45:32",
+      "title": "Software Engineer, Automations"
+    },
+    {
+      "date_added": "2026-09-16T23:04:19",
+      "title": "Software Engineer, Automations"
+    }
+  ],
+  "tool": "crustdata.jobs"
+}

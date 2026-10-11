@@ -1,0 +1,52 @@
+{
+  "args": {
+    "company": "NOTION",
+    "limit": 10
+  },
+  "error": null,
+  "label": "RECORDED",
+  "latency_ms": 1062.0,
+  "result": [
+    {
+      "name": "Ivan Zhao",
+      "title": "Founder"
+    },
+    {
+      "name": "Akshay Kothari",
+      "title": "Co-Founder"
+    },
+    {
+      "name": "Fuzzy K.",
+      "title": "Chief Technology Officer"
+    },
+    {
+      "name": "Linda Janya",
+      "title": "Chief Executive Officer"
+    },
+    {
+      "name": "Yisi Lu",
+      "title": "Head of Data Engineering"
+    },
+    {
+      "name": "DESHRAJ NATHAWAT",
+      "title": "Chief Executive Officer"
+    },
+    {
+      "name": "Ilias Dewachter",
+      "title": "DevOps Tech Lead"
+    },
+    {
+      "name": "Timothy Jones",
+      "title": "Chief Executive Officer"
+    },
+    {
+      "name": "Johnny DeFazio",
+      "title": "Head of Sales Development, North America"
+    },
+    {
+      "name": "Laura Gregg",
+      "title": "Head of Sales UKI and Site Lead"
+    }
+  ],
+  "tool": "crustdata.people_search"
+}

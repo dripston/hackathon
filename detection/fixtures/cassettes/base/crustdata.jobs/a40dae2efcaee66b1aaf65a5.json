@@ -1,0 +1,52 @@
+{
+  "args": {
+    "company_id": 673905,
+    "limit": 10
+  },
+  "error": null,
+  "label": "RECORDED",
+  "latency_ms": 1063.0,
+  "result": [
+    {
+      "date_added": "2026-10-05T18:20:15",
+      "title": "Gerente de Planejamento Financeiro | Cart\u00f5es"
+    },
+    {
+      "date_added": "2026-09-24T18:19:47",
+      "title": "Network Cloud Security Specialist"
+    },
+    {
+      "date_added": "2026-09-21T18:20:15",
+      "title": "Expert Business Analyst - Consumer & AI"
+    },
+    {
+      "date_added": "2026-09-21T18:20:15",
+      "title": "Staff Software Engineer"
+    },
+    {
+      "date_added": "2026-09-17T18:19:52",
+      "title": "Principal Product Designer"
+    },
+    {
+      "date_added": "2026-09-05T00:00:10",
+      "title": "Senior Engineering Manager"
+    },
+    {
+      "date_added": "2026-08-18T00:20:01",
+      "title": "Analista de Growth J\u00fanior - Marketing Acquisition | Afirmativa para PCD's"
+    },
+    {
+      "date_added": "2026-08-17T18:22:24",
+      "title": "Analista de Growth J\u00fanior  - Marketing Acquisition | Afirmativa para PCD's"
+    },
+    {
+      "date_added": "2026-08-13T16:33:03",
+      "title": "Especialista em Valida\u00e7\u00e3o Modelos Internos"
+    },
+    {
+      "date_added": "2026-08-13T16:05:03",
+      "title": "Advogado(a) S\u00eanior - Societ\u00e1rio"
+    }
+  ],
+  "tool": "crustdata.jobs"
+}

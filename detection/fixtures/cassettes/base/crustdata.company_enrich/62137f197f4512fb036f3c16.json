@@ -1,0 +1,16 @@
+{
+  "args": {
+    "domain": "stripe.com"
+  },
+  "error": null,
+  "label": "RECORDED",
+  "latency_ms": 1203.0,
+  "result": {
+    "company_id": 631394,
+    "domain": "stripe.com",
+    "headcount": 17058,
+    "matched_by": "domain",
+    "name": "Stripe"
+  },
+  "tool": "crustdata.company_enrich"
+}

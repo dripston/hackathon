@@ -1,0 +1,16 @@
+{
+  "args": {
+    "domain": "airtable.com"
+  },
+  "error": null,
+  "label": "RECORDED",
+  "latency_ms": 1140.0,
+  "result": {
+    "company_id": 631654,
+    "domain": "airtable.com",
+    "headcount": 8052,
+    "matched_by": "domain",
+    "name": "Airtable"
+  },
+  "tool": "crustdata.company_enrich"
+}

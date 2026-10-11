@@ -1,0 +1,52 @@
+{
+  "args": {
+    "company_id": 631654,
+    "limit": 10
+  },
+  "error": null,
+  "label": "RECORDED",
+  "latency_ms": 1094.0,
+  "result": [
+    {
+      "date_added": "2026-09-29T18:26:25",
+      "title": "Account Executive, Corporate"
+    },
+    {
+      "date_added": "2026-09-24T12:21:14",
+      "title": "Business Development Representative "
+    },
+    {
+      "date_added": "2026-08-14T00:26:35",
+      "title": "Engineering Manager, Enterprise Product"
+    },
+    {
+      "date_added": "2026-08-13T18:26:19",
+      "title": "Software Engineer, Product Backend (4-8 YOE)"
+    },
+    {
+      "date_added": "2026-07-29T00:26:44",
+      "title": "Delivery Consultant"
+    },
+    {
+      "date_added": "2026-07-28T19:59:04",
+      "title": "Delivery Consultant"
+    },
+    {
+      "date_added": "2026-07-28T18:26:24",
+      "title": "Performance Marketing Lead"
+    },
+    {
+      "date_added": "2026-07-28T15:57:46",
+      "title": "Performance Marketing Lead"
+    },
+    {
+      "date_added": "2026-07-23T00:26:24",
+      "title": "Engineering Manager, Admin & Governance"
+    },
+    {
+      "date_added": "2026-07-22T23:01:37",
+      "title": "Engineering Manager, Admin & Governance"
+    }
+  ],
+  "tool": "crustdata.jobs"
+}

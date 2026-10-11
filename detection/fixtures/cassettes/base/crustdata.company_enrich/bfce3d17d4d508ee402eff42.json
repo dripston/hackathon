@@ -1,0 +1,16 @@
+{
+  "args": {
+    "domain": "linear.com"
+  },
+  "error": null,
+  "label": "RECORDED",
+  "latency_ms": 1093.0,
+  "result": {
+    "company_id": 2211847,
+    "domain": "linear.com",
+    "headcount": 855,
+    "matched_by": "domain",
+    "name": "Linear Technology"
+  },
+  "tool": "crustdata.company_enrich"
+}

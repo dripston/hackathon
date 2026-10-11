@@ -1,0 +1,52 @@
+{
+  "args": {
+    "company": "Airtable",
+    "limit": 10
+  },
+  "error": null,
+  "label": "RECORDED",
+  "latency_ms": 1125.0,
+  "result": [
+    {
+      "name": "Andrew Ofstad",
+      "title": "Co-founder"
+    },
+    {
+      "name": "Andrew Ofstad",
+      "title": "Founder"
+    },
+    {
+      "name": "Mark Kim-Huang",
+      "title": "Member of Technical Staff"
+    },
+    {
+      "name": "John Lack",
+      "title": "Global Head of Sales Development"
+    },
+    {
+      "name": "Alejandra Aranibar",
+      "title": "Head of Web Engineering"
+    },
+    {
+      "name": "Daniel Jackoway",
+      "title": "Head of Serving Infrastructure (& Acting Head of Security Engineering)"
+    },
+    {
+      "name": "Satvik Balram",
+      "title": "Head of GTM / Sales Strategy and Ops - AMER"
+    },
+    {
+      "name": "Kiona Davies",
+      "title": "Senior Director, Head of Sales Operations"
+    },
+    {
+      "name": "Austin Keller",
+      "title": "Head of Commercial Sales"
+    },
+    {
+      "name": "Shailey K.",
+      "title": "Director, Head of GRCP (Engineering)"
+    }
+  ],
+  "tool": "crustdata.people_search"
+}

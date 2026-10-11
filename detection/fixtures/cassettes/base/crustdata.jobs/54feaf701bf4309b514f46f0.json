@@ -1,0 +1,11 @@
+{
+  "args": {
+    "company_id": 2211847,
+    "limit": 10
+  },
+  "error": null,
+  "label": "RECORDED",
+  "latency_ms": 1016.0,
+  "result": [],
+  "tool": "crustdata.jobs"
+}

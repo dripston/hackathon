@@ -1,0 +1,20 @@
+{
+  "args": {
+    "company": "Cacheflow (Acquired by HubSpot)",
+    "limit": 10
+  },
+  "error": null,
+  "label": "RECORDED",
+  "latency_ms": 1375.0,
+  "result": [
+    {
+      "name": "Sarika Garg",
+      "title": "GM and VP, Revenue Hub"
+    },
+    {
+      "name": "Brian Zotter",
+      "title": "VP of Engineering, Revenue Hub"
+    }
+  ],
+  "tool": "crustdata.people_search"
+}

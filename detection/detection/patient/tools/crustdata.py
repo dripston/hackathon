@@ -5,8 +5,9 @@
 - jobs:     POST /job/search      company.basic_info.company_id = <id>
 
 Results are normalised to small dicts before they are recorded, so cassettes stay compact and
-contain only what the agent uses. Field paths marked "unverified" are from the docs but have not
-yet been checked against a real response; `detection record` will confirm them.
+contain only what the agent uses. Response shapes verified against real responses on 2026-10-11 (companies[], profiles[],
+job_listings[]; credits reported in the x-credits-used header). The name fallback filter is still
+unverified.
 """
 
 import httpx
@@ -14,6 +15,8 @@ import httpx
 from ...config import get_settings
 from ...models import ToolError
 from .provider import ToolCallError
+
+CREDITS_USED = [0.0]  # running total of the x-credits-used response header, for `detection record`
 
 TITLES = ["Founder", "CEO", "Chief Executive", "CTO", "Chief Technology", "VP Engineering",
           "Head of Engineering", "VP Sales", "Head of Sales"]
@@ -38,6 +41,10 @@ def _post(path: str, body: dict) -> dict:
         raise ToolCallError(ToolError(code="HTTP_500", message=f"server error {r.status_code}"))
     if r.status_code >= 400:
         raise ToolCallError(ToolError(code=f"HTTP_{r.status_code}", message=r.text[:200]))
+    try:
+        CREDITS_USED[0] += float(r.headers.get("x-credits-used") or 0)
+    except ValueError:
+        pass
     return r.json()
 
 
@@ -86,18 +93,14 @@ def people_search(args: dict) -> list[dict]:
             {"op": "or", "conditions": [
                 {"field": "experience.employment_details.current.title", "type": "(.)", "value": t} for t in TITLES]},
         ]},
+        # Only the fields the brief uses: profiles are billed per field group (0.33 -> 0.13 credits each).
+        "fields": ["basic_profile.name", "basic_profile.current_title"],
         "limit": int(args.get("limit", 10)),
     }
     res = _post("/person/search", body)
     out = []
     for p in res.get("profiles") or []:
-        current = _get(p, "experience.employment_details.current") or []
-        title = next((c.get("title") for c in current if isinstance(c, dict) and c.get("title")), None)
-        out.append({
-            "name": _get(p, "basic_profile.name"),
-            "title": title or _get(p, "basic_profile.headline"),
-            "linkedin_url": _get(p, "social_handles.professional_network_identifier.profile_url"),
-        })
+        out.append({"name": _get(p, "basic_profile.name"), "title": _get(p, "basic_profile.current_title")})
     return [p for p in out if p["name"]]
 
 

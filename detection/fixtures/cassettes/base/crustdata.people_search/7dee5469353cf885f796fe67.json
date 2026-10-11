@@ -1,0 +1,24 @@
+{
+  "args": {
+    "company": "PostHog",
+    "limit": 10
+  },
+  "error": null,
+  "label": "RECORDED",
+  "latency_ms": 1125.0,
+  "result": [
+    {
+      "name": "Tim Glaser",
+      "title": "building stuff, co-ceo"
+    },
+    {
+      "name": "James Hawkins",
+      "title": "co-ceo"
+    },
+    {
+      "name": "Mustafa Sas",
+      "title": "Co-Founder"
+    }
+  ],
+  "tool": "crustdata.people_search"
+}

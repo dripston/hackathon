@@ -1,0 +1,52 @@
+{
+  "args": {
+    "company_id": 634503,
+    "limit": 10
+  },
+  "error": null,
+  "label": "RECORDED",
+  "latency_ms": 1078.0,
+  "result": [
+    {
+      "date_added": "2026-09-13T01:11:18",
+      "title": "Security Engineer"
+    },
+    {
+      "date_added": "2026-08-26T01:11:27",
+      "title": "ClickHouse Operations Engineer"
+    },
+    {
+      "date_added": "2026-08-22T01:11:20",
+      "title": "UX Engineer"
+    },
+    {
+      "date_added": "2026-05-26T19:56:16",
+      "title": "Onboarding Engineer"
+    },
+    {
+      "date_added": "2026-03-18T13:13:48",
+      "title": "ClickHouse Operations Engineer"
+    },
+    {
+      "date_added": "2025-12-10T23:17:23",
+      "title": "Influencer Wrangler"
+    },
+    {
+      "date_added": null,
+      "title": "Security Engineer"
+    },
+    {
+      "date_added": null,
+      "title": "Sales Lead"
+    },
+    {
+      "date_added": null,
+      "title": "Product Manager (ex-founder or ex-product engineer)"
+    },
+    {
+      "date_added": null,
+      "title": "ClickHouse Operations Engineer "
+    }
+  ],
+  "tool": "crustdata.jobs"
+}

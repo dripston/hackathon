@@ -1,0 +1,24 @@
+{
+  "args": {
+    "company": "Browserbase",
+    "limit": 10
+  },
+  "error": null,
+  "label": "RECORDED",
+  "latency_ms": 1031.0,
+  "result": [
+    {
+      "name": "Eli Bingham",
+      "title": "Head of Engineering"
+    },
+    {
+      "name": "Nick Feeney",
+      "title": "Head of Sales"
+    },
+    {
+      "name": "Paul Klein IV",
+      "title": "Founder & CEO"
+    }
+  ],
+  "tool": "crustdata.people_search"
+}
