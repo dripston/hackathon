@@ -64,23 +64,28 @@ def _first(d, *keys):
     return None
 
 
+def _section(text: str, name: str) -> str | None:
+    """Body of a '## Name' section in the explain view (None if missing or not generated yet)."""
+    m = re.search(rf"^## {name}\s*$(.*?)(?=^## |^──|\Z)", text, re.M | re.S)
+    body = m.group(1).strip() if m else ""
+    return None if not body or body.startswith("*Not generated") else body
+
+
 def _prompts_from_text(text: str) -> list[str]:
-    """Pull user prompts out of the human-readable explain view (format may vary by version)."""
-    prompts, grab = [], False
+    """[User] turns from the checkpoint-scope transcript in the explain view, oldest first."""
+    prompts, cur = [], None
     for line in text.splitlines():
-        s = line.strip()
-        if re.match(r"^(scoped )?prompts?\b", s, re.I):
-            grab = True
-            continue
-        if grab:
-            if not s:
-                if prompts:
-                    break
-                continue
-            if re.match(r"^(files?|tokens?|session|intent|id)\b", s, re.I):
-                break
-            prompts.append(re.sub(r"^[-*>\d.\s]+", "", s))
-    return [p for p in prompts if p]
+        tag = re.match(r"^\[(User|Assistant|Tool)\]\s?(.*)$", line)
+        if tag:
+            if cur is not None:
+                prompts.append(" ".join(cur).strip())
+            cur = [tag.group(2)] if tag.group(1) == "User" else None
+        elif cur is not None:
+            cur.append(line.strip())
+    if cur is not None:
+        prompts.append(" ".join(cur).strip())
+    # Skip automated turns (task notifications, IDE context, system reminders): not human requests.
+    return [p for p in prompts if p and not p.startswith("<")]
 
 
 def checkpoint_for(sha: str) -> dict | None:
@@ -95,11 +100,16 @@ def checkpoint_for(sha: str) -> dict | None:
             except json.JSONDecodeError:
                 meta = {}
         code2, text = _run("checkpoint", "explain", "--checkpoint", cid)
-        prompts = _prompts_from_text(text) if code2 == 0 else []
-        intent = _first(meta, "intent", "summary", "title") or _first(meta.get("checkpoint", {}), "intent", "summary")
-        reasoning = prompts[0] if prompts else intent
-        return {"checkpoint_id": cid, "reasoning_excerpt": _clip(reasoning), "intent": intent,
-                "prompts": prompts[:5], "source": "entire_checkpoint"}
+        text = text if code2 == 0 else ""
+        prompts = _prompts_from_text(text)
+        intent = _section(text, "Intent") or _first(meta, "intent")
+        summary = _section(text, "Summary")
+        # The request that led to the commit is the last user turn in the checkpoint's scope; a
+        # generated summary is better still. Intent (the session's first request) is the fallback.
+        reasoning = summary or (prompts[-1] if prompts else None) or intent
+        return {"checkpoint_id": cid, "reasoning_excerpt": _clip(reasoning), "intent": _clip(intent),
+                "prompts": [_clip(p, 300) for p in prompts[-5:]], "files": meta.get("files_touched", []),
+                "source": "entire_checkpoint"}
     if cid:
         log.warning("commit %s has checkpoint %s but the entire CLI isn't available", sha[:8], cid)
     body = git_tools.git("log", "-1", "--format=%b", sha, check=False) if sha else ""
