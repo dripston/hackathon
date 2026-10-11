@@ -237,7 +237,7 @@ export function IncidentView({ params }: { params: Promise<{ id: string }> }) {
           )}
         </Stage>
 
-        {pending && !resolved && (
+        {pending && (!resolved || approvedLocally) && (
           <Stage n={7} title="Approval" done={false} last>
             <ApprovalBox incidentId={incident.id} fixId={pending.id} onApproved={() => setApprovedLocally(true)} />
           </Stage>
