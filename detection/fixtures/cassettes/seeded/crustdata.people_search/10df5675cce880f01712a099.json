@@ -1,0 +1,22 @@
+{
+  "args": {
+    "company": "Copperfield",
+    "limit": 10
+  },
+  "error": null,
+  "label": "SEEDED",
+  "latency_ms": 120.0,
+  "result": [
+    {
+      "linkedin_url": null,
+      "name": "Chloe Martin",
+      "title": "CEO"
+    },
+    {
+      "linkedin_url": null,
+      "name": "Arjun Mehta",
+      "title": "Head of Engineering"
+    }
+  ],
+  "tool": "crustdata.people_search"
+}

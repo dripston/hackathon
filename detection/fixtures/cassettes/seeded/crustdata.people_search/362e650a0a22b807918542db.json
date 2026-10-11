@@ -1,0 +1,27 @@
+{
+  "args": {
+    "company": "Bluepeak",
+    "limit": 10
+  },
+  "error": null,
+  "label": "SEEDED",
+  "latency_ms": 120.0,
+  "result": [
+    {
+      "linkedin_url": null,
+      "name": "Hana Sato",
+      "title": "Founder & CEO"
+    },
+    {
+      "linkedin_url": null,
+      "name": "Luis Ortega",
+      "title": "CTO"
+    },
+    {
+      "linkedin_url": null,
+      "name": "Mira Patel",
+      "title": "VP Engineering"
+    }
+  ],
+  "tool": "crustdata.people_search"
+}

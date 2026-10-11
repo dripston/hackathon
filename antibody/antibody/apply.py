@@ -110,6 +110,9 @@ def patient_service(worktree: Path, stub: bool):
         cwd = worktree / "detection"
         cmd = ["uv", "run", "--quiet", "python", "-c", _launch("detection.cli", ["serve"])]
         env["DETECTION_PORT"] = str(port)
+        # detection keeps its uv cache inside the project; reuse the main checkout's so a fresh worktree
+        # doesn't re-download every dependency.
+        env.setdefault("UV_CACHE_DIR", str(REPO_ROOT / "detection" / ".uv-cache"))
         # Reuse the main checkout's detection/.env (secrets aren't in git, so the worktree lacks it).
         src_env = REPO_ROOT / "detection" / ".env"
         if src_env.exists() and not (cwd / ".env").exists():

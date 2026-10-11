@@ -1,0 +1,16 @@
+{
+  "args": {
+    "domain": "quillstack.com"
+  },
+  "error": null,
+  "label": "SEEDED",
+  "latency_ms": 120.0,
+  "result": {
+    "company_id": 7007,
+    "domain": "quillstack.com",
+    "headcount": 40,
+    "matched_by": "domain",
+    "name": "Quillstack"
+  },
+  "tool": "crustdata.company_enrich"
+}

@@ -1,0 +1,37 @@
+{
+  "args": {
+    "company": "Lumenwharf",
+    "limit": 10
+  },
+  "error": null,
+  "label": "SEEDED",
+  "latency_ms": 120.0,
+  "result": [
+    {
+      "linkedin_url": null,
+      "name": "Elena Varga",
+      "title": "CEO"
+    },
+    {
+      "linkedin_url": null,
+      "name": "Kofi Mensah",
+      "title": "CTO"
+    },
+    {
+      "linkedin_url": null,
+      "name": "Ruth Adler",
+      "title": "VP Sales"
+    },
+    {
+      "linkedin_url": null,
+      "name": "Jin Park",
+      "title": "VP Engineering"
+    },
+    {
+      "linkedin_url": null,
+      "name": "Omar Haddad",
+      "title": "Head of Growth"
+    }
+  ],
+  "tool": "crustdata.people_search"
+}

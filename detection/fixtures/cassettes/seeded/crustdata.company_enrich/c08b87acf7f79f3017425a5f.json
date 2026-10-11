@@ -1,0 +1,16 @@
+{
+  "args": {
+    "domain": "tinyforge.co"
+  },
+  "error": null,
+  "label": "SEEDED",
+  "latency_ms": 120.0,
+  "result": {
+    "company_id": 7008,
+    "domain": "tinyforge.co",
+    "headcount": 12,
+    "matched_by": "domain",
+    "name": "Tinyforge"
+  },
+  "tool": "crustdata.company_enrich"
+}

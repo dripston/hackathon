@@ -1,0 +1,11 @@
+# SEEDED set: fictional companies (see detection/seed.py). harborline.co is a lookalike of harborline.com.
+northwind-labs.io
+bluepeak.dev
+larkspur-ai.com
+lumenwharf.com
+tinyforge.co
+quillstack.com
+emberlane.io
+copperfield.app
+harborline.com
+harborline.co

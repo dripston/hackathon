@@ -1,0 +1,16 @@
+{
+  "args": {
+    "domain": "bluepeak.dev"
+  },
+  "error": null,
+  "label": "SEEDED",
+  "latency_ms": 120.0,
+  "result": {
+    "company_id": 7000,
+    "domain": "bluepeak.dev",
+    "headcount": 1300,
+    "matched_by": "domain",
+    "name": "Bluepeak"
+  },
+  "tool": "crustdata.company_enrich"
+}

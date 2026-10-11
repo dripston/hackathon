@@ -1,0 +1,27 @@
+{
+  "args": {
+    "company": "Larkspur AI",
+    "limit": 10
+  },
+  "error": null,
+  "label": "SEEDED",
+  "latency_ms": 120.0,
+  "result": [
+    {
+      "linkedin_url": null,
+      "name": "Tomas Novak",
+      "title": "Co-founder & CEO"
+    },
+    {
+      "linkedin_url": null,
+      "name": "Ines Duarte",
+      "title": "Co-founder & CTO"
+    },
+    {
+      "linkedin_url": null,
+      "name": "Sam Whitfield",
+      "title": "Head of Sales"
+    }
+  ],
+  "tool": "crustdata.people_search"
+}

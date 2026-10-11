@@ -1,0 +1,32 @@
+{
+  "args": {
+    "company": "Northwind Labs",
+    "limit": 10
+  },
+  "error": null,
+  "label": "SEEDED",
+  "latency_ms": 120.0,
+  "result": [
+    {
+      "linkedin_url": null,
+      "name": "Ava Lindqvist",
+      "title": "CEO"
+    },
+    {
+      "linkedin_url": null,
+      "name": "Marco Bellini",
+      "title": "CTO"
+    },
+    {
+      "linkedin_url": null,
+      "name": "Grace Okafor",
+      "title": "VP Sales"
+    },
+    {
+      "linkedin_url": null,
+      "name": "Dev Raman",
+      "title": "Head of Engineering"
+    }
+  ],
+  "tool": "crustdata.people_search"
+}

@@ -1,0 +1,16 @@
+{
+  "args": {
+    "domain": "emberlane.io"
+  },
+  "error": null,
+  "label": "SEEDED",
+  "latency_ms": 120.0,
+  "result": {
+    "company_id": 7002,
+    "domain": "emberlane.io",
+    "headcount": 18,
+    "matched_by": "domain",
+    "name": "Emberlane"
+  },
+  "tool": "crustdata.company_enrich"
+}

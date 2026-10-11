@@ -41,7 +41,11 @@ def has_unresolved(store: StateStore, detection: str) -> str | None:
 def _from_neatlogs(detections: list[str], now: datetime) -> dict[str, list[str]]:
     """{detection: [trace_id, ...]} for detections over threshold in the window."""
     start, end = _iso(now - timedelta(minutes=WINDOW_MIN)), _iso(now)
-    known = {d.get("name"): d for d in neatlogs_mcp.list_detections()}
+    known = {}
+    for d in neatlogs_mcp.list_detections():
+        for key in (d.get("name"), d.get("slug"), d.get("display_name")):
+            if key:
+                known[key] = d
     hits: dict[str, list[str]] = {}
     for name in detections:
         d = known.get(name)
@@ -67,6 +71,13 @@ def _from_neatlogs(detections: list[str], now: datetime) -> dict[str, list[str]]
                 break
         hits[name] = ids
     return hits
+
+
+def _neatlogs_names() -> set[str]:
+    names = set()
+    for d in neatlogs_mcp.list_detections():
+        names |= {d.get("name"), d.get("slug"), d.get("display_name")}
+    return {n for n in names if n}
 
 
 def _from_detection_runs(detections: list[str], now: datetime) -> dict[str, list[str]]:
@@ -98,6 +109,9 @@ def poll_once(store: StateStore | None = None, now: datetime | None = None) -> l
     try:
         if not neatlogs_mcp.configured():
             raise neatlogs_mcp.NeatlogsUnavailable("NEATLOGS_API_KEY not set")
+        if not any(d in _neatlogs_names() for d in detections):
+            raise neatlogs_mcp.NeatlogsUnavailable(
+                "none of our detections exist in neatlogs yet (create them in the dashboard)")
         hits = _from_neatlogs(detections, now)
     except neatlogs_mcp.NeatlogsUnavailable as e:
         scorer = ScorerClient()

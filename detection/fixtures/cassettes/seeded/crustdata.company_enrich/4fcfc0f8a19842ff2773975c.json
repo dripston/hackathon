@@ -1,0 +1,16 @@
+{
+  "args": {
+    "domain": "copperfield.app"
+  },
+  "error": null,
+  "label": "SEEDED",
+  "latency_ms": 120.0,
+  "result": {
+    "company_id": 7001,
+    "domain": "copperfield.app",
+    "headcount": 60,
+    "matched_by": "domain",
+    "name": "Copperfield"
+  },
+  "tool": "crustdata.company_enrich"
+}

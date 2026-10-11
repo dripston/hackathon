@@ -1,0 +1,27 @@
+{
+  "args": {
+    "company": "Harborline Logistics",
+    "limit": 10
+  },
+  "error": null,
+  "label": "SEEDED",
+  "latency_ms": 120.0,
+  "result": [
+    {
+      "linkedin_url": null,
+      "name": "Felix Grant",
+      "title": "CEO"
+    },
+    {
+      "linkedin_url": null,
+      "name": "Maya Lin",
+      "title": "CTO"
+    },
+    {
+      "linkedin_url": null,
+      "name": "Ben Archer",
+      "title": "VP Sales"
+    }
+  ],
+  "tool": "crustdata.people_search"
+}

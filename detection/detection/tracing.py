@@ -1,0 +1,100 @@
+"""neatlogs tracing for the patient (workflow "company-research"). No-op without NEATLOGS_API_KEY.
+
+Custom attributes (shared names from /CONTRACT.md) are set on the run's root span:
+antibody.run_id, antibody.prompt_version, antibody.bug_flags, antibody.simulated, antibody.violations,
+antibody.tw.<check_id> (1 = failed), antibody.jev.<check> (score 0..1).
+"""
+
+import atexit
+import json
+import logging
+from contextlib import contextmanager
+
+from .config import get_settings
+
+log = logging.getLogger("detection.tracing")
+_nl = None
+_started = False
+
+
+def init() -> bool:
+    global _nl, _started
+    if _started:
+        return _nl is not None
+    _started = True
+    key = get_settings().neatlogs_api_key
+    if not key:
+        log.info("neatlogs: no NEATLOGS_API_KEY, tracing disabled")
+        return False
+    try:
+        import neatlogs
+
+        neatlogs.init(api_key=key, workflow_name="company-research")
+        _nl = neatlogs
+        atexit.register(shutdown)
+        return True
+    except Exception as e:  # tracing must never break the patient
+        log.warning("neatlogs init failed: %s", e)
+        return False
+
+
+def wrap(client):
+    if init():
+        try:
+            return _nl.wrap(client)
+        except Exception as e:
+            log.warning("neatlogs wrap failed: %s", e)
+    return client
+
+
+@contextmanager
+def run_span(name: str = "company-research"):
+    """Root span for one patient run. Yields (span or None, trace_id or None)."""
+    if not init():
+        yield None, None
+        return
+    try:
+        cm = _nl.trace(name, kind="WORKFLOW")
+        span = cm.__enter__()
+    except Exception as e:
+        log.warning("neatlogs span failed: %s", e)
+        yield None, None
+        return
+    trace_id = None
+    try:
+        ctx = span.get_span_context()
+        trace_id = format(ctx.trace_id, "032x") if ctx and ctx.trace_id else None
+    except Exception:
+        pass
+    try:
+        yield span, trace_id
+    finally:
+        cm.__exit__(None, None, None)
+
+
+def set_attributes(span, attrs: dict) -> None:
+    if span is None:
+        return
+    for k, v in attrs.items():
+        try:
+            span.set_attribute(k, v if isinstance(v, (str, int, float, bool)) else json.dumps(v))
+        except Exception:
+            pass
+
+
+def flush() -> None:
+    if _nl is not None:
+        try:
+            _nl.flush()
+        except Exception:
+            pass
+
+
+def shutdown() -> None:
+    if _nl is None:
+        return
+    for fn in ("flush", "shutdown"):
+        try:
+            getattr(_nl, fn)()
+        except Exception:
+            pass

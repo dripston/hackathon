@@ -1,0 +1,17 @@
+{
+  "args": {
+    "company": "Emberlane",
+    "limit": 10
+  },
+  "error": null,
+  "label": "SEEDED",
+  "latency_ms": 120.0,
+  "result": [
+    {
+      "linkedin_url": null,
+      "name": "Yusuf Demir",
+      "title": "Founder & CEO"
+    }
+  ],
+  "tool": "crustdata.people_search"
+}

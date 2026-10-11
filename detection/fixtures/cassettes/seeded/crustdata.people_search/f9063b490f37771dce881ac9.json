@@ -1,0 +1,17 @@
+{
+  "args": {
+    "company": "Tinyforge",
+    "limit": 10
+  },
+  "error": null,
+  "label": "SEEDED",
+  "latency_ms": 120.0,
+  "result": [
+    {
+      "linkedin_url": null,
+      "name": "Priya Raghavan",
+      "title": "Founder"
+    }
+  ],
+  "tool": "crustdata.people_search"
+}

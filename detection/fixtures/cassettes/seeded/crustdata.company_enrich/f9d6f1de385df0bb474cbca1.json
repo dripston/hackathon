@@ -1,0 +1,16 @@
+{
+  "args": {
+    "domain": "larkspur-ai.com"
+  },
+  "error": null,
+  "label": "SEEDED",
+  "latency_ms": 120.0,
+  "result": {
+    "company_id": 7004,
+    "domain": "larkspur-ai.com",
+    "headcount": 85,
+    "matched_by": "domain",
+    "name": "Larkspur AI"
+  },
+  "tool": "crustdata.company_enrich"
+}
