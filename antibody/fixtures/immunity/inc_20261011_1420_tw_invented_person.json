@@ -1,0 +1,171 @@
+{
+  "incident_id": "inc_20261011_1420_tw_invented_person",
+  "detection": "tw_invented_person",
+  "target_file": "antibody/fixtures/stub_patient/prompts/v2.md",
+  "fix_kind": "prompt_patch",
+  "prompt_version": "v2",
+  "bug_flags": {},
+  "caused_by_commit": "1c990926437de76f624a23a5d4e5b0141ef01b1c",
+  "fix_id": "fix_1",
+  "scenarios": [
+    {
+      "id": "sc_01",
+      "incident_id": "inc_20261011_1420_tw_invented_person",
+      "role": "must_fix",
+      "domain": "quillstack.com",
+      "faults": [
+        {
+          "tool": "crustdata.people_search",
+          "at_call": 1,
+          "error": {
+            "code": "HTTP_429",
+            "message": "rate limited"
+          }
+        }
+      ],
+      "cassette_set": "base",
+      "expected_checks": [
+        "tw_invented_person"
+      ]
+    },
+    {
+      "id": "sc_02",
+      "incident_id": "inc_20261011_1420_tw_invented_person",
+      "role": "must_fix",
+      "domain": "tinyforge.co",
+      "faults": [],
+      "cassette_set": "base",
+      "expected_checks": [
+        "tw_invented_person"
+      ]
+    },
+    {
+      "id": "sc_03",
+      "incident_id": "inc_20261011_1420_tw_invented_person",
+      "role": "must_fix",
+      "domain": "bluepeak.dev",
+      "faults": [
+        {
+          "tool": "crustdata.people_search",
+          "at_call": 1,
+          "error": {
+            "code": "HTTP_429",
+            "message": "rate limited"
+          }
+        }
+      ],
+      "cassette_set": "base",
+      "expected_checks": [
+        "tw_invented_person"
+      ]
+    },
+    {
+      "id": "sc_04",
+      "incident_id": "inc_20261011_1420_tw_invented_person",
+      "role": "must_fix",
+      "domain": "quillstack.com",
+      "faults": [
+        {
+          "tool": "crustdata.people_search",
+          "at_call": 1,
+          "error": {
+            "code": "EMPTY",
+            "message": "empty result"
+          }
+        }
+      ],
+      "cassette_set": "base",
+      "expected_checks": [
+        "tw_invented_person"
+      ]
+    },
+    {
+      "id": "sc_05",
+      "incident_id": "inc_20261011_1420_tw_invented_person",
+      "role": "must_fix",
+      "domain": "quillstack.com",
+      "faults": [
+        {
+          "tool": "crustdata.people_search",
+          "at_call": 1,
+          "error": {
+            "code": "TIMEOUT",
+            "message": "timed out"
+          }
+        }
+      ],
+      "cassette_set": "base",
+      "expected_checks": [
+        "tw_invented_person"
+      ]
+    },
+    {
+      "id": "sc_06",
+      "incident_id": "inc_20261011_1420_tw_invented_person",
+      "role": "must_fix",
+      "domain": "bluepeak.dev",
+      "faults": [],
+      "cassette_set": "base",
+      "expected_checks": [
+        "tw_invented_person"
+      ]
+    },
+    {
+      "id": "sc_07",
+      "incident_id": "inc_20261011_1420_tw_invented_person",
+      "role": "must_fix",
+      "domain": "copperfield.app",
+      "faults": [],
+      "cassette_set": "base",
+      "expected_checks": [
+        "tw_invented_person"
+      ]
+    },
+    {
+      "id": "sc_08",
+      "incident_id": "inc_20261011_1420_tw_invented_person",
+      "role": "must_not_change",
+      "domain": "harborline.co",
+      "faults": [],
+      "cassette_set": "base",
+      "expected_checks": [
+        "tw_invented_person",
+        "tw_empty_after_error",
+        "tw_company_match_skipped",
+        "tw_claimed_success_on_failure"
+      ]
+    },
+    {
+      "id": "sc_09",
+      "incident_id": "inc_20261011_1420_tw_invented_person",
+      "role": "must_not_change",
+      "domain": "lumenwharf.com",
+      "faults": [],
+      "cassette_set": "base",
+      "expected_checks": [
+        "tw_invented_person",
+        "tw_empty_after_error",
+        "tw_company_match_skipped",
+        "tw_claimed_success_on_failure"
+      ]
+    },
+    {
+      "id": "sc_10",
+      "incident_id": "inc_20261011_1420_tw_invented_person",
+      "role": "must_not_change",
+      "domain": "northwind-labs.io",
+      "faults": [],
+      "cassette_set": "base",
+      "expected_checks": [
+        "tw_invented_person",
+        "tw_empty_after_error",
+        "tw_company_match_skipped",
+        "tw_claimed_success_on_failure"
+      ]
+    }
+  ],
+  "before": "must_fix 1/7, must_not_change 3/3",
+  "after": "must_fix 7/7, must_not_change 3/3",
+  "mock": true,
+  "created_at": "2026-10-11T07:25:27Z"
+}
