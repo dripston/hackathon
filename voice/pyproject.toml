@@ -1,0 +1,30 @@
+[project]
+name = "voice-agent"
+version = "0.1.0"
+description = "Two-way Telegram AI voice assistant (Sarvam STT/TTS, Groq LLM, Open-Meteo weather)"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.30.0",
+    "python-telegram-bot>=22.0,<23.0",
+    "groq>=0.11.0",
+    "httpx>=0.27.0",
+    "pydantic-settings>=2.5.0",
+    "loguru>=0.7.2",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.0",
+    "pytest-asyncio>=0.24.0",
+]
+
+# This is an application, not an installable library — uv manages the env only.
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+addopts = "-q"

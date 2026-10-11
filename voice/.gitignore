@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Secrets — never commit real credentials
+.env
+
+# Pytest / tooling caches
+.pytest_cache/
+.ruff_cache/
+
+# Scratch audio produced while testing
+*.ogg
+*.wav
+!tests/**/*.wav
