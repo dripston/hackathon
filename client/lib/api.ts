@@ -160,8 +160,9 @@ export async function approveFix(id: string, body: { fix_id: string; phrase: str
   return mock<Resolution>({
     ...resolution,
     approval: { phrase: body.phrase.trim(), channel: body.channel, at: new Date().toISOString() },
-    merged: true,
-    pr_url: asType<IncidentDetail>(incident1).resolution?.pr_url ?? null,
+    // Mock mode never opens or merges a real PR, so it must not claim one.
+    merged: false,
+    pr_url: null,
   });
 }
 

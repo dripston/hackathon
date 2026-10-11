@@ -37,6 +37,8 @@ export function ApprovalBox({ incidentId, fixId, onDone }: { incidentId: string;
   const [reason, setReason] = useState("");
   const [busy, setBusy] = useState(false);
   const [outcome, setOutcome] = useState<Outcome | null>(null);
+  // Once a decision is recorded, lock the form so it can't be submitted twice.
+  const [decided, setDecided] = useState(false);
 
   const typed = phrase.trim();
   const match = APPROVAL_PATTERN.exec(typed);
@@ -48,6 +50,7 @@ export function ApprovalBox({ incidentId, fixId, onDone }: { incidentId: string;
     try {
       const { data } = await action();
       setOutcome({ tone: "ok", text: okText(data) });
+      setDecided(true);
     } catch (err) {
       setOutcome(describe(err));
     } finally {
@@ -58,15 +61,15 @@ export function ApprovalBox({ incidentId, fixId, onDone }: { incidentId: string;
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!valid || busy) return;
+    if (!valid || busy || decided) return;
     void run(
       () => approveFix(incidentId, { fix_id: fixId, phrase: typed, channel: "typed" }),
-      (r) => `Approved${r.merged ? " and merged" : ""}${r.pr_url ? `: ${r.pr_url}` : ""}`,
+      (r) => `Approved${r.merged ? " and merged" : ""}${r.pr_url ? `: ${r.pr_url}` : ""}${r.merged ? "" : ". Approval recorded; nothing was merged."}`,
     );
   };
 
   const reject = () => {
-    if (!reason.trim() || busy) return;
+    if (!reason.trim() || busy || decided) return;
     void run(
       () => rejectFix(incidentId, { fix_id: fixId, reason: reason.trim() }),
       () => "Rejected. The incident is escalated and nothing was merged.",
@@ -89,8 +92,9 @@ export function ApprovalBox({ incidentId, fixId, onDone }: { incidentId: string;
             className="h-12 max-w-md font-mono text-lg"
             aria-invalid={!!hint}
             aria-describedby="approval-hint"
+            disabled={decided}
           />
-          <Button type="submit" disabled={!valid || busy} className="bg-healthy hover:bg-healthy/80 h-12 px-6 text-base text-black">
+          <Button type="submit" disabled={!valid || busy || decided} className="bg-healthy hover:bg-healthy/80 h-12 px-6 text-base text-black">
             {busy ? "Working…" : "Approve"}
           </Button>
         </div>
@@ -111,8 +115,9 @@ export function ApprovalBox({ incidentId, fixId, onDone }: { incidentId: string;
             placeholder="Reason"
             autoComplete="off"
             className="h-10 max-w-md"
+            disabled={decided}
           />
-          <Button type="button" variant="outline" disabled={!reason.trim() || busy} onClick={reject}>
+          <Button type="button" variant="outline" disabled={!reason.trim() || busy || decided} onClick={reject}>
             Reject
           </Button>
         </div>

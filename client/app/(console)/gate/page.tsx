@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { getGate } from "@/lib/api";
 import { usePoll } from "@/lib/use-poll";
-import { Dot, LabelBadge, PageHeader, Panel, PollNote, stamp } from "@/components/console/ui";
+import { Dot, PageHeader, Panel, PollNote, stamp } from "@/components/console/ui";
 import { cn } from "@/lib/utils";
 
 export default function GatePage() {
@@ -37,7 +37,6 @@ export default function GatePage() {
           >
             <p className="text-muted-foreground flex flex-wrap items-center gap-3 font-mono">
               {g.branch} · checked {stamp(g.created_at)}
-              <LabelBadge label="SIMULATED" />
             </p>
             <p
               className={cn(
