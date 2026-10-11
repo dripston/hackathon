@@ -1,5 +1,6 @@
 """Settings from environment / antibody/.env. Model IDs come only from env."""
 
+import os
 from functools import lru_cache
 from pathlib import Path
 
@@ -12,6 +13,21 @@ REPO_ROOT = ANTIBODY_DIR.parent
 # Export antibody/.env to the process environment too: boto3 reads AWS_* (including
 # AWS_BEARER_TOKEN_BEDROCK) only from os.environ, not from pydantic settings. Never overrides real env.
 load_dotenv(ANTIBODY_DIR / ".env", override=False)
+
+
+def _use_certifi() -> None:
+    """Verify TLS with certifi's CA bundle instead of the Windows trust store. httpx2 (inside the
+    openai SDK) otherwise uses truststore, whose Windows chain check (CertGetCertificateChain) can block
+    for minutes fetching revocation data, which hung API calls made from server worker threads."""
+    try:
+        import certifi
+
+        os.environ.setdefault("SSL_CERT_FILE", certifi.where())
+    except ImportError:
+        pass
+
+
+_use_certifi()
 
 
 class Settings(BaseSettings):

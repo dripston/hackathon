@@ -14,6 +14,21 @@ PROMPTS_DIR = Path(__file__).resolve().parent / "patient" / "prompts"
 load_dotenv(PROJECT_DIR / ".env", override=False)
 
 
+def _use_certifi() -> None:
+    """Verify TLS with certifi's CA bundle instead of the Windows trust store. httpx2 (inside the
+    openai SDK) otherwise uses truststore, whose Windows chain check (CertGetCertificateChain) can block
+    for minutes fetching revocation data, which hung API calls made from server worker threads."""
+    try:
+        import certifi
+
+        os.environ.setdefault("SSL_CERT_FILE", certifi.where())
+    except ImportError:
+        pass
+
+
+_use_certifi()
+
+
 def _flag(name: str, default: str = "0") -> bool:
     return os.environ.get(name, default).strip().lower() in ("1", "true", "yes", "on")
 

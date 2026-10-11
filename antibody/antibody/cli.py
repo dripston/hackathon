@@ -78,6 +78,17 @@ def cmd_neatlogs_setup(a) -> int:
     return 0
 
 
+def cmd_aftercare(a) -> int:
+    """Re-run the post-merge job by hand: pull main, gate it, refresh the backtest behind /trust."""
+    from .aftercare import after_merge, status
+    from .state import StateStore
+
+    after_merge(a.incident or "manual")
+    st = status(StateStore())
+    print(json.dumps(st, indent=2))
+    return 0 if st.get("state") == "done" else 1
+
+
 def cmd_costs(a) -> int:
     from .costs import report
 
@@ -162,6 +173,9 @@ def main(argv: list[str] | None = None) -> int:
     b.add_argument("--clean", nargs="*", default=[], help="known-good commits to count false alarms on")
     b.set_defaults(fn=cmd_backtest)
 
+    af = sub.add_parser("aftercare", help="pull main, gate it and refresh the backtest (runs after a merge)")
+    af.add_argument("incident", nargs="?")
+    af.set_defaults(fn=cmd_aftercare)
     ns = sub.add_parser("neatlogs-setup", help="create the tw_* detections in neatlogs (idempotent)")
     ns.set_defaults(fn=cmd_neatlogs_setup)
     c = sub.add_parser("costs", help="cost per incident (ledger and neatlogs), for the business plan")
