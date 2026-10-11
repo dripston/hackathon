@@ -81,6 +81,11 @@ def run(file: str, ship_mock: bool = False, pause: float = 0.6) -> int:
     _say(f"  status: {out.status}  ·  PR: {res.pr_url if res and res.pr_url else 'not opened'}  ·  "
          f"{time.monotonic() - t0:.0f} s  ·  ${res.cost_usd if res else 0:.4f}", DIM)
     if store.is_mock(inc.id):
-        _say("  (MOCK: the patient and scorer were Antibody's stubs for this run)", YELLOW)
+        from .patient_client import PatientClient
+
+        if PatientClient().is_stub:
+            _say("  (MOCK: the patient and scorer were Antibody's built-in stubs for this run)", YELLOW)
+        else:
+            _say("  (MOCK data: the real patient ran, but on SEEDED fictional companies, not Crustdata recordings)", YELLOW)
     _say()
     return 0

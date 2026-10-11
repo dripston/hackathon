@@ -73,6 +73,13 @@ def _from_neatlogs(detections: list[str], now: datetime) -> dict[str, list[str]]
     return hits
 
 
+def _neatlogs_names() -> set[str]:
+    names = set()
+    for d in neatlogs_mcp.list_detections():
+        names |= {d.get("name"), d.get("slug"), d.get("display_name")}
+    return {n for n in names if n}
+
+
 def _from_detection_runs(detections: list[str], now: datetime) -> dict[str, list[str]]:
     rows, _ = ScorerClient().recent_runs(200)
     cutoff = now - timedelta(minutes=WINDOW_MIN)
@@ -102,6 +109,9 @@ def poll_once(store: StateStore | None = None, now: datetime | None = None) -> l
     try:
         if not neatlogs_mcp.configured():
             raise neatlogs_mcp.NeatlogsUnavailable("NEATLOGS_API_KEY not set")
+        if not any(d in _neatlogs_names() for d in detections):
+            raise neatlogs_mcp.NeatlogsUnavailable(
+                "none of our detections exist in neatlogs yet (create them in the dashboard)")
         hits = _from_neatlogs(detections, now)
     except neatlogs_mcp.NeatlogsUnavailable as e:
         scorer = ScorerClient()
