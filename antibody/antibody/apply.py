@@ -117,6 +117,15 @@ def patient_service(worktree: Path, stub: bool):
         src_env = REPO_ROOT / "detection" / ".env"
         if src_env.exists() and not (cwd / ".env").exists():
             shutil.copy(src_env, cwd / ".env")
+        # An older commit's patient only knows the GROQ_* settings. Groq and DeepSeek both speak the
+        # OpenAI API, so point those at the provider in use (process env beats the copied .env).
+        if src_env.exists():
+            from dotenv import dotenv_values
+
+            denv = dotenv_values(src_env)
+            if (denv.get("LLM_PROVIDER") or "").lower() == "deepseek" and denv.get("DEEPSEEK_API_KEY"):
+                env["GROQ_API_KEY"] = denv["DEEPSEEK_API_KEY"]
+                env["GROQ_BASE_URL"] = denv.get("DEEPSEEK_BASE_URL") or "https://api.deepseek.com"
         # Recordings are test data, not the code under test: an older commit (e.g. a backtest of the commit
         # that caused an incident) predates today's recordings, so give it the current ones.
         src_cassettes = REPO_ROOT / "detection" / "fixtures" / "cassettes"
