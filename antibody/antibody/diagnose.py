@@ -148,6 +148,22 @@ def _fallback_explanation(incident: Incident, change: dict, commit: dict | None,
     return " ".join(parts), kind
 
 
+def suspect_needle(change: dict, stub: bool) -> str | None:
+    """Text whose introduction marks the bad change: the flag name, or the first line the failing
+    prompt version added relative to the healthy one."""
+    if change.get("suspect_flag"):
+        return change["suspect_flag"]
+    sv, hv = change.get("suspect_prompt_version"), change.get("healthy_prompt_version")
+    if sv and hv and sv != hv:
+        a, b = prompt_dir(stub) / f"{hv}.md", prompt_dir(stub) / f"{sv}.md"
+        if a.exists() and b.exists():
+            old = set(a.read_text(encoding="utf-8").splitlines())
+            added = [l.strip() for l in b.read_text(encoding="utf-8").splitlines() if l.strip() and l not in old]
+            if added:
+                return added[0]
+    return None
+
+
 def change_diff(change: dict, stub: bool, commit: dict | None, tfile: Path | None, limit: int = 4000) -> str | None:
     """The actual text of what changed: healthy prompt version -> suspect version, else the commit's diff."""
     import difflib
@@ -188,7 +204,8 @@ def diagnose(incident: Incident) -> tuple[Diagnosis, bool, dict]:
 
     commit = None
     if tfile is not None and tfile.exists():
-        commit = git_tools.last_commit_touching(tfile)
+        needle = suspect_needle(change, mock)
+        commit = (git_tools.introducing_commit(tfile, needle) if needle else None)             or git_tools.last_commit_touching(tfile)
 
     checkpoint = entire_cli.checkpoint_for(commit["sha"]) if commit else None
     reasoning = checkpoint.get("reasoning_excerpt") if checkpoint else None

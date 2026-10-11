@@ -53,3 +53,14 @@ def github_repo() -> str:
     url = git("remote", "get-url", "origin", check=False)
     m = re.search(r"github\.com[:/]([^/]+/[^/.]+?)(?:\.git)?$", url)
     return m.group(1) if m else ""
+
+
+def introducing_commit(path: Path, needle: str) -> dict | None:
+    """The oldest commit that added `needle` to `path` (git pickaxe), i.e. the commit that introduced
+    the suspect change, not whichever commit touched the file last."""
+    rel = str(Path(path).resolve().relative_to(REPO_ROOT)).replace("\\", "/")
+    out = git("log", f"-S{needle}", "--reverse", "--format=%H%x1f%s%x1f%an%x1f%aI", "--", rel, check=False)
+    if not out:
+        return None
+    sha, subject, author, date = out.splitlines()[0].split("\x1f")
+    return {"sha": sha, "subject": subject, "author": author, "date": date, "file": rel, "needle": needle}
