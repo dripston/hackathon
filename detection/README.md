@@ -1,3 +1,31 @@
+# Detection service (patient, tripwires, Jev, API on :5050)
+
+The `detection` package is the service from `/CONTRACT.md`. It runs the **patient**, a company-research agent on Crustdata, and scores every run. Jev Tracer, the teammate's original prototype, is documented below and still ships alongside it.
+
+```bash
+cd detection && uv sync
+uv run detection serve                     # API on :5050: /health /run /score /runs /risks
+uv run detection run stripe.com            # one run, printed step by step (--fault crustdata.people_search@1:HTTP_429, --swallow)
+uv run detection traffic --rate 6          # production-like traffic, replayed from recordings (--fault-rate, --decay, --prompt v3)
+uv run detection forecast                  # risk forecasts from recent runs
+uv run detection record                    # record real Crustdata responses (spends credits; stops if the projection exceeds --max-credits)
+uv run python -m pytest                    # tests_detection/, no network
+```
+
+- **The patient:** `detection/patient/`. Its steps are `crustdata.company_enrich`, then `llm.identify` (only when the prompt has an `## Identify` section), then `crustdata.people_search`, `crustdata.jobs` and `llm.brief`. Prompts are versioned in `patient/prompts/v1..v3.md`.
+- **Recordings:** `fixtures/cassettes/base/` holds real Crustdata responses for the 20 domains in `fixtures/domains.txt` (26.7 credits, 2026-10-11). Replay never calls Crustdata; a call with no recording returns an empty result marked `synthetic: true`. `seeded/` holds fictional companies and is reported as mock data.
+- **Checks** (`detection/checks/`):
+  - four deterministic tripwires: `tw_invented_person`, `tw_empty_after_error`, `tw_company_match_skipped`, `tw_claimed_success_on_failure`;
+  - **`jev_grounded`**: jevals `Grounded` on TypeSafe's `jev-latest`, a 0..1 score of whether every claim in the brief is supported by the tool results. It's advisory and never a violation.
+- **neatlogs:** each run is a `company-research` trace. Its scores go on a child span `antibody.score`, whose input is compact JSON, and the `tw_*` neatlogs detections match on it (`antibody neatlogs-setup` creates them). Real runs are also appended to `.state/runs.jsonl`, which `GET /runs` serves.
+- **Seeded bugs** (`fixtures/bug-commits.json`, labelled SEEDED), each committed by a separate Entire-tracked coding-agent session:
+  1. **v2 "at least 3 decision makers":** latent, never fired;
+  2. **`swallow_tool_errors`:** a code bug behind the `BUG_SWALLOW_TOOL_ERRORS` flag;
+  3. **v3 drops the company check.**
+- **LLM:** `LLM_PROVIDER=deepseek` (`deepseek-flash`) or `groq`, both OpenAI-compatible and traced by `neatlogs.wrap`.
+
+---
+
 # Jev Tracer
 
 An evidence-based reliability engineer prototype for AI agents. The MVP catches

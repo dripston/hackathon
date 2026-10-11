@@ -121,6 +121,11 @@ def cmd_approve(a) -> int:
         print(f"error: {e}")
         return 1
     print(f"approved {a.fix}; merged={res.merged} pr={res.pr_url}")
+    if res.merged:
+        from .aftercare import after_merge
+
+        print("pulling main, gating it and refreshing the backtest...")
+        after_merge(a.incident)
     return 0
 
 
