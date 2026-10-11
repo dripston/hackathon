@@ -112,7 +112,7 @@ function Loaded({
     <div className="mx-auto max-w-6xl">
       <BackLink />
       <div className="mt-4 flex flex-wrap items-center gap-3">
-        <h1 className="font-mono text-2xl font-semibold">{incident.id}</h1>
+        <h1 className="font-mono text-2xl font-semibold break-all">{incident.id}</h1>
         <MockBadge show={mock} />
         <span
           className={cn(
@@ -173,18 +173,18 @@ function Loaded({
                 {diagnosis.target_file && (
                   <>
                     {" "}
-                    · <code className="text-foreground font-mono">{diagnosis.target_file}</code>
+                    · <code className="text-foreground font-mono break-all">{diagnosis.target_file}</code>
                   </>
                 )}
               </p>
               {diagnosis.reasoning_excerpt && (
-                <figure className="border-infected/40 bg-infected/[0.06] mt-4 rounded-2xl border p-8">
+                <figure className="border-infected/40 bg-infected/[0.06] mt-4 rounded-2xl border p-5 sm:p-8">
                   <p className="text-muted-foreground font-mono text-sm tracking-wider uppercase">
                     {diagnosis.reasoning_source === "entire_checkpoint"
                       ? "From the Entire checkpoint · the reasoning behind the change"
                       : "From the commit message"}
                   </p>
-                  <blockquote className="mt-4 text-2xl leading-10 font-medium sm:text-3xl sm:leading-[1.4]">
+                  <blockquote className="mt-4 text-xl leading-8 font-medium break-words sm:text-2xl sm:leading-10 lg:text-3xl lg:leading-[1.4]">
                     “{diagnosis.reasoning_excerpt}”
                   </blockquote>
                   {diagnosis.reasoning_source === "entire_checkpoint" && diagnosis.checkpoint_url && (
@@ -411,9 +411,9 @@ function FamilyList({ scenarios }: { scenarios: Scenario[] }) {
             {scenarios
               .filter((s) => s.role === role)
               .map((s) => (
-                <li key={s.id} className="flex gap-3">
+                <li key={s.id} className="flex flex-wrap gap-x-3">
                   <span>{s.domain}</span>
-                  <span className="text-muted-foreground ml-auto text-right">
+                  <span className="text-muted-foreground ml-auto text-right break-words">
                     {s.faults[0] ? `${s.faults[0].error.code} on ${s.faults[0].tool}` : "no fault"}
                   </span>
                 </li>
@@ -435,7 +435,7 @@ function BackLink() {
 
 function Stage({ n, title, done, last, children }: { n: number; title: string; done: boolean; last?: boolean; children: ReactNode }) {
   return (
-    <li className="relative flex gap-6 pb-12">
+    <li className="relative flex gap-4 pb-12 sm:gap-6">
       {!last && <span className="bg-border absolute top-10 bottom-0 left-[19px] w-px" aria-hidden />}
       <span
         className={cn(

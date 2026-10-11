@@ -136,7 +136,7 @@ function Square({ scenario, verdict, size, template }: { scenario: Scenario; ver
       />
       <div
         role="tooltip"
-        className="border-border bg-popover invisible absolute top-full left-0 z-20 mt-2 w-72 rounded-lg border p-3 text-sm opacity-0 shadow-xl transition-opacity group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100"
+        className="border-border bg-popover absolute top-full left-0 z-20 mt-2 hidden w-72 max-w-[calc(100vw-2rem)] rounded-lg border p-3 text-sm shadow-xl group-focus-within:block group-hover:block"
       >
         <p className="font-medium">{scenario.domain}</p>
         <p className="text-muted-foreground mt-1 font-mono text-xs">

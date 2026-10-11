@@ -142,7 +142,7 @@ export function TraceLink({ id, template, className }: { id: string | null; temp
     );
   };
   return (
-    <span className={cn("inline-flex items-center gap-2 font-mono text-sm", className)}>
+    <span className={cn("inline-flex flex-wrap items-center gap-x-2 font-mono text-sm break-all", className)}>
       {id}
       <button onClick={copy} className="text-muted-foreground hover:text-foreground text-xs underline" aria-label={`Copy trace id ${id}`}>
         {copied ? "copied" : "copy"}
