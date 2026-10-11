@@ -152,3 +152,22 @@ def test_apply_edits_tolerates_spacing():
     text = "Rules:\n    - keep   this\n- change me\n"
     out = fix.apply_edits(text, [{"find": "- keep this\n- change me", "replace": "- keep this\n- changed"}])
     assert out == "Rules:\n- keep this\n- changed\n"
+
+
+def test_flag_on_everywhere_is_still_the_suspect():
+    # Real incident 2026-10-11: production had swallow_tool_errors on for every run; it only bites
+    # when people search errors, so lift is ~0. The prompt is unchanged (v1 everywhere).
+    from antibody.diagnose import what_changed
+
+    run = lambda: {"prompt_version": "v1", "bug_flags": {"swallow_tool_errors": True}}
+    change = what_changed([run() for _ in range(9)], [run() for _ in range(10)])
+    assert change["suspect_flag"] == "swallow_tool_errors"
+
+
+def test_prompt_change_still_wins_over_a_flag_everywhere():
+    from antibody.diagnose import what_changed
+
+    f = [{"prompt_version": "v2", "bug_flags": {"swallow_tool_errors": True}} for _ in range(5)]
+    h = [{"prompt_version": "v1", "bug_flags": {"swallow_tool_errors": True}} for _ in range(5)]
+    change = what_changed(f, h)
+    assert change["suspect_flag"] is None and change["suspect_prompt_version"] == "v2"

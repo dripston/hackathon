@@ -98,6 +98,11 @@ def what_changed(failing: list[dict], healthy: list[dict]) -> dict:
     best_f = max(f_lift, key=f_lift.get, default=None)
     vl, fl = v_lift.get(best_v, 0.0), f_lift.get(best_f, 0.0)
     suspect_flag = best_f if best_f and fl > 0.2 and fl >= vl else None
+    if suspect_flag is None and vl <= 0.2:
+        # Nothing separates the groups (e.g. the flag is on everywhere and only bites when a tool
+        # errors). A non-default code path that is on in every failing run beats an unchanged prompt.
+        always = [k for k in ff if ff[k] == len(failing) and failing]
+        suspect_flag = max(always, key=lambda k: f_lift[k]) if always else None
     return {
         "failing_prompt_versions": dict(fv), "healthy_prompt_versions": dict(hv),
         "failing_flags": dict(ff), "healthy_flags": dict(hf),
