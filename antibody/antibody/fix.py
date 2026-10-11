@@ -96,17 +96,26 @@ def propose(diag: Diagnosis, content: str, family_result: FamilyResult, scenario
                  if isinstance(p.get("failing"), list) else p.get("failing")}
                 for p in (previous or [])],
         }, separators=(",", ":"))
-        try:
-            parsed = _parse(llm.complete("strong", FIX_SYSTEM, user, max_tokens=1500).text)
+        problem = None
+        for _ in range(2):  # one retry, told what went wrong, before falling back to the rule-based fix
+            prompt = user if problem is None else user + f"\n\nYour previous reply could not be used: {problem}"
+            try:
+                parsed = _parse(llm.complete("strong", FIX_SYSTEM, prompt, max_tokens=2500).text)
+            except Exception as e:
+                problem = f"it was not valid JSON ({str(e)[:120]}). Reply with the JSON object only."
+                log.warning("fix: model reply unusable (%s)", str(e)[:120])
+                continue
             applied = apply_edits(content, parsed.get("edits") or [])
             if applied is None and parsed.get("content"):
                 applied = parsed["content"]
             if applied is not None and applied != content:
                 new, desc, mock = applied, parsed.get("description", "model fix"), False
-            else:
-                log.warning("fix: model reply had no applicable edit; using the rule-based fix")
-        except Exception as e:
-            log.warning("fix: LLM call failed (%s); using the rule-based fix", e)
+                break
+            problem = ("no edit applied: every `find` string must be copied exactly from file_content, "
+                       "including indentation, and must change something.")
+            log.warning("fix: model reply had no applicable edit")
+        if new is None:
+            log.warning("fix: model gave no usable fix; using the rule-based fix")
     if new is None:
         new, desc = _rule_based(diag, content)
         desc = f"[rule-based] {desc}"

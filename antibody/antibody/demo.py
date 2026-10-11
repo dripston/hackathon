@@ -1,6 +1,7 @@
 """`antibody demo`: the golden path, narrated for the video. Same pipeline as `handle`, readable output."""
 
 import json
+import sys
 import time
 from pathlib import Path
 
@@ -25,6 +26,8 @@ def _say(text: str = "", color: str = "") -> None:
 
 
 def run(file: str, ship_mock: bool = False, pause: float = 0.6) -> int:
+    if hasattr(sys.stdout, "reconfigure"):  # Windows pipes default to cp1252, which has no ▸ or ·
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     store = StateStore()
     inc = Incident.model_validate(json.loads(Path(file).read_text(encoding="utf-8")))
     _say()
@@ -83,9 +86,14 @@ def run(file: str, ship_mock: bool = False, pause: float = 0.6) -> int:
     if store.is_mock(inc.id):
         from .patient_client import PatientClient
 
+        sources = (store.read(inc.id, "meta") or {}).get("mock_sources", [])
+        fallback = [s for s in sources if s.startswith("fix_")]
         if PatientClient().is_stub:
             _say("  (MOCK: the patient and scorer were Antibody's built-in stubs for this run)", YELLOW)
+        elif fallback and len(fallback) == len(sources):
+            _say(f"  (MOCK: {', '.join(fallback)} came from the rule-based fallback, not the model; "
+                 "later attempts saw it)", YELLOW)
         else:
-            _say("  (MOCK data: the real patient ran, but on SEEDED fictional companies, not Crustdata recordings)", YELLOW)
+            _say(f"  (MOCK data in: {', '.join(sources)}; e.g. SEEDED fictional companies or stubs)", YELLOW)
     _say()
     return 0
