@@ -56,7 +56,7 @@ def cmd_gate(a) -> int:
 
     print(f"gate: replaying immunity families against {a.head}")
     report, mock = run_gate(a.head)
-    print(f"verdict: {report.verdict.upper()}" + (" (MOCK)" if mock else ""))
+    print(f"verdict: {report.verdict.upper()}" + (" (MOCK)" if mock else "") + (f": {report.note}" if report.note else ""))
     return 1 if report.verdict == "blocked" else 0
 
 

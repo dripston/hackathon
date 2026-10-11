@@ -255,6 +255,9 @@ def approve(store: StateStore, incident_id: str, fix_id: str, phrase: str, chann
     if res.pr_url:
         (merge or _gh_merge)(res.pr_url)
         res.merged = True
+    elif _ship_target() == "local":
+        _local_merge(store, incident_id, fix_id)
+        res.merged = True
     store.write(incident_id, "resolution", res)
     inc.status = "resolved"
     store.write(incident_id, "incident", inc)
@@ -275,3 +278,17 @@ def reject(store: StateStore, incident_id: str, fix_id: str, reason: str) -> Res
 
 def _gh_merge(pr_url: str) -> None:
     git_tools.gh("pr", "merge", pr_url, "--squash")
+
+
+def _ship_target() -> str:
+    from .config import get_settings
+    return get_settings().ship_target
+
+
+def _local_merge(store: StateStore, incident_id: str, fix_id: str) -> None:
+    """SHIP_TARGET=local: merge the accepted fix branch into the checkout's current branch (never pushed)."""
+    attempts = [Attempt.model_validate(a) for a in (store.read(incident_id, "attempts") or [])]
+    branch = next((a.fix.branch for a in attempts if a.fix.id == fix_id and a.fix.branch), None)
+    if not branch:
+        raise ApprovalError(f"No local branch recorded for {fix_id}", 409)
+    git_tools.git("merge", "--no-ff", "-m", f"Merge Antibody {fix_id} for {incident_id}", branch)

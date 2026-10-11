@@ -125,7 +125,7 @@ def incident_approve(incident_id: str, body: ApproveBody, response: Response):
         return JSONResponse({"error": str(e)}, status_code=e.status)
     except RuntimeError as e:  # gh merge failed
         return JSONResponse({"error": f"Approved, but merge failed: {e}"}, status_code=502)
-    if res.merged:
+    if res.merged and get_settings().aftercare_auto:
         aftercare.start(incident_id)  # pull main, re-run the gate on main, refresh /trust
     _mock(response, st.is_mock(incident_id))
     return res

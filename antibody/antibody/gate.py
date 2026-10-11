@@ -10,7 +10,7 @@ import logging
 from pathlib import Path
 
 from . import apply, git_tools, grade, replay
-from .config import REPO_ROOT
+from .config import REPO_ROOT, get_settings
 from .models import GateFamily, GateReport, Scenario
 from .patient_client import PatientClient
 from .scorer_client import ScorerClient
@@ -78,13 +78,30 @@ def check_family(fam: dict, ref: str, budget: replay.Budget | None = None) -> tu
                       must_not_change_total=result.must_not_change_total, message=msg), mock
 
 
+def _write(store: StateStore, report: GateReport, mock: bool) -> None:
+    store.write_gate(report)
+    meta = store.root / "gate" / "meta.json"
+    meta.write_text(json.dumps({"mock": mock}), encoding="utf-8")
+
+
 def run_gate(head: str, store: StateStore | None = None, echo=print) -> tuple[GateReport, bool]:
     store = store or StateStore()
+    s = get_settings()
+    # A gate that silently replays against the stub proves nothing about the real code, so when the
+    # real patient is expected (USE_STUBS=false) but unreachable, it blocks instead of passing.
+    if not s.use_stubs and PatientClient().is_stub:
+        note = f"the patient at {s.patient_url} is not reachable, so nothing was verified; start detection and re-run"
+        echo(f"  BLOCKED {note}")
+        report = GateReport(branch=head, verdict="blocked", created_at=now_iso(), note=note)
+        _write(store, report, False)
+        return report, False
     families = load_families(ref=head)
     out: list[GateFamily] = []
     any_mock = False
+    stub_replays = False
     for fam in families:
         res, mock = check_family(fam, head)
+        stub_replays = stub_replays or mock
         any_mock = any_mock or mock or fam.get("mock", False)
         if res is None:
             echo(f"  n/a  {fam['incident_id']}: {fam['target_file']} not on {head}")
@@ -93,9 +110,11 @@ def run_gate(head: str, store: StateStore | None = None, echo=print) -> tuple[Ga
         out.append(res)
     report = GateReport(branch=head, verdict="blocked" if any(f.reopens for f in out) else "safe",
                         families=out, created_at=now_iso())
-    store.write_gate(report)
-    meta = store.root / "gate" / "meta.json"
-    meta.write_text(json.dumps({"mock": any_mock}), encoding="utf-8")
+    if stub_replays and not s.use_stubs and report.verdict == "safe":
+        report.verdict = "blocked"
+        report.note = "some replays fell back to the stub (patient unreachable mid-run), so the pass is not verified"
+        echo(f"  BLOCKED {report.note}")
+    _write(store, report, any_mock)
     return report, any_mock
 
 

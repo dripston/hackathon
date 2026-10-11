@@ -44,3 +44,31 @@ def test_backtest_counts_catches_and_false_alarms(monkeypatch):
     s = gate.backtest(StateStore(), echo=lambda _: None, clean_refs=["clean1"])
     assert s["caught"] == 1 and s["detection_rate"] == 1.0
     assert s["false_alarms"] == 0 and s["clean_checks"] == 2
+
+
+def test_gate_blocks_when_real_patient_unreachable(monkeypatch):
+    """USE_STUBS=false and the patient is down: never pass on stub replays."""
+    from types import SimpleNamespace
+
+    class DownPatient:
+        is_stub = True
+
+    monkeypatch.setattr(gate, "get_settings", lambda: SimpleNamespace(use_stubs=False, patient_url="http://x:5050"))
+    monkeypatch.setattr(gate, "PatientClient", DownPatient)
+    monkeypatch.setattr(gate, "load_families", lambda *a, **k: [family()])
+    report, mock = gate.run_gate("good", StateStore(), echo=lambda _: None)
+    assert report.verdict == "blocked" and report.families == [] and "not reachable" in report.note and not mock
+
+
+def test_gate_blocks_when_replays_fell_back_to_stub(monkeypatch):
+    from types import SimpleNamespace
+
+    class UpPatient:
+        is_stub = False
+
+    monkeypatch.setattr(gate, "get_settings", lambda: SimpleNamespace(use_stubs=False, patient_url="http://x:5050"))
+    monkeypatch.setattr(gate, "PatientClient", UpPatient)
+    monkeypatch.setattr(git_tools, "show_file", lambda ref, path: {"good": FIXED}.get(ref))
+    monkeypatch.setattr(gate, "load_families", lambda *a, **k: [family()])
+    report, _ = gate.run_gate("good", StateStore(), echo=lambda _: None)  # stub replays: run_family says mock
+    assert report.verdict == "blocked" and "fell back to the stub" in report.note

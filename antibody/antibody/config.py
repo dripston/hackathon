@@ -8,7 +8,9 @@ from dotenv import load_dotenv
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 ANTIBODY_DIR = Path(__file__).resolve().parent.parent  # the antibody/ project folder
-REPO_ROOT = ANTIBODY_DIR.parent
+# ANTIBODY_REPO_ROOT points Antibody at another checkout of the repo (the end-to-end test uses a
+# throwaway worktree, so a reintroduced bug never touches the real main).
+REPO_ROOT = Path(os.environ.get("ANTIBODY_REPO_ROOT") or ANTIBODY_DIR.parent).resolve()
 
 # Export antibody/.env to the process environment too: boto3 reads AWS_* (including
 # AWS_BEARER_TOKEN_BEDROCK) only from os.environ, not from pydantic settings. Never overrides real env.
@@ -58,6 +60,11 @@ class Settings(BaseSettings):
     cassette_set: str = "base"  # detection's recording set: base (real Crustdata) or seeded (fictional)
 
     github_repo: str = ""  # OWNER/REPO
+    # github: push the fix branch, open a PR, merge it on approval. local: commit the fix branch and merge
+    # it into deploy_branch on approval, never pushing (the end-to-end test).
+    ship_target: str = "github"
+    deploy_branch: str = "main"  # the branch aftercare gates after a merge
+    aftercare_auto: bool = True  # run aftercare (gate + backtest) in the background after each merge
     antibody_api_port: int = 4000
     antibody_state_dir: str = ".state"
     antibody_cost_cap_usd: float = 1.50

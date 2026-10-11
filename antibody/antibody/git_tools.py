@@ -56,11 +56,14 @@ def github_repo() -> str:
 
 
 def introducing_commit(path: Path, needle: str, newest: bool = False) -> dict | None:
-    """A commit that changed how often `needle` occurs in `path` (git pickaxe). Oldest = the commit
-    that introduced a new line of text; newest = the latest change to how an existing name is used."""
+    """A commit whose diff touches `needle` in `path`. Oldest (git -S) = the commit that introduced a new
+    line of text; newest (git -G) = the latest commit that changed a line using an existing name, even
+    when the number of times the name appears stayed the same."""
+    import re
+
     rel = str(Path(path).resolve().relative_to(REPO_ROOT)).replace("\\", "/")
-    order = [] if newest else ["--reverse"]
-    out = git("log", f"-S{needle}", *order, "--format=%H%x1f%s%x1f%an%x1f%aI", "--", rel, check=False)
+    search = [f"-G{re.escape(needle)}"] if newest else [f"-S{needle}", "--reverse"]
+    out = git("log", *search, "--format=%H%x1f%s%x1f%an%x1f%aI", "--", rel, check=False)
     if not out:
         return None
     sha, subject, author, date = out.splitlines()[0].split("\x1f")

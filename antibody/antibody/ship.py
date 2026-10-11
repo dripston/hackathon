@@ -109,6 +109,8 @@ def ship(incident: Incident, diag: Diagnosis, scenarios: list[Scenario], fix: Fi
         return {"pr_url": None, "note": "mock run: branch committed locally, not pushed (use --ship-mock to open a PR)"}
 
     branch = git_tools.git("rev-parse", "--abbrev-ref", "HEAD", cwd=worktree)
+    if get_settings().ship_target == "local":
+        return {"pr_url": None, "note": f"local run: {branch} committed, not pushed; approval merges it locally"}
     git_tools.git("push", "-u", "origin", branch, cwd=worktree)
     body = pr_body(incident, diag, fix, before, after, cost_usd, duration_ms, mock)
     with tempfile.NamedTemporaryFile("w", suffix=".md", delete=False, encoding="utf-8") as f:

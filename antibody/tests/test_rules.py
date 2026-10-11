@@ -171,3 +171,21 @@ def test_prompt_change_still_wins_over_a_flag_everywhere():
     h = [{"prompt_version": "v1", "bug_flags": {"swallow_tool_errors": True}} for _ in range(5)]
     change = what_changed(f, h)
     assert change["suspect_flag"] is None and change["suspect_prompt_version"] == "v2"
+
+
+def test_local_ship_merges_fix_branch(monkeypatch):
+    """SHIP_TARGET=local (end-to-end test): approval merges the recorded fix branch, never pushes."""
+    from antibody import pipeline
+    from antibody.models import Attempt, FixCandidate
+
+    st = StateStore()
+    _awaiting(st)
+    fix = FixCandidate(id="fix_2", incident_id="inc_x", attempt=2, kind="prompt_patch", description="d", diff="x",
+                       branch="antibody/inc_x/attempt-2")
+    st.write("inc_x", "attempts", [Attempt(fix=fix, accepted=True)])
+    calls = []
+    monkeypatch.setattr(pipeline, "_ship_target", lambda: "local")
+    monkeypatch.setattr(pipeline.git_tools, "git", lambda *a, **k: calls.append(a) or "")
+    res = approve(st, "inc_x", "fix_2", "approve fix 2", "voice")
+    assert res.merged and calls[0][:2] == ("merge", "--no-ff") and calls[0][-1] == "antibody/inc_x/attempt-2"
+    assert not any("push" in c for c in calls)

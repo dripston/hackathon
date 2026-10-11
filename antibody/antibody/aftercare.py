@@ -6,6 +6,7 @@ import logging
 import threading
 
 from . import git_tools
+from .config import get_settings
 from .state import StateStore, now_iso
 
 log = logging.getLogger("antibody.aftercare")
@@ -40,11 +41,12 @@ def after_merge(incident_id: str, store: StateStore | None = None) -> None:
     try:
         while True:
             _pending.clear()
+            s = get_settings()
             _status(store, state="pulling", incident_id=incident_id, error=None)
-            out = git_tools.git("pull", "--ff-only", check=False)
+            out = git_tools.git("pull", "--ff-only", check=False) if s.ship_target == "github" else "local merge, nothing to pull"
             log.info("aftercare: git pull: %s", (out or "").strip()[-200:])
             _status(store, state="gating", pulled=(out or "").strip()[-200:])
-            report, _ = run_gate("main", store, echo=lambda m: log.info("gate: %s", m))
+            report, _ = run_gate(s.deploy_branch, store, echo=lambda m: log.info("gate: %s", m))
             _status(store, state="backtesting", gate_verdict=report.verdict)
             summary = backtest(store, echo=lambda m: log.info("backtest: %s", m))
             _status(store, state="done", backtest_caught=summary.get("caught"),

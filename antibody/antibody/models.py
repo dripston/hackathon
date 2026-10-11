@@ -207,3 +207,4 @@ class GateReport(BaseModel):
     verdict: Literal["safe", "blocked"]
     families: list[GateFamily] = Field(default_factory=list)
     created_at: str
+    note: str | None = None  # why the gate blocked without a family failing (e.g. the patient was unreachable)
