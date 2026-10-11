@@ -136,14 +136,18 @@ def patient_service(worktree: Path, stub: bool):
             shutil.copytree(src_cassettes, cwd / "fixtures" / "cassettes", dirs_exist_ok=True)
     env.pop("VIRTUAL_ENV", None)
     log.info("starting patient from worktree: %s (port %d)", cwd, port)
-    proc = subprocess.Popen(cmd, cwd=cwd, env=env, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE,
+    # Output goes to a file, never a pipe: nobody reads a pipe while the service runs, and once its
+    # buffer fills (request logs, tracing) the service blocks mid-write and every run times out.
+    log_path = cwd / ".service.log"
+    log_file = open(log_path, "wb")
+    proc = subprocess.Popen(cmd, cwd=cwd, env=env, stdout=log_file, stderr=subprocess.STDOUT,
                             start_new_session=os.name != "nt")
     url = f"http://127.0.0.1:{port}"
     try:
         deadline = time.monotonic() + 120
         while time.monotonic() < deadline:
             if proc.poll() is not None:
-                err = proc.stderr.read().decode(errors="replace") if proc.stderr else ""
+                err = log_path.read_text(encoding="utf-8", errors="replace")
                 raise RuntimeError(f"worktree patient exited early: {err[-800:]}")
             try:
                 if httpx.get(f"{url}/health", timeout=1.0).status_code == 200:
@@ -156,6 +160,7 @@ def patient_service(worktree: Path, stub: bool):
         yield url
     finally:
         _kill_tree(proc)
+        log_file.close()
 
 
 def _kill_tree(proc: subprocess.Popen) -> None:

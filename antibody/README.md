@@ -16,8 +16,8 @@ Antibody watches neatlogs for silent failures in the patient agent. When one kee
 
 | Incident | Caught by | Cause found | Fix | Family before → after | PR |
 |---|---|---|---|---|---|
-| `inc_20261011_1102_tw_empty_after_error` | detection run log (before the neatlogs detections existed) | `32de239`, with its Entire request quoted | one line: report "unavailable", not "ok" | must_fix 5/7 → 7/7, must_not_change 3/3 kept | #3 |
-| `inc_20261011_1137_tw_company_match_skipped` | **neatlogs detection** | `4b732f0` (prompt v3 dropped the company check) | prompt rollback that restores the Identify step | must_fix 1/7 → 7/7, must_not_change 0/3 → 3/3 | #4 |
+| `inc_20261011_1102_tw_empty_after_error` | detection run log (before the neatlogs detections existed) | `32de239`, with its Entire request quoted | one line: report "unavailable", not "ok" | must_fix 5/7 → 7/7, must_not_change 3/3 kept | #3, merged on a **spoken** "approve fix 1" to the Telegram bot |
+| `inc_20261011_1137_tw_company_match_skipped` | **neatlogs detection** | `4b732f0` (prompt v3 dropped the company check) | prompt rollback that restores the Identify step | must_fix 1/7 → 7/7, must_not_change 0/3 → 3/3 | #4, merged on a typed "approve fix 1" in Telegram |
 
 The first pass of the first incident blamed the unchanged prompt, couldn't reproduce the failure, and **escalated instead of shipping**. The diagnosis was fixed (a flag on in every failing run is the suspect), and the rerun is above. Cost is about $0.03 and 3 minutes per incident.
 
@@ -102,7 +102,7 @@ No LLM is called when none is configured. Diagnosis then uses a template explana
 | Patient and scorer | real: detection's service, replaying **real Crustdata recordings** (20 domains). Outages are injected faults, labelled as such. |
 | Diagnosis with Entire checkpoint reasoning | real: quotes the request from the agent session that made the commit |
 | LLM explanation and fixes | real (DeepSeek `deepseek-flash`) |
-| PRs and squash merge on approval | real (#3, #4) |
+| PRs and squash merge on approval | real: #3 approved by voice and #4 typed, both through the Telegram on-call bot |
 | Gate and backtest | real, replay only. Verified: PR #4's branch is SAFE |
 | neatlogs detections and intake | real (`inc_…_1137` was opened from a neatlogs detection) |
 | Entire Trail on ship | not created: the repo isn't onboarded to Entire (`entire repo mirror add`) |

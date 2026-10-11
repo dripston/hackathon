@@ -28,6 +28,7 @@ neatlogs, Entire, cfo.ai, Crustdata, DeepSeek (`deepseek-flash`, Antibody and th
 - 2026-10-11: `tw_*` detections created in neatlogs through its MCP (`antibody neatlogs-setup`). Scores reach neatlogs on an `antibody.score` span, because the SDK drops custom attributes set after a span starts. Second real incident, `inc_20261011_1137_tw_company_match_skipped`, opened **from the neatlogs detection**: blamed prompt v3 (`4b732f0`), rolled the Identify step back in, must_fix 1/7 -> 7/7, must_not_change 0/3 -> 3/3. PR #4; the gate on its branch says SAFE
 - 2026-10-11: Jev (`jevals` Grounded on TypeSafe `jev-latest`) scores every run's brief against its tool results, about 0.8 s a run; advisory, never a violation
 - 2026-10-11: Operator API made console-ready: incident detail with scenarios and attempt verdicts, `/overview`, `/trust`, `/evidence`, a post-merge job (pull, gate main, backtest), and real response samples in `antibody/fixtures/api-samples/`
+- 2026-10-11: first real on-call loop: the Telegram bot called Rehaan about the incident, he said "approve fix 1" (voice) and PR #3 merged; the bot then called about the second, and a typed "approve fix 1" merged PR #4. Fixed what it showed: a double call (two checks racing) and a post-merge job that skipped the second merge
 - 2026-10-11: voice agent linked: the Telegram bot calls the on-call engineer with the brief and merges only on the spoken or typed phrase "approve fix N" (the model can't approve)
 
 ## Demo
