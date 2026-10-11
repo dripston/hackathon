@@ -6,13 +6,15 @@ tests inject mocks for STT/TTS/LLM/audio without any network or credentials.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Awaitable, Callable
 
 from app.agent import llm
 from app.config import Settings
+from app.bot.oncall import OnCallState
 from app.memory.conversation import ConversationStore
 from app.services import audio, sarvam_stt, sarvam_tts
+from app.services.antibody import AntibodyClient
 
 # (audio_bytes, filename) -> (transcript, detected_language_code)
 TranscribeFn = Callable[[bytes, str], Awaitable[tuple[str, str | None]]]
@@ -33,6 +35,9 @@ class BotServices:
     to_wav: ConvertFn
     to_ogg: ConvertFn
     generate: GenerateFn
+    # Antibody link (None in tests that don't need it: approvals are then never intercepted).
+    antibody: AntibodyClient | None = None
+    oncall: OnCallState | None = field(default=None)
 
     @classmethod
     def default(cls, settings: Settings) -> "BotServices":
@@ -58,4 +63,6 @@ class BotServices:
             to_wav=audio.to_wav_16k_mono,
             to_ogg=audio.to_ogg_opus,
             generate=generate,
+            antibody=AntibodyClient(settings),
+            oncall=OnCallState(settings),
         )

@@ -56,6 +56,13 @@ class Settings(BaseSettings):
     llm_max_tool_iterations: int = 4
     log_transcripts: bool = False
 
+    # --- Antibody (the on-call system this bot is the voice of) ---
+    antibody_url: str = "http://localhost:4000"
+    # Telegram chat that gets called when a fix is waiting. Blank: the chat that last sent /oncall.
+    oncall_chat_id: str = ""
+    oncall_poll_seconds: float = 15.0
+    state_dir: str = ".state"
+
     # Sarvam API base (overridable for tests / proxies).
     sarvam_base_url: str = "https://api.sarvam.ai"
 

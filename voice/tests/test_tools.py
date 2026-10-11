@@ -8,8 +8,9 @@ from app.agent import tools
 
 
 async def test_schema_requires_city():
-    (fn,) = [t["function"] for t in tools.TOOLS]
-    assert fn["name"] == "get_weather"
+    fns = {t["function"]["name"]: t["function"] for t in tools.TOOLS}
+    assert set(fns) == {"get_weather", "list_incidents", "get_incident_brief", "get_incident_details"}
+    fn = fns["get_weather"]
     assert fn["parameters"]["required"] == ["city"]
 
 
@@ -50,3 +51,9 @@ async def test_valid_call_delegates_to_weather(monkeypatch):
     result = await tools.execute_tool("get_weather", {"city": "  Pune  ", "date": "today"})
     assert result == {"status": "ok", "city": "Pune"}
     assert captured == {"city": "Pune", "date": "today"}
+
+
+async def test_no_tool_can_approve():
+    # Approvals must come from the engineer's own words, never from the model.
+    assert not any("approve" in t["function"]["name"] or "reject" in t["function"]["name"]
+                   for t in tools.TOOLS)

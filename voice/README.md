@@ -27,6 +27,33 @@ Telegram ⇄ FastAPI + python-telegram-bot
 - Per-chat conversation memory with `/reset`, plus `/start` and `/help`.
 - Graceful fallbacks: a text reply is sent only if speech synthesis fails.
 
+## Antibody on-call
+
+This bot is Antibody's voice. When Antibody has a fix that passed its whole family of
+variants, it needs a human to say yes, and this bot calls that human.
+
+1. Start Antibody's Operator API (`cd antibody && uv run antibody serve`, port 4000) and set
+   `ANTIBODY_URL` if it isn't on `http://localhost:4000`.
+2. In the Telegram chat that should be called, send `/oncall`. The chat id is saved in
+   `.state/oncall.json` (or set `ONCALL_CHAT_ID`).
+3. Every `ONCALL_POLL_SECONDS` the bot checks `GET /incidents`. For each incident that is
+   `awaiting_approval` (or `escalated`, i.e. no fix passed) and hasn't been announced, it sends a
+   text plus a voice note: the brief from `GET /incidents/{id}/brief`, then "To merge it, say:
+   approve fix N". If Antibody marks the data as mock (`x-antibody-mock`), the call says so.
+4. Reply by voice or text:
+   - `approve fix 1` -> `POST /incidents/{id}/approve` with `channel: "voice"` (or `"typed"`).
+     Antibody merges the pull request.
+   - `reject fix 1 because ...` -> `POST /incidents/{id}/reject`.
+   - Anything else ("why did it break?", "what did the fix change?") goes to the LLM, which can
+     only read: `list_incidents`, `get_incident_brief`, `get_incident_details`.
+
+Approvals never go through the model. The handler matches the engineer's own transcript before
+the LLM sees it. Only speech-to-text noise is cleaned up: capitals, edge punctuation, "one" -> 1,
+"fix number 1". "Yes", "ok, do it" or "please approve fix 1" are not approvals, and Antibody
+re-checks the exact phrase anyway.
+
+`/incidents` lists what needs a decision now.
+
 ## Prerequisites
 
 - **Python 3.13** and [**uv**](https://docs.astral.sh/uv/).

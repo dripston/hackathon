@@ -18,6 +18,7 @@ from telegram.constants import ChatAction
 from telegram.error import TelegramError
 from telegram.ext import ContextTypes
 
+from app.bot import oncall
 from app.bot.services import BotServices
 from app.errors import (
     AudioConversionError,
@@ -41,22 +42,27 @@ _TTS_LANGS = {
 }
 
 WELCOME = (
-    "👋 Hi! I'm your voice assistant.\n\n"
-    "• Send me a *text message* and I'll reply with a voice note.\n"
-    "• Send me a *voice note* and I'll listen, think, and reply with a voice note.\n\n"
-    "I speak English, Hindi and Hinglish, and I can check the live weather for any "
-    "city. Try: \"What's the weather in Bengaluru today?\"\n\n"
-    "Use /help for more, or /reset to start a fresh conversation."
+    "👋 Hi! I'm Antibody's on-call voice.\n\n"
+    "When an AI agent fails silently and Antibody has a proven fix, I call you here "
+    "with a voice note. Send /oncall in this chat to be the one I call.\n\n"
+    "• Ask me anything: \"What's broken?\", \"Why did it break?\"\n"
+    "• To merge a fix, say or type exactly: approve fix 1\n"
+    "• To turn it down: reject fix 1 because ...\n\n"
+    "I speak English, Hindi and Hinglish. Use /help for more."
 )
 
 HELP = (
     "Here's what I can do:\n\n"
     "• Text ➜ voice: type a question, get a spoken answer.\n"
     "• Voice ➜ voice: send a voice note, get a spoken answer.\n"
-    "• Weather: \"What's the weather in Mumbai?\" then \"What about tomorrow?\"\n"
-    "• Chit-chat: \"Tell me a joke.\"\n\n"
+    "• Incidents: \"What's broken?\", \"Read me the brief\", \"What did the fix change?\"\n"
+    "• Approve: say or type exactly \"approve fix 1\". Yes, ok or do it won't count.\n"
+    "• Reject: \"reject fix 1 because it hides the error\"\n"
+    "• Weather: \"What's the weather in Mumbai?\"\n\n"
     "Commands:\n"
     "/start – intro\n"
+    "/oncall – call this chat when a fix needs approval\n"
+    "/incidents – what needs a decision now\n"
     "/help – this message\n"
     "/reset – clear our conversation history\n\n"
     "Note: I remember recent context per chat, but memory resets if the bot "
@@ -109,6 +115,45 @@ async def _speak(services, update: Update, reply_text: str, tts_language: str) -
         await update.message.reply_text(reply_text)
         return
     await _send_voice(update, ogg)
+async def _decision(services, chat_id: int, text: str, channel: str) -> str | None:
+    """Approve/reject straight to Antibody, never through the LLM. None if not a decision."""
+    if services.antibody is None or services.oncall is None:
+        return None
+    reply = await oncall.handle_command(services.antibody, services.oncall, chat_id, text, channel)
+    if reply is not None:
+        logger.info("Decision via {} in chat {}: {}", channel, chat_id, reply)
+    return reply
+
+
+async def oncall_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    services = _services(context)
+    services.oncall.chat_id = update.effective_chat.id
+    services.oncall.save()
+    await update.message.reply_text(
+        "📟 You're on call. When Antibody has a fix waiting, I'll call you here.")
+    try:
+        called = await oncall.check_once(context.bot, services)
+    except Exception as exc:
+        await update.message.reply_text(f"Couldn't reach Antibody yet: {exc}")
+        return
+    if not called:
+        await update.message.reply_text("Nothing needs you right now.")
+
+
+async def incidents_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    services = _services(context)
+    try:
+        items, mock = await services.antibody.incidents()
+    except Exception as exc:
+        await update.message.reply_text(f"Couldn't reach Antibody: {exc}")
+        return
+    if not items:
+        await update.message.reply_text("No incidents.")
+        return
+    lines = [f"• {i['id']} – {i['status']} ({i.get('detection')})" for i in items[:8]]
+    await update.message.reply_text(("Test data.\n" if mock else "") + "\n".join(lines))
+
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text(WELCOME)
 
@@ -130,6 +175,10 @@ async def handle_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     if not text:
         return
     async with services.store.lock(chat_id):
+        decision = await _decision(services, chat_id, text, "typed")
+        if decision is not None:
+            await update.message.reply_text(decision)
+            return
         try:
             async with keep_action(context.bot, chat_id, ChatAction.RECORD_VOICE):
                 reply = await services.generate(text, chat_id, services.store)
@@ -180,6 +229,11 @@ async def handle_voice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
             return
 
         tts_language = _pick_tts_language(detected, settings)
+        decision = await _decision(services, chat_id, transcript, "voice")
+        if decision is not None:
+            await update.message.reply_text(f"🎙 \"{transcript}\"\n{decision}")
+            await _speak(services, update, decision, tts_language)
+            return
         try:
             async with keep_action(context.bot, chat_id, ChatAction.RECORD_VOICE):
                 reply = await services.generate(transcript, chat_id, services.store)

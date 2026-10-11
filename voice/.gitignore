@@ -20,3 +20,6 @@ wheels/
 *.ogg
 *.wav
 !tests/**/*.wav
+
+# Antibody on-call state (who is on call, which incidents were announced)
+.state/

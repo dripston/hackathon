@@ -13,11 +13,13 @@ polling instances against the same bot token.
 
 from __future__ import annotations
 
+import asyncio
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Header, HTTPException, Request, Response
 from telegram import Update
 
+from app.bot import oncall
 from app.bot.telegram_bot import build_application, process_webhook_update
 from app.config import Settings, get_settings
 from app.utils.logging import configure_logging, logger
@@ -52,9 +54,15 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             await application.updater.start_polling(drop_pending_updates=True)
             logger.info("Telegram long polling started")
 
+        services = application.bot_data["services"]
+        watcher = asyncio.create_task(oncall.watch(application.bot, services))
+        logger.info("On-call watcher polling {} every {}s", settings.antibody_url,
+                    settings.oncall_poll_seconds)
+
         try:
             yield
         finally:
+            watcher.cancel()
             if not settings.is_webhook and application.updater.running:
                 await application.updater.stop()
             await application.stop()

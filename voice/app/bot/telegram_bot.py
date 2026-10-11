@@ -32,6 +32,8 @@ def build_application(
     application.add_handler(CommandHandler("start", handlers.start))
     application.add_handler(CommandHandler("help", handlers.help_command))
     application.add_handler(CommandHandler("reset", handlers.reset))
+    application.add_handler(CommandHandler("oncall", handlers.oncall_command))
+    application.add_handler(CommandHandler("incidents", handlers.incidents_command))
     application.add_handler(
         MessageHandler(filters.VOICE | filters.AUDIO, handlers.handle_voice)
     )
