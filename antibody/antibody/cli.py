@@ -1,4 +1,4 @@
-"""antibody watch | handle | gate | backtest | serve | stub-serve | approve"""
+"""antibody watch | handle | gate | backtest | costs | serve | stub-serve | approve"""
 
 import argparse
 import json
@@ -63,8 +63,21 @@ def cmd_gate(a) -> int:
 def cmd_backtest(a) -> int:
     from .gate import backtest
 
-    s = backtest()
+    s = backtest(clean_refs=a.clean)
     print(f"caught {s['caught']}/{s['families']} causing commits; false alarms {s['false_alarms']}/{s['clean_checks']} clean parents")
+    return 0
+
+
+def cmd_costs(a) -> int:
+    from .costs import report
+
+    r = report()
+    for row in r["rows"]:
+        nl = "n/a" if row["neatlogs_cost_usd"] is None else f"${row['neatlogs_cost_usd']:.4f}"
+        print(f"  {row['incident_id']}: ledger ${row['ledger_cost_usd']:.4f}, neatlogs {nl}, "
+              f"{row['duration_ms'] / 1000:.0f} s{' (MOCK)' if row['mock'] else ''}")
+    print(f"real incidents: {r['real_incidents']}; avg ledger cost: {r['avg_ledger_cost_usd_real']}; "
+          f"avg neatlogs cost: {r['avg_neatlogs_cost_usd_real']}")
     return 0
 
 
@@ -111,7 +124,11 @@ def main(argv: list[str] | None = None) -> int:
     g.set_defaults(fn=cmd_gate)
 
     b = sub.add_parser("backtest", help="gate each family against the commit that caused it, and its parent")
+    b.add_argument("--clean", nargs="*", default=[], help="known-good commits to count false alarms on")
     b.set_defaults(fn=cmd_backtest)
+
+    c = sub.add_parser("costs", help="cost per incident (ledger and neatlogs), for the business plan")
+    c.set_defaults(fn=cmd_costs)
 
     ap = sub.add_parser("approve", help="approve a fix with the exact phrase")
     ap.add_argument("incident")

@@ -41,10 +41,15 @@ def trace_link(trace_id: str | None) -> str:
     return f"[{trace_id}]({tmpl.format(trace_id=trace_id)})" if tmpl else f"`{trace_id}`"
 
 
+def ref(trace_id: str | None, run_id: str | None) -> str:
+    return trace_link(trace_id) if trace_id else f"run `{run_id}`"
+
+
 def pr_body(incident: Incident, diag: Diagnosis, fix: FixCandidate, before: FamilyResult, after: FamilyResult,
             cost_usd: float, duration_ms: int, mock: bool) -> str:
-    bad = [v.trace_id for v in before.verdicts if not v.passed][:2]
-    good = [v.trace_id for v in after.verdicts if v.passed][:2]
+    # Before: the real failing production traces when we have them; else the failing replays.
+    bad = [ref(t, None) for t in incident.trace_ids[:2]] or           [ref(v.trace_id, v.run_id) for v in before.verdicts if not v.passed][:2]
+    good = [ref(v.trace_id, v.run_id) for v in after.verdicts if v.passed][:2]
     lines = [
         f"## What broke: `{incident.detection}`",
         "",
@@ -69,9 +74,9 @@ def pr_body(incident: Incident, diag: Diagnosis, fix: FixCandidate, before: Fami
         f"| Before | {before.must_fix_passed}/{before.must_fix_total} | {before.must_not_change_passed}/{before.must_not_change_total} |",
         f"| After | {after.must_fix_passed}/{after.must_fix_total} | {after.must_not_change_passed}/{after.must_not_change_total} |",
         "",
-        "Failing before: " + ", ".join(trace_link(t) for t in bad),
+        "Failing before: " + (", ".join(bad) or "n/a"),
         "",
-        "Passing after: " + ", ".join(trace_link(t) for t in good),
+        "Passing after (replays): " + (", ".join(good) or "n/a"),
         "",
         f"Antibody cost: ${cost_usd:.4f} · time: {duration_ms / 1000:.0f} s",
         "",

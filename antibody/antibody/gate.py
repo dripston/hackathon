@@ -32,6 +32,8 @@ def check_family(fam: dict, ref: str, budget: replay.Budget | None = None) -> tu
     scenarios = [Scenario.model_validate(s) for s in fam["scenarios"]]
     flags = fam.get("bug_flags") or None
     iid = fam["incident_id"]
+    if git_tools.show_file(ref, fam["target_file"]) is None:
+        return None, False  # the file didn't exist at that ref: the family doesn't apply
     if fam["fix_kind"] == "tool_wrapper_patch":
         stub = PatientClient().is_stub
         safe_ref = ref.replace("/", "_").replace("~", "_").replace("^", "_")
@@ -83,8 +85,9 @@ def run_gate(head: str, store: StateStore | None = None, echo=print) -> tuple[Ga
     return report, any_mock
 
 
-def backtest(store: StateStore | None = None, echo=print) -> dict:
-    """For each family: the causing commit should be blocked; its parent should pass."""
+def backtest(store: StateStore | None = None, echo=print, clean_refs: list[str] | None = None) -> dict:
+    """For each family: the causing commit should be blocked; its parent should pass.
+    `clean_refs`: extra known-good commits; any family blocking one counts as a false alarm."""
     store = store or StateStore()
     rows = []
     for fam in load_families():
@@ -99,18 +102,27 @@ def backtest(store: StateStore | None = None, echo=print) -> dict:
             "false_alarm": bool(good and good.reopens), "parent": good.message if good else "n/a (file absent before)",
             "mock": fam.get("mock", False),
         }
-        echo(f"  {fam['incident_id']}: causing commit {'BLOCKED' if row['caught'] else 'missed'}; "
-             f"parent {'FALSE ALARM' if row['false_alarm'] else 'ok'}")
+        parent = "n/a (file absent)" if good is None else ("FALSE ALARM" if row["false_alarm"] else "ok")
+        echo(f"  {fam['incident_id']}: causing commit {'BLOCKED' if row['caught'] else 'missed'}; parent {parent}")
         rows.append(row)
+    clean = []
+    for ref in clean_refs or []:
+        for fam in load_families():
+            res, _ = check_family(fam, ref)
+            if res is not None:
+                clean.append({"ref": ref, "incident_id": fam["incident_id"], "false_alarm": res.reopens,
+                              "message": res.message})
+                echo(f"  clean {ref} vs {fam['incident_id']}: {'FALSE ALARM' if res.reopens else 'ok'}")
     caught = sum(r["caught"] for r in rows)
     parents = [r for r in rows if not r["parent"].startswith("n/a")]
-    fa = sum(r["false_alarm"] for r in parents)
+    checks = [{"false_alarm": r["false_alarm"]} for r in parents] + clean
+    fa = sum(c["false_alarm"] for c in checks)
     summary = {
         "families": len(rows), "caught": caught,
         "detection_rate": (caught / len(rows)) if rows else None,
-        "false_alarms": fa, "clean_checks": len(parents),
-        "false_alarm_rate": (fa / len(parents)) if parents else None,
-        "rows": rows, "created_at": now_iso(),
+        "false_alarms": fa, "clean_checks": len(checks),
+        "false_alarm_rate": (fa / len(checks)) if checks else None,
+        "rows": rows, "clean": clean, "created_at": now_iso(),
         "label": "SIMULATED (replay of recorded tool responses against seeded bugs)",
     }
     (store.root / "backtest.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
