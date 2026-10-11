@@ -33,18 +33,18 @@ def run(file: str, ship_mock: bool = False, pause: float = 0.6) -> int:
     _say()
     t0 = time.monotonic()
 
-    def echo(line: str) -> None:
-        stage = line[1:].split("]")[0].strip()
-        body = line.split("]", 1)[1].strip() if "]" in line else line
-        if body.startswith("fix_"):
-            color = GREEN if "ACCEPTED" in body else RED
-            _say(f"      {body}", color)
-            return
+    def on_stage(stage: str) -> None:
         _say(f"  ▸ {LABELS.get(stage, stage)}", CYAN)
+
+    def echo(line: str) -> None:
+        body = line.split("]", 1)[1].strip() if "]" in line else line
+        if body.startswith("fix_") and "->" in body:
+            _say(f"      {body}", GREEN if "ACCEPTED" in body else RED)
+            return
         _say(f"      {body}")
         time.sleep(pause)
 
-    out = Pipeline(store, echo=echo, ship_mock=ship_mock).handle(inc, force=True)
+    out = Pipeline(store, echo=echo, ship_mock=ship_mock, on_stage=on_stage).handle(inc, force=True)
 
     diag = store.read(inc.id, "diagnosis", Diagnosis)
     base = store.read(inc.id, "baseline", FamilyResult)
