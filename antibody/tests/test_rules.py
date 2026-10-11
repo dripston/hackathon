@@ -146,3 +146,9 @@ def test_apply_edits_is_all_or_nothing():
     assert fix.apply_edits(text, [{"find": "b", "replace": "B"}, {"find": "zzz", "replace": "y"}]) is None
     assert fix.apply_edits("x x", [{"find": "x", "replace": "y"}]) is None  # ambiguous
     assert fix.apply_edits(text, []) is None
+
+
+def test_apply_edits_tolerates_spacing():
+    text = "Rules:\n    - keep   this\n- change me\n"
+    out = fix.apply_edits(text, [{"find": "- keep this\n- change me", "replace": "- keep this\n- changed"}])
+    assert out == "Rules:\n- keep this\n- changed\n"

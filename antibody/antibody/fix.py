@@ -129,15 +129,37 @@ def apply_edits(content: str, edits: list[dict]) -> str | None:
         find, repl = e.get("find"), e.get("replace")
         if not isinstance(find, str) or not isinstance(repl, str) or not find:
             return None
-        if out.count(find) != 1:
-            # models sometimes normalise line endings or trailing spaces; try once more on stripped text
-            alt = find.strip()
-            if not alt or out.count(alt) != 1:
-                log.warning("fix: edit target found %d times, rejecting edit set", out.count(find))
-                return None
-            find = alt
-        out = out.replace(find, repl, 1)
+        if out.count(find) == 1:
+            out = out.replace(find, repl, 1)
+            continue
+        alt = find.strip()
+        if alt and out.count(alt) == 1:
+            out = out.replace(alt, repl.strip(), 1)
+            continue
+        loose = _replace_lines_loosely(out, find, repl)
+        if loose is None:
+            log.warning("fix: edit target not found exactly once, rejecting edit set")
+            return None
+        out = loose
     return out
+
+
+def _replace_lines_loosely(content: str, find: str, repl: str) -> str | None:
+    """Match `find` as a block of whole lines, ignoring indentation and spacing differences
+    (models often re-indent or collapse spaces). Only applies if exactly one block matches."""
+    norm = lambda l: " ".join(l.split())
+    want = [norm(l) for l in find.splitlines() if l.strip()]
+    if not want:
+        return None
+    lines = content.splitlines(keepends=True)
+    hits = [i for i in range(len(lines) - len(want) + 1)
+            if [norm(l) for l in lines[i:i + len(want)]] == want]
+    if len(hits) != 1:
+        return None
+    i = hits[0]
+    nl = lines[i][len(lines[i].rstrip("\r\n")):] or "\n"
+    new_block = "".join(l + nl for l in repl.splitlines()) if repl else ""
+    return "".join(lines[:i]) + new_block + "".join(lines[i + len(want):])
 
 
 def _parse(text: str) -> dict:
