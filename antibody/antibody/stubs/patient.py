@@ -46,7 +46,7 @@ def run(
 
     def add(kind, name, args=None, result=None, error=None, synthetic=False):
         steps.append(Step(index=len(steps), kind=kind, name=name, args=args, result=result,
-                          error=error, latency_ms=50.0, cost_usd=0.0 if kind == "tool" else 0.0005,
+                          error=error, latency_ms=50.0, cost_usd=0.0,  # stub: no real spend, never report a made-up cost
                           synthetic=synthetic))
         return steps[-1]
 

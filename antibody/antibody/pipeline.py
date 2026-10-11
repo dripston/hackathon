@@ -25,9 +25,10 @@ MAX_ATTEMPTS = 3
 
 class Pipeline:
     def __init__(self, store: StateStore | None = None, echo: Callable[[str], None] = print,
-                 ship_mock: bool = False):
+                 ship_mock: bool = False, on_stage: Callable[[str], None] | None = None):
         self.store = store or StateStore()
         self.echo = echo
+        self.on_stage = on_stage  # called just before a stage runs (used by the narrated demo)
         self.ship_mock = ship_mock
 
     # ---------- helpers ----------
@@ -70,6 +71,8 @@ class Pipeline:
             if inc.status in ("escalated",) and stage != "resolution":
                 self.echo(f"[{stage:<10}] skip (incident escalated)")
                 continue
+            if self.on_stage:
+                self.on_stage(stage)
             try:
                 with tracing.span(f"antibody.{stage}", kind="WORKFLOW" if stage == "diagnosis" else "CHAIN",
                                   **{"antibody.incident_id": inc.id, "antibody.detection": inc.detection}):

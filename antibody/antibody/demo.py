@@ -55,9 +55,11 @@ def run(file: str, ship_mock: bool = False, pause: float = 0.6) -> int:
     _say()
     _say("  WHY IT BROKE", BOLD)
     _say(f"      {diag.explanation}")
-    if diag.reasoning_excerpt:
-        src = "Entire checkpoint" if diag.reasoning_source == "entire_checkpoint" else "commit message"
-        _say(f"      reason recorded in the {src}: \"{diag.reasoning_excerpt[:200]}\"", YELLOW)
+    if diag.reasoning_excerpt and diag.reasoning_source == "entire_checkpoint":
+        _say(f"      why it was changed (Entire checkpoint): \"{diag.reasoning_excerpt[:200]}\"", YELLOW)
+    elif diag.reasoning_excerpt:
+        src = "commit message (no Entire checkpoint for this commit)"
+        _say(f"      reason from the {src}: \"{diag.reasoning_excerpt[:160]}\"", DIM)
     if accepted:
         _say()
         _say(f"  THE FIX ({accepted.fix.id})", BOLD)
