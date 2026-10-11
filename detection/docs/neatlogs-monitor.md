@@ -1,6 +1,6 @@
 # Per-request Neatlogs to Jev monitoring
 
-The CLI loads `.env` from the project root automatically. Existing terminal
+The CLI loads `.env` from the repo root automatically. Existing terminal
 variables take precedence. INFO progress logs go to stderr while the final JSON
 summary remains on stdout. Logs show page discovery, pending requests, context
 collection, normalization, Jev evaluation, outcomes, and polling waits. Trace

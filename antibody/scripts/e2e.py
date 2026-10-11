@@ -201,9 +201,8 @@ def make_lab() -> str:
     if FIXED not in text:
         raise Abort("agent.py no longer has the fixed people-search block; update FIXED in this script")
     agent.write_text(text.replace(FIXED, BUGGY), encoding="utf-8", newline="\n")
-    for sub in ("detection", "antibody"):
-        if (MAIN / sub / ".env").exists():
-            shutil.copy(MAIN / sub / ".env", LAB / sub / ".env")  # secrets aren't in git
+    if (MAIN / ".env").exists():
+        shutil.copy(MAIN / ".env", LAB / ".env")  # the repo's single .env; secrets aren't in git
     git("add", "detection/detection/patient/agent.py", cwd=LAB)
     # hooks off for this one commit: it is test scaffolding, not work to record
     git("-c", f"core.hooksPath={LAB_ROOT / 'no-hooks'}", "commit", "-q", "-m",

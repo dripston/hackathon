@@ -12,7 +12,7 @@ uv pip install "neatlogs[langchain]"
 The graph invocation gets the documented Neatlogs callback; the SDK flushes
 and shuts down at the end. Synthetic task, tool results, and final claim are
 exported under workflow `jev-demo-deployment`. No LLM key is needed to run this
-deterministic sample. The CLI loads the project-root `.env` automatically;
+deterministic sample. The CLI loads the repo-root `.env` automatically;
 existing process variables take precedence. Use the interpreter directly
 after installing this optional SDK; a later `uv sync` can remove it.
 

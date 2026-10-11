@@ -28,7 +28,7 @@ The first pass of the first incident blamed the unchanged prompt, couldn't repro
 ```bash
 cd antibody
 uv sync
-cp .env.example .env            # then fill it in (see below)
+cp ../.env.example ../.env      # one .env for the whole repo, at the root; fill it in (see below)
 
 uv run antibody serve                 # Operator API on :4000 (needs detection on :5050)
 uv run antibody watch                 # poll neatlogs every 60 s, handle new incidents
@@ -72,7 +72,7 @@ Detection's own API on `:5050` serves the Live ward's feed: `GET /runs?limit=20`
 - **Polling:** poll every 2 seconds. While Antibody works, the incident's `status` moves through `diagnosing → simulating → fixing → awaiting_approval`, and the stage keys appear in `GET /incidents/{id}` as they complete.
 - **Trace links:** set `NEATLOGS_TRACE_URL` to a dashboard URL containing `{trace_id}` (copy one from the neatlogs UI). `trace_url_template` then carries it to the console. neatlogs doesn't document the URL format, so it isn't hard-coded.
 
-## Environment (`antibody/.env`)
+## Environment (the repo's single `.env`, at the root)
 
 | Var | Notes |
 |---|---|

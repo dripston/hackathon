@@ -18,7 +18,7 @@ Work only in your own folder. Need something from another folder? Tell your huma
 
 ## Rules
 
-1. **No secrets in git.** Every `.env` is ignored. Only `.env.example` files with empty values are committed. Never print keys in logs, traces or commit messages.
+1. **No secrets in git.** The repo has one `.env`, at the root, and it is ignored. Only `.env.example` files with empty values are committed: the root one (every service) and `client/.env.example` (Next.js reads its own folder). Never print keys in logs, traces or commit messages.
 2. **Small commits that explain why.** Judges check that commits happened during the hackathon (Oct 10–12, 2026). Entire is enabled on this repo; your session and reasoning are saved with each commit.
 3. **Never fake results.** Every number in the README, video or `evidence/` must come from a file or trace. Label data as LIVE, RECORDED, SIMULATED or SEEDED. The bugs in the patient are seeded; say so.
 4. **Trace everything in neatlogs** (LLM calls, tool calls). Flush before a script exits.

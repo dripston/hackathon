@@ -166,7 +166,7 @@ agent has two read-only evidence tools, bounded execution, structured hypothesis
 output, and checked evidence citations. Model output never becomes executable
 code. Offline investigation remains available without an LLM.
 
-`.env.example` lists environment variable names; it is not loaded automatically.
+The repo's root `.env.example` lists every variable. Copy it to `.env` at the repo root: detection, Antibody and the voice bot all load that one file.
 Keep credentials in the process environment or your secret manager.
 
 ## Artifacts and CI

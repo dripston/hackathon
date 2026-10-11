@@ -1,6 +1,6 @@
 """Application configuration via pydantic-settings.
 
-All secrets come from the environment (or a local .env). Fields default to safe,
+All secrets come from the environment (or the repo's single .env at the repo root). Fields default to safe,
 empty values so the package can be imported in tests without real credentials;
 ``Settings.validate_runtime()`` enforces required secrets only when the bot
 actually starts.
@@ -9,6 +9,7 @@ actually starts.
 from __future__ import annotations
 
 from functools import lru_cache
+from pathlib import Path
 
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -16,7 +17,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file=".env",
+        # one .env for the whole repo, whichever folder the bot is started from
+        env_file=str(Path(__file__).resolve().parents[2] / ".env"),
         env_file_encoding="utf-8",
         extra="ignore",
         case_sensitive=False,

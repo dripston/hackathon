@@ -20,7 +20,7 @@ from pathlib import Path
 import httpx
 
 from . import git_tools
-from .config import REPO_ROOT, get_settings
+from .config import ENV_FILE, REPO_ROOT, get_settings
 
 log = logging.getLogger("antibody.apply")
 
@@ -119,6 +119,13 @@ def patient_service(worktree: Path, stub: bool):
     """Run the patient + scorer from `worktree` on a spare port; yields its base URL."""
     port = _free_port()
     env = dict(os.environ)
+    # Secrets aren't in git, so the worktree has no .env. Current code reads the repo-root .env; older
+    # commits (e.g. a backtest of the commit that caused an incident) read detection/.env, so give both.
+    src_env = REPO_ROOT / ".env" if (REPO_ROOT / ".env").exists() else ENV_FILE
+    if src_env.exists():
+        for dst in (worktree / ".env", worktree / "detection" / ".env"):
+            if dst.parent.exists() and not dst.exists():
+                shutil.copy(src_env, dst)
     if stub:
         cwd = worktree / "antibody"
         cmd = ["uv", "run", "--quiet", "python", "-c", _launch("antibody.cli", ["stub-serve", "--port", str(port)])]
@@ -129,10 +136,6 @@ def patient_service(worktree: Path, stub: bool):
         # detection keeps its uv cache inside the project; reuse the main checkout's so a fresh worktree
         # doesn't re-download every dependency.
         env.setdefault("UV_CACHE_DIR", str(REPO_ROOT / "detection" / ".uv-cache"))
-        # Reuse the main checkout's detection/.env (secrets aren't in git, so the worktree lacks it).
-        src_env = REPO_ROOT / "detection" / ".env"
-        if src_env.exists() and not (cwd / ".env").exists():
-            shutil.copy(src_env, cwd / ".env")
         # An older commit's patient only knows the GROQ_* settings. Groq and DeepSeek both speak the
         # OpenAI API, so point those at the provider in use (process env beats the copied .env).
         if src_env.exists():

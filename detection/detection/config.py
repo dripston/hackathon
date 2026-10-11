@@ -1,4 +1,4 @@
-"""Settings from the environment / detection/.env. Model IDs only from env."""
+"""Settings from the environment / the repo's single .env (at the repo root). Model IDs only from env."""
 
 import os
 from functools import lru_cache
@@ -11,7 +11,9 @@ PROJECT_DIR = Path(__file__).resolve().parent.parent  # the detection/ project f
 FIXTURES = PROJECT_DIR / "fixtures"
 PROMPTS_DIR = Path(__file__).resolve().parent / "patient" / "prompts"
 
-load_dotenv(PROJECT_DIR / ".env", override=False)
+ENV_FILE = PROJECT_DIR.parent / ".env"  # one .env for the whole repo (see /.env.example)
+
+load_dotenv(ENV_FILE, override=False)
 
 
 def _use_certifi() -> None:
