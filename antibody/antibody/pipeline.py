@@ -152,7 +152,8 @@ class Pipeline:
         previous: list[dict] = []
         last = baseline
         for n in range(1, MAX_ATTEMPTS + 1):
-            cand, new_content, mock = fix.propose(diag, content, last, scenarios, n, previous)
+            cand, new_content, mock = fix.propose(diag, content, last, scenarios, n, previous,
+                                                  change_diff=(self.store.read(inc.id, "evidence") or {}).get("change_diff"))
             self._mock(inc.id, mock, f"fix_{n}")
             if not cand.diff.strip():
                 attempts.append(Attempt(fix=cand, error="empty diff"))

@@ -9,6 +9,7 @@ dependencies = [
     "httpx>=0.28.1",
     "mcp>=2.3.0",
     "neatlogs>=1.4.26",
+    "openai>=3.28.0",
     "pydantic>=2.11",
     "pydantic-settings>=2.15.0",
     "python-dotenv>=1.2.4",

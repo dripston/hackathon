@@ -1,4 +1,5 @@
-"""LLM access: Bedrock (Converse API) or Anthropic, chosen by LLM_PROVIDER. Model IDs only from env.
+"""LLM access: Bedrock (Converse API), Anthropic, or Groq (OpenAI-compatible), chosen by LLM_PROVIDER.
+Model IDs only from env.
 
 Never sets temperature / top_p / top_k (Claude 4.7+ rejects non-default values).
 If no provider is configured, `available()` is False and callers use their deterministic fallback,
@@ -52,6 +53,8 @@ def available(tier: str = "strong") -> bool:
         return False
     if s.llm_provider == "anthropic":
         return bool(s.anthropic_api_key)
+    if s.llm_provider == "groq":
+        return bool(s.groq_api_key)
     return s.llm_provider == "bedrock" and _aws_credentials()
 
 
@@ -77,6 +80,17 @@ def _price(tier: str) -> tuple[float, float]:
 
 _bedrock = None
 _anthropic = None
+_groq = None
+
+
+def _groq_client():
+    global _groq
+    if _groq is None:
+        import openai
+
+        s = get_settings()
+        _groq = tracing.wrap(openai.OpenAI(api_key=s.groq_api_key, base_url=s.groq_base_url))
+    return _groq
 
 
 def _bedrock_client():
@@ -97,13 +111,41 @@ def _anthropic_client():
     return _anthropic
 
 
+def _with_retry(call, attempts: int = 4):
+    """Retry rate-limited calls (HTTP 429), waiting as long as the provider asks (capped)."""
+    import re
+    import time
+
+    for i in range(attempts):
+        try:
+            return call()
+        except Exception as e:
+            status = getattr(e, "status_code", None)
+            if status != 429 or i == attempts - 1:
+                raise
+            msg = str(e)
+            m = re.search(r"try again in ([\d.]+)s", msg)
+            wait = min(float(m.group(1)) + 1 if m else 15.0 * (i + 1), 60.0)
+            log.warning("llm rate-limited; retrying in %.0f s", wait)
+            time.sleep(wait)
+
+
 def complete(tier: str, system: str, user: str, max_tokens: int = 2000) -> LLMResult:
     """One call. Raises if no provider is configured; check `available()` first."""
     if not available(tier):
         raise RuntimeError("No LLM configured (set LLM_PROVIDER and MODEL_CHEAP/MODEL_STRONG)")
     s = get_settings()
     model = _model(tier)
-    if s.llm_provider == "anthropic":
+    if s.llm_provider == "groq":
+        # max_tokens covers the model's hidden reasoning too, so leave headroom. Groq's free tier
+        # counts the requested max_tokens against an 8k tokens-per-minute limit, so keep it modest.
+        resp = _with_retry(lambda: _groq_client().chat.completions.create(
+            model=model, max_tokens=max_tokens + 1500,
+            messages=[{"role": "system", "content": system}, {"role": "user", "content": user}],
+        ))
+        text = resp.choices[0].message.content or ""
+        tin, tout = resp.usage.prompt_tokens, resp.usage.completion_tokens
+    elif s.llm_provider == "anthropic":
         msg = _anthropic_client().messages.create(
             model=model, max_tokens=max_tokens, system=system,
             messages=[{"role": "user", "content": user}],

@@ -6,6 +6,7 @@ Its behaviour depends on the prompt text, so prompt fixes visibly change outcome
 - bug_flags.swallow_tool_errors turns people-search errors into an empty list.
 """
 
+import re
 import uuid
 
 from ..models import AgentRun, Fault, Step, ToolError
@@ -66,7 +67,8 @@ def run(
             {"company_name": rec["company_name"], "headcount": rec["headcount"], "domain": rec.get("lookalike_of", domain)})
 
     company_ok = bool(rec) and "company" not in errors
-    if company_ok and "confirm the company" in prompt:
+    # Any instruction to confirm/verify the company or the enrichment result counts (a real model would follow it).
+    if company_ok and re.search(r"\b(confirm|verify|check)\w*\b.{0,60}\b(company|enrichment)", prompt):
         match = "lookalike_of" not in rec
         add("llm", "llm.confirm_company", {"domain": domain}, {"match": match})
         brief["company_match_confirmed"] = match

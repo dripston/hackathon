@@ -127,7 +127,9 @@ def target_file(change: dict, stub: bool) -> Path | None:
 EXPLAIN_SYSTEM = (
     "You are the diagnosis step of an on-call system for AI agents. You get evidence about a silent "
     "failure: failing vs healthy runs, what changed, the commit, and the reasoning recorded when the "
-    "change was made. Explain in 2-4 plain sentences what broke and why, using only the evidence. "
+    "change was made. The exact change is in `change_diff`: base the explanation on it. Explain in 2-4 "
+    "plain sentences what broke and why, using only the evidence. Never state names, numbers or "
+    "prompt text that don't appear in the evidence. "
     "Then choose fix_kind: prompt_patch (edit the prompt, keeping its intent), prompt_rollback (the "
     "change has no intent worth keeping), or tool_wrapper_patch (the bug is in tool-calling code, not "
     'the prompt). Reply with JSON only: {"explanation": "...", "fix_kind": "..."}'
@@ -144,6 +146,34 @@ def _fallback_explanation(incident: Incident, change: dict, commit: dict | None,
         parts.append(f"The change was made because: {reasoning[:200]}")
     kind = "tool_wrapper_patch" if change["suspect_flag"] else "prompt_patch"
     return " ".join(parts), kind
+
+
+def change_diff(change: dict, stub: bool, commit: dict | None, tfile: Path | None, limit: int = 4000) -> str | None:
+    """The actual text of what changed: healthy prompt version -> suspect version, else the commit's diff."""
+    import difflib
+
+    sv, hv = change.get("suspect_prompt_version"), change.get("healthy_prompt_version")
+    if not change.get("suspect_flag") and sv and hv and sv != hv:
+        a, b = prompt_dir(stub) / f"{hv}.md", prompt_dir(stub) / f"{sv}.md"
+        if a.exists() and b.exists():
+            d = "".join(difflib.unified_diff(a.read_text(encoding="utf-8").splitlines(True),
+                                             b.read_text(encoding="utf-8").splitlines(True),
+                                             fromfile=f"prompts/{hv}.md (healthy)", tofile=f"prompts/{sv}.md (failing)"))
+            if d:
+                return d[:limit]
+    if commit and tfile is not None:
+        rel = str(tfile.resolve().relative_to(REPO_ROOT)).replace("\\", "/")
+        d = git_tools.git("show", "--format=", commit["sha"], "--", rel, check=False)
+        if change.get("suspect_flag") and d:
+            # keep only the hunks that mention the flag, so the model sees the relevant code
+            flag = change["suspect_flag"]
+            lines = d.splitlines()
+            hits = [i for i, l in enumerate(lines) if flag in l]
+            if hits:
+                keep = sorted({j for i in hits for j in range(max(0, i - 6), min(len(lines), i + 8))})
+                d = "\n".join(lines[j] for j in keep)
+        return d[:limit] if d else None
+    return None
 
 
 def diagnose(incident: Incident) -> tuple[Diagnosis, bool, dict]:
@@ -169,15 +199,20 @@ def diagnose(incident: Incident) -> tuple[Diagnosis, bool, dict]:
                 "failing_domains": failing_domains,
                 "healthy_domains": [d for d in dict.fromkeys(h["domain"] for h in h_all if h["domain"])
                                     if d not in failing_domains],
-                "checkpoint": checkpoint, "target_file": str(tfile) if tfile else None}
+                "checkpoint": checkpoint, "target_file": str(tfile) if tfile else None,
+                "change_diff": change_diff(change, mock, commit, tfile)}
 
     explanation, fix_kind = _fallback_explanation(incident, change, commit, reasoning)
     if llm.available("strong"):
         try:
-            res = llm.complete("strong", EXPLAIN_SYSTEM, json.dumps(evidence, indent=1, default=str), 800)
+            compact = {k: v for k, v in evidence.items() if k not in ("failing_domains", "healthy_domains") and v}
+            compact["failing"], compact["healthy"] = evidence["failing"][:3], evidence["healthy"][:3]
+            res = llm.complete("strong", EXPLAIN_SYSTEM, json.dumps(compact, separators=(",", ":"), default=str), 600)
             parsed = _parse_json(res.text)
             explanation = parsed.get("explanation") or explanation
-            if parsed.get("fix_kind") in ("prompt_patch", "prompt_rollback", "tool_wrapper_patch"):
+            # The model may only choose *how* to fix a prompt; whether the fix is code or prompt is
+            # decided by the evidence (a suspect flag means the bug is in tool-calling code).
+            if not change["suspect_flag"] and parsed.get("fix_kind") in ("prompt_patch", "prompt_rollback"):
                 fix_kind = parsed["fix_kind"]
         except Exception as e:
             log.warning("diagnosis LLM failed (%s); using the template explanation", e)

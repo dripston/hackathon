@@ -52,10 +52,11 @@ Any response built from stub data carries `x-antibody-mock: 1`. CORS allows `COR
 | Var | Notes |
 |---|---|
 | `NEATLOGS_API_KEY` | Used for intake (MCP), tracing (`workflow=antibody`) and diagnosis traces |
-| `LLM_PROVIDER` | `bedrock` (default), `anthropic`, or `stub` |
+| `LLM_PROVIDER` | `groq` (what we use: the hackathon AWS account doesn't allow Bedrock), `anthropic`, `bedrock`, or `stub` |
+| `GROQ_API_KEY` | Groq key; Groq's API is OpenAI-compatible and traced by `neatlogs.wrap` |
 | `AWS_REGION`, `AWS_BEARER_TOKEN_BEDROCK` | Bedrock API key; standard AWS credentials also work. `.env` is exported to the process so boto3 can see it. |
-| `MODEL_CHEAP`, `MODEL_STRONG` | Bedrock model or inference-profile IDs. Never hard-coded. |
-| `PRICE_*_PER_MTOK` | USD per million tokens, used for the cost cap and the ledger cost |
+| `MODEL_CHEAP`, `MODEL_STRONG` | model IDs, e.g. `openai/gpt-oss-20b` on Groq. Never hard-coded. |
+| `PRICE_*_PER_MTOK` | USD per million tokens, used for the cost cap and the ledger cost. gpt-oss-20b on Groq: 0.075 in, 0.30 out |
 | `PATIENT_URL`, `SCORER_URL` | detection's service; default `http://localhost:5050` |
 | `USE_STUBS` | `1` = use the built-in stubs. With `0`, Antibody still falls back to the stubs, loudly, if detection's `/health` doesn't answer. |
 | `GITHUB_REPO` | `owner/repo`; defaults to the `origin` remote |
@@ -77,7 +78,7 @@ No LLM is called when none is configured. Diagnosis then uses a template explana
 | Entire checkpoint reasoning | real once commits carry an `Entire-Checkpoint` trailer. Until then the commit message is quoted, and labelled as such. |
 | Entire Trail on ship | needs `entire login` |
 | Patient and scorer | **stubbed** (`antibody/stubs/`, fictional companies) until detection's service on `:5050` is up |
-| LLM explanation and fixes | need Bedrock credentials in `.env` |
+| LLM explanation and fixes | real (Groq, gpt-oss-20b). Diagnosis gets the actual prompt/code diff; fixes are find/replace edits. |
 
 ## What Antibody needs from detection (`/CONTRACT.md` is the source of truth)
 

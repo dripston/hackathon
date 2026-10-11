@@ -138,3 +138,11 @@ def test_llm_fix_falls_back_when_model_fails(monkeypatch):
     content = "- Sales needs actionable briefs: every brief must include at least 3 decision makers.\n"
     cand, new, mock = fix.propose(_diag(), content, fam(1, 1, 0, 0), [], 1)
     assert mock and cand.description.startswith("[rule-based]") and "fewer" in new
+
+
+def test_apply_edits_is_all_or_nothing():
+    text = "a\nb\nc\n"
+    assert fix.apply_edits(text, [{"find": "b", "replace": "B"}]) == "a\nB\nc\n"
+    assert fix.apply_edits(text, [{"find": "b", "replace": "B"}, {"find": "zzz", "replace": "y"}]) is None
+    assert fix.apply_edits("x x", [{"find": "x", "replace": "y"}]) is None  # ambiguous
+    assert fix.apply_edits(text, []) is None

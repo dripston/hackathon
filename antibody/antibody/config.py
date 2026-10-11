@@ -21,7 +21,9 @@ class Settings(BaseSettings):
     neatlogs_mcp_url: str = "https://ingest.neatlogs.com/mcp"
     neatlogs_trace_url: str = ""  # e.g. a dashboard URL with {trace_id}; empty = show bare ids
 
-    llm_provider: str = "bedrock"  # bedrock | anthropic | stub
+    llm_provider: str = "bedrock"  # bedrock | anthropic | groq | stub
+    groq_api_key: str = ""
+    groq_base_url: str = "https://api.groq.com/openai/v1"
     aws_region: str = "us-east-1"
     anthropic_api_key: str = ""
     model_cheap: str = ""

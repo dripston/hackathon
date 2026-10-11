@@ -16,12 +16,14 @@ from .models import Diagnosis, FamilyResult, FixCandidate, Scenario
 log = logging.getLogger("antibody.fix")
 
 FIX_SYSTEM = (
-    "You fix silent failures in an AI agent. You get: a diagnosis, the file to change, the failing "
-    "scenarios with the checks they failed, and the original reasoning for the change that caused it. "
-    "Make the SMALLEST change that removes the failure while respecting the original intent. Example: "
-    "if sales wanted at least 3 contacts, keep 'aim for 3 contacts' but add 'never name anyone not in "
-    "tool results; list fewer and say why'. Don't rewrite unrelated parts. "
-    "Reply with JSON only: {\"description\": \"one sentence\", \"content\": \"the FULL revised file\"}"
+    "You fix silent failures in an AI agent. You get: a diagnosis, the file to change (a prompt or "
+    "code), the change that caused the failure, the failing scenarios with the checks they failed, "
+    "the original reasoning for that change, and any earlier attempts that were rejected. "
+    "Make the SMALLEST edit that removes the failure while keeping the goal the original change was "
+    "made for: don't just revert it if its intent can be kept safely. Don't touch unrelated parts. "
+    "Reply with JSON only: {\"description\": \"one plain sentence\", \"edits\": [{\"find\": \"exact "
+    "text copied from the file\", \"replace\": \"new text\"}]}. Each `find` must appear exactly once in "
+    "the file; keep edits short."
 )
 
 
@@ -66,7 +68,8 @@ def _rule_based(diag: Diagnosis, content: str) -> tuple[str, str]:
 
 
 def propose(diag: Diagnosis, content: str, family_result: FamilyResult, scenarios: list[Scenario],
-            attempt: int, previous: list[dict] | None = None) -> tuple[FixCandidate, str, bool]:
+            attempt: int, previous: list[dict] | None = None,
+            change_diff: str | None = None) -> tuple[FixCandidate, str, bool]:
     """Returns (candidate, new_file_content, is_mock). `previous` = [{description, diff, failing}] from earlier attempts."""
     path = diag.target_file or "unknown"
     sc_by_id = {s.id: s for s in scenarios}
@@ -75,20 +78,29 @@ def propose(diag: Diagnosis, content: str, family_result: FamilyResult, scenario
          "faults": [f"{f.tool}@{f.at_call}:{f.error.code}" for f in sc_by_id[v.scenario_id].faults],
          "failed_checks": v.failed_checks}
         for v in family_result.verdicts if not v.passed
-    ]
+    ][:6]
     new = None
     if llm.available("strong"):
         user = json.dumps({
-            "diagnosis": diag.model_dump(), "file_path": path, "file_content": content,
+            "diagnosis": {"explanation": diag.explanation, "fix_kind": diag.fix_kind},
+            "file_path": path, "file_content": content,
             "failing_scenarios": failing, "original_reasoning": diag.reasoning_excerpt,
-            "previous_attempts_that_failed": previous or [],
-        }, indent=1)
+            "change_that_caused_it": change_diff,
+            "previous_attempts_that_failed": [
+                {"description": p.get("description"), "diff": p.get("diff"),
+                 "still_failing": [f.get("failed_checks") for f in (p.get("failing") or [])][:5]
+                 if isinstance(p.get("failing"), list) else p.get("failing")}
+                for p in (previous or [])],
+        }, separators=(",", ":"))
         try:
-            parsed = _parse(llm.complete("strong", FIX_SYSTEM, user, max_tokens=8000).text)
-            if parsed.get("content"):
-                new, desc, mock = parsed["content"], parsed.get("description", "model fix"), False
+            parsed = _parse(llm.complete("strong", FIX_SYSTEM, user, max_tokens=1500).text)
+            applied = apply_edits(content, parsed.get("edits") or [])
+            if applied is None and parsed.get("content"):
+                applied = parsed["content"]
+            if applied is not None and applied != content:
+                new, desc, mock = applied, parsed.get("description", "model fix"), False
             else:
-                log.warning("fix: model reply had no file content; using the rule-based fix")
+                log.warning("fix: model reply had no applicable edit; using the rule-based fix")
         except Exception as e:
             log.warning("fix: LLM call failed (%s); using the rule-based fix", e)
     if new is None:
@@ -102,6 +114,26 @@ def propose(diag: Diagnosis, content: str, family_result: FamilyResult, scenario
         diff=unified_diff(path, content, new), attempt=attempt,
     )
     return cand, new, mock
+
+
+def apply_edits(content: str, edits: list[dict]) -> str | None:
+    """Apply find/replace edits; None if any `find` isn't found exactly once (no partial edits)."""
+    if not edits:
+        return None
+    out = content
+    for e in edits:
+        find, repl = e.get("find"), e.get("replace")
+        if not isinstance(find, str) or not isinstance(repl, str) or not find:
+            return None
+        if out.count(find) != 1:
+            # models sometimes normalise line endings or trailing spaces; try once more on stripped text
+            alt = find.strip()
+            if not alt or out.count(alt) != 1:
+                log.warning("fix: edit target found %d times, rejecting edit set", out.count(find))
+                return None
+            find = alt
+        out = out.replace(find, repl, 1)
+    return out
 
 
 def _parse(text: str) -> dict:
