@@ -24,22 +24,33 @@ def status(store: StateStore) -> dict:
     return json.loads(path.read_text(encoding="utf-8")) if path.exists() else {"state": "idle"}
 
 
+_pending = threading.Event()
+
+
 def after_merge(incident_id: str, store: StateStore | None = None) -> None:
+    """Pull main, gate it and refresh the backtest. A merge that lands while this runs is not lost: the
+    job runs once more afterwards, so main is gated with every merged family."""
     from .gate import backtest, run_gate
 
     store = store or StateStore()
     if not _lock.acquire(blocking=False):
-        log.info("aftercare already running; %s will be covered by it", incident_id)
+        _pending.set()
+        log.info("aftercare already running; it will run again for %s", incident_id)
         return
     try:
-        _status(store, state="pulling", incident_id=incident_id, error=None)
-        out = git_tools.git("pull", "--ff-only", check=False)
-        log.info("aftercare: git pull: %s", (out or "").strip()[-200:])
-        _status(store, state="gating", pulled=(out or "").strip()[-200:])
-        report, _ = run_gate("main", store, echo=lambda m: log.info("gate: %s", m))
-        _status(store, state="backtesting", gate_verdict=report.verdict)
-        summary = backtest(store, echo=lambda m: log.info("backtest: %s", m))
-        _status(store, state="done", backtest_caught=summary.get("caught"), backtest_families=summary.get("families"))
+        while True:
+            _pending.clear()
+            _status(store, state="pulling", incident_id=incident_id, error=None)
+            out = git_tools.git("pull", "--ff-only", check=False)
+            log.info("aftercare: git pull: %s", (out or "").strip()[-200:])
+            _status(store, state="gating", pulled=(out or "").strip()[-200:])
+            report, _ = run_gate("main", store, echo=lambda m: log.info("gate: %s", m))
+            _status(store, state="backtesting", gate_verdict=report.verdict)
+            summary = backtest(store, echo=lambda m: log.info("backtest: %s", m))
+            _status(store, state="done", backtest_caught=summary.get("caught"),
+                    backtest_families=summary.get("families"))
+            if not _pending.is_set():
+                break
     except Exception as e:  # keep the API alive; the console shows the error
         log.exception("aftercare failed")
         _status(store, state="failed", error=str(e)[:300])

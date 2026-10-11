@@ -60,8 +60,11 @@ def create(incident_id: str, attempt: int, rel_path: str, new_content: str, mess
 
 def checkout(ref: str, name: str) -> Path:
     """Detached worktree of an existing ref (used by the gate)."""
-    path = worktrees_root() / name
-    remove(path, None)
+    import uuid
+
+    # A unique suffix: two gate runs (e.g. a post-merge job and a manual backtest) must never share a
+    # folder, and Windows can keep a just-removed one locked.
+    path = worktrees_root() / f"{name[:100]}-{uuid.uuid4().hex[:6]}"
     git_tools.git("worktree", "add", "--detach", str(path), ref)
     return path
 

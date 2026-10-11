@@ -163,3 +163,13 @@ async def test_one_call_at_a_time_oldest_first(settings, state):
     assert await oncall.check_once(bot, services) == []  # still deciding on the first
     reply = await oncall.handle_command(fake.client(settings), state, 7, "approve fix 1", "voice")
     assert fake.approvals and "1 more fix is waiting" in reply
+
+
+async def test_concurrent_checks_call_once(settings, state):
+    import asyncio
+
+    fake = FakeAntibody()
+    state.chat_id = 7
+    services, bot = Services(settings, fake.client(settings), state), Bot()
+    results = await asyncio.gather(oncall.check_once(bot, services), oncall.check_once(bot, services))
+    assert sorted(len(r) for r in results) == [0, 1] and len(bot.messages) == 1

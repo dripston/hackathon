@@ -102,8 +102,17 @@ async def _send_call(bot, chat_id: int, text: str, services) -> None:
     await bot.send_voice(chat_id=chat_id, voice=InputFile(io.BytesIO(ogg), filename="oncall.ogg"))
 
 
+_check_lock = asyncio.Lock()
+
+
 async def check_once(bot, services) -> list[str]:
-    """Announce every incident that needs a human and hasn't been announced. Returns their ids."""
+    """Call about the next incident that needs a human. Serialised: /oncall and the watcher can run it
+    at the same moment, and must not both call about the same incident."""
+    async with _check_lock:
+        return await _check_once(bot, services)
+
+
+async def _check_once(bot, services) -> list[str]:
     state: OnCallState = services.oncall
     if state.chat_id is None:
         return []
