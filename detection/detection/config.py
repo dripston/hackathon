@@ -19,8 +19,11 @@ def _flag(name: str, default: str = "0") -> bool:
 
 
 class Settings(BaseModel):
+    llm_provider: str = "groq"  # groq | deepseek (both OpenAI-compatible)
     groq_api_key: str = ""
     groq_base_url: str = "https://api.groq.com/openai/v1"
+    deepseek_api_key: str = ""
+    deepseek_base_url: str = "https://api.deepseek.com"
     model_cheap: str = ""
     price_in_per_mtok: float = 0.0
     price_out_per_mtok: float = 0.0
@@ -37,6 +40,12 @@ class Settings(BaseModel):
     cors_origins: str = "http://localhost:3000"
 
     @property
+    def llm_key_and_url(self) -> tuple[str, str]:
+        if self.llm_provider == "deepseek":
+            return self.deepseek_api_key, self.deepseek_base_url
+        return self.groq_api_key, self.groq_base_url
+
+    @property
     def cors_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
 
@@ -45,8 +54,11 @@ class Settings(BaseModel):
 def get_settings() -> Settings:
     e = os.environ.get
     return Settings(
+        llm_provider=e("LLM_PROVIDER", "groq").strip().lower(),
         groq_api_key=e("GROQ_API_KEY", ""),
         groq_base_url=e("GROQ_BASE_URL", "https://api.groq.com/openai/v1"),
+        deepseek_api_key=e("DEEPSEEK_API_KEY", ""),
+        deepseek_base_url=e("DEEPSEEK_BASE_URL", "https://api.deepseek.com"),
         model_cheap=e("MODEL_CHEAP", ""),
         price_in_per_mtok=float(e("PRICE_CHEAP_IN_PER_MTOK", "0") or 0),
         price_out_per_mtok=float(e("PRICE_CHEAP_OUT_PER_MTOK", "0") or 0),

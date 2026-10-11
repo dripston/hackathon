@@ -24,7 +24,7 @@ _client = None
 
 def available() -> bool:
     s = get_settings()
-    return bool(s.groq_api_key and s.model_cheap)
+    return bool(s.llm_key_and_url[0] and s.model_cheap)
 
 
 def _get_client():
@@ -33,13 +33,14 @@ def _get_client():
         import openai
 
         s = get_settings()
-        _client = tracing.wrap(openai.OpenAI(api_key=s.groq_api_key, base_url=s.groq_base_url))
+        key, url = s.llm_key_and_url
+        _client = tracing.wrap(openai.OpenAI(api_key=key, base_url=url, timeout=120.0))
     return _client
 
 
 def complete(system: str, user: str, max_tokens: int = 1200) -> LLMResult:
     if not available():
-        raise RuntimeError("LLM not configured: set GROQ_API_KEY and MODEL_CHEAP in detection/.env")
+        raise RuntimeError("LLM not configured: set LLM_PROVIDER, its API key and MODEL_CHEAP in detection/.env")
     s = get_settings()
     t0 = time.monotonic()
     for attempt in range(4):

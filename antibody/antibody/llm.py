@@ -55,6 +55,8 @@ def available(tier: str = "strong") -> bool:
         return bool(s.anthropic_api_key)
     if s.llm_provider == "groq":
         return bool(s.groq_api_key)
+    if s.llm_provider == "deepseek":
+        return bool(s.deepseek_api_key)
     return s.llm_provider == "bedrock" and _aws_credentials()
 
 
@@ -83,13 +85,16 @@ _anthropic = None
 _groq = None
 
 
-def _groq_client():
+def _openai_compat_client():
+    """Groq and DeepSeek both speak the OpenAI chat-completions API."""
     global _groq
     if _groq is None:
         import openai
 
         s = get_settings()
-        _groq = tracing.wrap(openai.OpenAI(api_key=s.groq_api_key, base_url=s.groq_base_url))
+        key, url = ((s.deepseek_api_key, s.deepseek_base_url) if s.llm_provider == "deepseek"
+                    else (s.groq_api_key, s.groq_base_url))
+        _groq = tracing.wrap(openai.OpenAI(api_key=key, base_url=url, timeout=180.0))
     return _groq
 
 
@@ -136,10 +141,10 @@ def complete(tier: str, system: str, user: str, max_tokens: int = 2000) -> LLMRe
         raise RuntimeError("No LLM configured (set LLM_PROVIDER and MODEL_CHEAP/MODEL_STRONG)")
     s = get_settings()
     model = _model(tier)
-    if s.llm_provider == "groq":
+    if s.llm_provider in ("groq", "deepseek"):
         # max_tokens covers the model's hidden reasoning too, so leave headroom. Groq's free tier
         # counts the requested max_tokens against an 8k tokens-per-minute limit, so keep it modest.
-        resp = _with_retry(lambda: _groq_client().chat.completions.create(
+        resp = _with_retry(lambda: _openai_compat_client().chat.completions.create(
             model=model, max_tokens=max_tokens + 1500,
             messages=[{"role": "system", "content": system}, {"role": "user", "content": user}],
         ))
