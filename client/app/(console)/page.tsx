@@ -55,14 +55,15 @@ export default function LiveWard() {
 
       <div className="mt-6 grid gap-6 xl:grid-cols-[1fr_440px]">
         <Panel title="Live feed · last 20 runs" action={<PollNote poll={runs} />}>
-          <table className="w-full text-left">
+          <div className="-mx-2 overflow-x-auto px-2">
+          <table className="w-full min-w-[560px] text-left whitespace-nowrap">
             <thead className="text-muted-foreground text-sm">
               <tr>
-                <th className="pb-3 font-normal">When</th>
-                <th className="pb-3 font-normal">Domain</th>
-                <th className="pb-3 font-normal">Prompt</th>
-                <th className="pb-3 font-normal">Status</th>
-                <th className="pb-3 font-normal">Tripwires</th>
+                <th className="pb-3 pr-4 font-normal">When</th>
+                <th className="pb-3 pr-4 font-normal">Domain</th>
+                <th className="pb-3 pr-4 font-normal">Prompt</th>
+                <th className="pb-3 pr-4 font-normal">Status</th>
+                <th className="pb-3 pr-4 font-normal">Tripwires</th>
                 <th className="pb-3 font-normal">Jev</th>
               </tr>
             </thead>
@@ -81,13 +82,13 @@ export default function LiveWard() {
                       bad && "bg-infected/[0.04]",
                     )}
                   >
-                    <td className="text-muted-foreground py-2.5 font-mono text-sm">
+                    <td className="text-muted-foreground py-2.5 pr-4 font-mono text-sm">
                       {item.run.started_at ? ago(item.run.started_at, now) : "—"}
                     </td>
-                    <td className="py-2.5 font-medium">{item.run.input.domain}</td>
-                    <td className="py-2.5 font-mono text-sm">{item.run.prompt_version}</td>
-                    <td className="text-muted-foreground py-2.5 font-mono text-sm">200 OK</td>
-                    <td className="py-2.5">
+                    <td className="py-2.5 pr-4 font-medium">{item.run.input.domain}</td>
+                    <td className="py-2.5 pr-4 font-mono text-sm">{item.run.prompt_version}</td>
+                    <td className="text-muted-foreground py-2.5 pr-4 font-mono text-sm">200 OK</td>
+                    <td className="py-2.5 pr-4">
                       <span className="flex gap-2">
                         {item.score.checks
                           .filter((c) => c.id.startsWith("tw_"))
@@ -96,7 +97,7 @@ export default function LiveWard() {
                           ))}
                       </span>
                     </td>
-                    <td className="py-2.5">
+                    <td className="py-2.5 pr-4">
                       {jev?.score != null && (
                         <span
                           title="jev_grounded: advisory score, not an alarm"
@@ -111,6 +112,7 @@ export default function LiveWard() {
               })}
             </tbody>
           </table>
+          </div>
           {runs.loading && <p className="text-muted-foreground">Loading runs…</p>}
           {!runs.loading && !list.length && !runs.error && <p className="text-muted-foreground">No runs yet.</p>}
         </Panel>

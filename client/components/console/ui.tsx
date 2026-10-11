@@ -36,7 +36,7 @@ export function PageHeader({ title, mock, children }: { title: string; mock?: bo
 
 export function Panel({ title, action, className, children }: { title?: ReactNode; action?: ReactNode; className?: string; children: ReactNode }) {
   return (
-    <section className={cn("border-border bg-card/40 rounded-xl border", className)}>
+    <section className={cn("border-border bg-card/40 min-w-0 rounded-xl border", className)}>
       {title && (
         <header className="border-border flex items-center gap-3 border-b px-5 py-3">
           <h2 className="text-muted-foreground font-mono text-sm tracking-wider uppercase">{title}</h2>

@@ -55,7 +55,8 @@ export default function TrustPage() {
           </div>
 
           <Panel title="Seeded bugs" className="mt-6">
-            <table className="w-full text-left">
+            <div className="overflow-x-auto">
+            <table className="w-full min-w-[640px] text-left">
               <thead className="text-muted-foreground text-sm">
                 <tr>
                   <th className="pb-3 font-normal">Bug</th>
@@ -81,6 +82,7 @@ export default function TrustPage() {
                 ))}
               </tbody>
             </table>
+            </div>
           </Panel>
 
           <Panel title={`Misses (${measured.misses.length})`} className="mt-6">

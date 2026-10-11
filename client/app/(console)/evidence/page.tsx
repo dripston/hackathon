@@ -39,7 +39,8 @@ export default function EvidencePage() {
 
       {items.length > 0 && (
         <Panel>
-          <table className="w-full text-left">
+          <div className="overflow-x-auto">
+          <table className="w-full min-w-[560px] text-left">
             <thead className="text-muted-foreground text-sm">
               <tr>
                 <th className="pb-3 font-normal">Requirement</th>
@@ -79,6 +80,7 @@ export default function EvidencePage() {
               ))}
             </tbody>
           </table>
+          </div>
         </Panel>
       )}
 

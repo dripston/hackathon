@@ -115,24 +115,28 @@ const ShinyText = ({
   const syncRef = useRef<(() => void) | null>(null);
   const content = children ?? text;
 
-  settingsRef.current = {
-    color,
-    shineColor,
-    speed: Math.max(0.1, speed),
-    delay: Math.max(0, delay),
-    angle,
-    shineWidth: clamp(shineWidth, 2, 200),
-    softness: clamp(softness, 0, 1),
-    bands: clamp(Math.round(bands), 1, 3),
-    glow: clamp(glow, 0, 1),
-    sign: direction === 'right' ? 1 : -1,
-    ease: EASINGS[easing as Easing] ?? EASINGS.smooth,
-    trigger: TRIGGERS.includes(trigger as Trigger) ? (trigger as Trigger) : 'loop',
-    yoyo,
-    followPointer,
-    pauseOnHover,
-    disabled
-  };
+  // Latest settings for the animation loop; written after render, not during it.
+  useEffect(() => {
+    settingsRef.current = {
+      color,
+      shineColor,
+      speed: Math.max(0.1, speed),
+      delay: Math.max(0, delay),
+      angle,
+      shineWidth: clamp(shineWidth, 2, 200),
+      softness: clamp(softness, 0, 1),
+      bands: clamp(Math.round(bands), 1, 3),
+      glow: clamp(glow, 0, 1),
+      sign: direction === 'right' ? 1 : -1,
+      ease: EASINGS[easing as Easing] ?? EASINGS.smooth,
+      trigger: TRIGGERS.includes(trigger as Trigger) ? (trigger as Trigger) : 'loop',
+      yoyo,
+      followPointer,
+      pauseOnHover,
+      disabled
+    };
+  });
+
 
   useEffect(() => {
     syncRef.current?.();
