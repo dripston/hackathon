@@ -1,0 +1,136 @@
+"""Operator API on :4000, used by the console and the voice agent. Shapes follow /CONTRACT.md."""
+
+import logging
+from typing import Literal
+
+from fastapi import BackgroundTasks, FastAPI, Request, Response
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel
+
+from . import brief, intake
+from .config import get_settings
+from .models import Attempt, Diagnosis, FamilyResult, Incident, Resolution
+from .pipeline import ApprovalError, approve, reject
+from .scorer_client import ScorerClient
+from .state import StateStore
+
+log = logging.getLogger("antibody.api")
+app = FastAPI(title="Antibody Operator API")
+app.add_middleware(CORSMiddleware, allow_origins=get_settings().cors_list, allow_methods=["*"],
+                   allow_headers=["*"], expose_headers=["x-antibody-mock"])
+
+
+def store() -> StateStore:
+    return StateStore()
+
+
+def _mock(resp: Response, is_mock: bool) -> None:
+    if is_mock:
+        resp.headers["x-antibody-mock"] = "1"
+
+
+class ApproveBody(BaseModel):
+    fix_id: str
+    phrase: str
+    channel: Literal["typed", "voice"] = "typed"
+
+
+class RejectBody(BaseModel):
+    fix_id: str
+    reason: str = ""
+
+
+@app.get("/health")
+def health():
+    return {"ok": True}
+
+
+@app.get("/incidents")
+def incidents(response: Response) -> list[Incident]:
+    st = store()
+    out = [st.read(i, "incident", Incident) for i in st.incident_ids()]
+    out.sort(key=lambda i: i.first_seen, reverse=True)
+    _mock(response, any(st.is_mock(i.id) for i in out))
+    return out
+
+
+@app.get("/incidents/{incident_id}")
+def incident(incident_id: str, response: Response):
+    st = store()
+    inc = st.read(incident_id, "incident", Incident)
+    if inc is None:
+        return JSONResponse({"error": "Unknown incident"}, status_code=404)
+    families = []
+    base = st.read(incident_id, "baseline", FamilyResult)
+    if base:
+        families.append(base)
+    families += [a.result for a in (Attempt.model_validate(x) for x in (st.read(incident_id, "attempts") or [])) if a.result]
+    _mock(response, st.is_mock(incident_id))
+    return {
+        "incident": inc,
+        "diagnosis": st.read(incident_id, "diagnosis", Diagnosis),
+        "families": families,
+        "resolution": st.read(incident_id, "resolution", Resolution),
+    }
+
+
+@app.get("/incidents/{incident_id}/brief")
+def incident_brief(incident_id: str, response: Response):
+    st = store()
+    try:
+        text = brief.build(st, incident_id)
+    except KeyError:
+        return JSONResponse({"error": "Unknown incident"}, status_code=404)
+    _mock(response, st.is_mock(incident_id))
+    return {"text": text}
+
+
+@app.post("/incidents/{incident_id}/approve")
+def incident_approve(incident_id: str, body: ApproveBody, response: Response):
+    st = store()
+    try:
+        res = approve(st, incident_id, body.fix_id, body.phrase, body.channel)
+    except ApprovalError as e:
+        return JSONResponse({"error": str(e)}, status_code=e.status)
+    except RuntimeError as e:  # gh merge failed
+        return JSONResponse({"error": f"Approved, but merge failed: {e}"}, status_code=502)
+    _mock(response, st.is_mock(incident_id))
+    return res
+
+
+@app.post("/incidents/{incident_id}/reject")
+def incident_reject(incident_id: str, body: RejectBody, response: Response):
+    st = store()
+    try:
+        res = reject(st, incident_id, body.fix_id, body.reason)
+    except ApprovalError as e:
+        return JSONResponse({"error": str(e)}, status_code=e.status)
+    _mock(response, st.is_mock(incident_id))
+    return res
+
+
+@app.get("/gate/latest")
+def gate_latest(response: Response):
+    st = store()
+    report = st.read_gate()
+    if report is None:
+        return JSONResponse({"error": "No gate report yet"}, status_code=404)
+    meta = st.root / "gate" / "meta.json"
+    import json
+    _mock(response, meta.exists() and json.loads(meta.read_text()).get("mock", False))
+    return report
+
+
+@app.get("/risks")
+def risks(response: Response):
+    data, mock = ScorerClient().risks()
+    _mock(response, mock)
+    return data
+
+
+@app.post("/webhooks/neatlogs")
+async def neatlogs_webhook(request: Request, background: BackgroundTasks):
+    path = store().save_webhook(await request.body())
+    background.add_task(intake.poll_once)
+    return {"stored": path.name}

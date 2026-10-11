@@ -1,0 +1,117 @@
+"""The pre-deploy gate: replay every saved immunity family against a branch and predict which past
+incidents it would re-open. Replay only; never calls Crustdata live.
+
+Also the backtest: run each family against the commit that caused its incident (should block) and
+against that commit's parent (should pass), to report detection and false-alarm rates.
+"""
+
+import json
+import logging
+from pathlib import Path
+
+from . import apply, git_tools, grade, replay
+from .config import REPO_ROOT
+from .models import GateFamily, GateReport, Scenario
+from .patient_client import PatientClient
+from .scorer_client import ScorerClient
+from .state import StateStore, now_iso
+
+log = logging.getLogger("antibody.gate")
+
+IMMUNITY = REPO_ROOT / "antibody" / "fixtures" / "immunity"
+
+
+def load_families(directory: Path = IMMUNITY) -> list[dict]:
+    if not directory.exists():
+        return []
+    return [json.loads(p.read_text(encoding="utf-8")) for p in sorted(directory.glob("*.json"))]
+
+
+def check_family(fam: dict, ref: str, budget: replay.Budget | None = None) -> tuple[GateFamily | None, bool]:
+    """Replay one family against git ref `ref`. Returns (result or None if not applicable, is_mock)."""
+    scenarios = [Scenario.model_validate(s) for s in fam["scenarios"]]
+    flags = fam.get("bug_flags") or None
+    iid = fam["incident_id"]
+    if fam["fix_kind"] == "tool_wrapper_patch":
+        stub = PatientClient().is_stub
+        safe_ref = ref.replace("/", "_").replace("~", "_").replace("^", "_")
+        wt = apply.checkout(ref, f"gate-{iid}-{safe_ref}"[:120])
+        try:
+            with apply.patient_service(wt, stub=stub) as url:
+                result, mock = replay.run_family(iid, scenarios, ref, prompt_version=fam.get("prompt_version"),
+                                                 bug_flags=flags, budget=budget,
+                                                 patient=PatientClient(url, force_http=True),
+                                                 scorer=ScorerClient(url, force_http=True))
+        finally:
+            apply.remove(wt, None)
+    else:
+        content = git_tools.show_file(ref, fam["target_file"])
+        if content is None:
+            return None, False
+        result, mock = replay.run_family(iid, scenarios, ref, prompt_override=content, bug_flags=flags, budget=budget)
+    reopens = result.must_fix_passed < result.must_fix_total
+    broke = result.must_not_change_passed < result.must_not_change_total
+    if reopens:
+        msg = f"re-opens {iid}: must_fix {result.must_fix_passed}/{result.must_fix_total}"
+    elif broke:
+        msg = f"breaks healthy cases of {iid}: must_not_change {result.must_not_change_passed}/{result.must_not_change_total}"
+    else:
+        msg = f"ok {iid}: {grade.line(result)}"
+    return GateFamily(incident_id=iid, must_fix_passed=result.must_fix_passed, must_fix_total=result.must_fix_total,
+                      reopens=reopens or broke, must_not_change_passed=result.must_not_change_passed,
+                      must_not_change_total=result.must_not_change_total, message=msg), mock
+
+
+def run_gate(head: str, store: StateStore | None = None, echo=print) -> tuple[GateReport, bool]:
+    store = store or StateStore()
+    families = load_families()
+    out: list[GateFamily] = []
+    any_mock = False
+    for fam in families:
+        res, mock = check_family(fam, head)
+        any_mock = any_mock or mock or fam.get("mock", False)
+        if res is None:
+            echo(f"  n/a  {fam['incident_id']}: {fam['target_file']} not on {head}")
+            continue
+        echo(f"  {'FAIL' if res.reopens else 'pass'} {res.message}")
+        out.append(res)
+    report = GateReport(branch=head, verdict="blocked" if any(f.reopens for f in out) else "safe",
+                        families=out, created_at=now_iso())
+    store.write_gate(report)
+    meta = store.root / "gate" / "meta.json"
+    meta.write_text(json.dumps({"mock": any_mock}), encoding="utf-8")
+    return report, any_mock
+
+
+def backtest(store: StateStore | None = None, echo=print) -> dict:
+    """For each family: the causing commit should be blocked; its parent should pass."""
+    store = store or StateStore()
+    rows = []
+    for fam in load_families():
+        sha = fam.get("caused_by_commit")
+        if not sha:
+            continue
+        bad, _ = check_family(fam, sha)
+        good, _ = check_family(fam, f"{sha}^")
+        row = {
+            "incident_id": fam["incident_id"], "commit": sha,
+            "caught": bool(bad and bad.reopens), "bad": bad.message if bad else "n/a",
+            "false_alarm": bool(good and good.reopens), "parent": good.message if good else "n/a (file absent before)",
+            "mock": fam.get("mock", False),
+        }
+        echo(f"  {fam['incident_id']}: causing commit {'BLOCKED' if row['caught'] else 'missed'}; "
+             f"parent {'FALSE ALARM' if row['false_alarm'] else 'ok'}")
+        rows.append(row)
+    caught = sum(r["caught"] for r in rows)
+    parents = [r for r in rows if not r["parent"].startswith("n/a")]
+    fa = sum(r["false_alarm"] for r in parents)
+    summary = {
+        "families": len(rows), "caught": caught,
+        "detection_rate": (caught / len(rows)) if rows else None,
+        "false_alarms": fa, "clean_checks": len(parents),
+        "false_alarm_rate": (fa / len(parents)) if parents else None,
+        "rows": rows, "created_at": now_iso(),
+        "label": "SIMULATED (replay of recorded tool responses against seeded bugs)",
+    }
+    (store.root / "backtest.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
+    return summary

@@ -1,0 +1,30 @@
+[project]
+name = "antibody"
+version = "0.1.0"
+description = "Antibody core: diagnoses, immunises and gates silent AI agent failures"
+requires-python = ">=3.13"
+dependencies = [
+    "boto3>=1.43.111",
+    "fastapi>=0.143.0",
+    "httpx>=0.28.1",
+    "pydantic>=2.11",
+    "pydantic-settings>=2.15.0",
+    "python-dotenv>=1.2.4",
+    "uvicorn[standard]>=0.54.0",
+]
+
+[project.scripts]
+antibody = "antibody.cli:main"
+
+[dependency-groups]
+dev = ["pytest>=8.4"]
+
+[build-system]
+requires = ["uv_build>=0.12.21,<0.13.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-root = ""
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

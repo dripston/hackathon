@@ -1,0 +1,8 @@
+{
+  "id": "inc_20261011_1420_tw_invented_person",
+  "detection": "tw_invented_person",
+  "trace_ids": ["trace_stub_010", "trace_stub_014"],
+  "workflow": "company-research",
+  "first_seen": "2026-10-11T14:20:00Z",
+  "status": "open"
+}
