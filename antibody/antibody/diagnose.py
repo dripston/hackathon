@@ -118,8 +118,10 @@ def target_file(change: dict, stub: bool) -> Path | None:
     if change["suspect_flag"]:
         if stub:
             return ANTIBODY_DIR / "antibody" / "stubs" / "patient.py"
-        files = [REPO_ROOT / f for f in get_settings().tool_file_list]
-        return next((f for f in files if f.exists()), files[0] if files else None)
+        files = [REPO_ROOT / f for f in get_settings().tool_file_list if (REPO_ROOT / f).exists()]
+        flag = change["suspect_flag"]
+        using = [f for f in files if flag in f.read_text(encoding="utf-8", errors="replace")]
+        return (using or files or [None])[0]
     v = change["suspect_prompt_version"]
     return prompt_dir(stub) / f"{v}.md" if v else None
 
@@ -205,7 +207,7 @@ def diagnose(incident: Incident) -> tuple[Diagnosis, bool, dict]:
     commit = None
     if tfile is not None and tfile.exists():
         needle = suspect_needle(change, mock)
-        commit = (git_tools.introducing_commit(tfile, needle) if needle else None)             or git_tools.last_commit_touching(tfile)
+        commit = (git_tools.introducing_commit(tfile, needle, newest=bool(change["suspect_flag"])) if needle else None)             or git_tools.last_commit_touching(tfile)
 
     checkpoint = entire_cli.checkpoint_for(commit["sha"], commit.get("file")) if commit else None
     reasoning = checkpoint.get("reasoning_excerpt") if checkpoint else None

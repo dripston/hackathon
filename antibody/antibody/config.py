@@ -47,7 +47,7 @@ class Settings(BaseSettings):
 
     # Where the patient's prompt and tool code live (detection teammate's folder).
     patient_prompt_dir: str = "detection/detection/patient/prompts"
-    patient_tool_files: str = "detection/detection/patient/tools/provider.py,detection/detection/patient/tools/crustdata.py,detection/detection/patient/agent.py"
+    patient_tool_files: str = "detection/detection/patient/agent.py,detection/detection/patient/tools/provider.py,detection/detection/patient/tools/crustdata.py"
     detections: str = "tw_invented_person,tw_empty_after_error,tw_company_match_skipped,tw_claimed_success_on_failure,jev_grounded_low"
 
     @property
