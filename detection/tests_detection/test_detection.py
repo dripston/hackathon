@@ -130,3 +130,34 @@ def test_jev_reads_the_brief_as_sentences():
     text = _final_answer({"company_name": "Stripe", "headcount": 8000, "summary": "Payments company.",
                           "decision_makers": [{"name": "Ada", "title": "CEO"}], "hiring_signals": ["Hiring SREs"]})
     assert text == "The company is Stripe with about 8000 employees. Payments company. Ada is CEO there. Hiring signal: Hiring SREs."
+
+
+def test_forecast_sees_a_rising_error_rate_and_ignores_an_old_outage(tmp_path, monkeypatch):
+    import json
+    from types import SimpleNamespace
+
+    from detection import forecast
+
+    now = datetime(2026, 10, 11, 12, 30, tzinfo=UTC)
+    lines = []
+
+    def add(minutes_ago, errored):
+        at = (now - timedelta(minutes=minutes_ago)).isoformat().replace("+00:00", "Z")
+        step = {"index": 0, "kind": "tool", "name": "crustdata.people_search",
+                "error": {"code": "HTTP_429", "message": "x"} if errored else None}
+        lines.append(json.dumps({"run": {"started_at": at, "steps": [step]}, "score": {"violations": []}}))
+
+    for i in range(20):
+        add(90 + i % 10, True)  # an old outage, outside the 40-minute lookback
+    for window, rate in ((3, 0.02), (2, 0.05), (1, 0.08), (0, 0.11)):  # 10-minute windows, newest = 0
+        for i in range(100):
+            add(window * 10 + (i % 10) + 0.5, i < rate * 100)
+    runs = tmp_path / "runs.jsonl"
+    runs.write_text("\n".join(lines), encoding="utf-8")
+    monkeypatch.setattr(forecast, "runs_path", lambda: runs)
+    monkeypatch.setattr(forecast, "get_settings", lambda: SimpleNamespace(state_dir=tmp_path))
+
+    (f,) = forecast.forecasts(now)
+    assert f.subject == "crustdata.people_search" and f.related_check == "tw_empty_after_error"
+    assert abs(f.current - 0.11) < 1e-9 and f.likelihood == "likely" and 5 < f.eta_minutes < 30
+    assert f.outcome == "pending"

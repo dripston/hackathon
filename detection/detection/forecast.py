@@ -8,6 +8,7 @@ without that, 'did_not_happen'.
 """
 
 import json
+import os
 from collections import defaultdict
 from datetime import UTC, datetime, timedelta
 
@@ -16,6 +17,8 @@ from .config import get_settings
 from .models import RiskForecast
 
 WINDOW_MIN = 10
+# Only the recent trend matters: an outage an hour ago shouldn't flatten today's slow rise.
+LOOKBACK_MIN = float(os.environ.get("FORECAST_LOOKBACK_MIN", "40"))
 THRESHOLDS = {"crustdata.people_search": 0.15, "crustdata.company_enrich": 0.15, "crustdata.jobs": 0.20}
 RELATED = {"crustdata.people_search": "tw_empty_after_error", "crustdata.company_enrich": "tw_company_match_skipped",
            "crustdata.jobs": "tw_claimed_success_on_failure"}
@@ -45,11 +48,11 @@ def eta_minutes(current: float, threshold: float, slope_per_min: float) -> float
     return (threshold - current) / slope_per_min
 
 
-def _load(now: datetime, hours: float = 2.0) -> list[dict]:
+def _load(now: datetime, minutes: float | None = None) -> list[dict]:
     path = runs_path()
     if not path.exists():
         return []
-    cutoff = now - timedelta(hours=hours)
+    cutoff = now - timedelta(minutes=minutes or LOOKBACK_MIN)
     rows = []
     for line in path.read_text(encoding="utf-8").splitlines():
         try:

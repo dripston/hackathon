@@ -35,7 +35,8 @@ def main() -> int:
                           ("detection_risks", f"{DETECTION}/risks"), ("health", f"{ANTIBODY}/health"),
                           ("overview", f"{ANTIBODY}/overview"), ("incidents", f"{ANTIBODY}/incidents"),
                           ("risks", f"{ANTIBODY}/risks"), ("trust", f"{ANTIBODY}/trust"),
-                          ("aftercare", f"{ANTIBODY}/aftercare")]:
+                          ("aftercare", f"{ANTIBODY}/aftercare"),
+                          ("evidence", f"{ANTIBODY}/evidence")]:
             failures += check(name, c.get(url)) is None
         gate = c.get(f"{ANTIBODY}/gate/latest")
         failures += check("gate_latest", gate, expect=gate.status_code if gate.status_code in (200, 404) else 200) is None

@@ -160,6 +160,15 @@ def trust_report():
     return trust.report(store())
 
 
+@app.get("/evidence")
+def evidence_export():
+    """Not in the contract (extra endpoint): labelled proof for judges (incidents with traces, commits,
+    Entire checkpoints, before/after, PRs, gate, backtest, costs). Same as `antibody evidence`."""
+    from .evidence import build
+
+    return build(store())
+
+
 @app.get("/aftercare")
 def aftercare_status():
     """Progress of the post-merge job (pull, gate main, backtest)."""

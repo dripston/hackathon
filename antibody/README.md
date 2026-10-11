@@ -58,6 +58,7 @@ Real responses from the running system are in [`fixtures/api-samples/`](fixtures
 | `POST /incidents/{id}/reject` | `{ fix_id, reason }`; the incident becomes `escalated`, and nothing merges | |
 | `GET /gate/latest` | latest `GateReport`: `verdict` (`safe` \| `blocked`), one row per immunity family with `reopens` and `message` (e.g. `re-opens inc_…: must_fix 3/7`). 404 until a gate has run | `gate_latest.json` |
 | `GET /trust` *extra* | for the Trust page: each seeded bug with `would_have_blocked` and a note, `catch_rate`, `misses` (listed, not hidden), `false_alarm_rate`, `label` (SIMULATED). `status: not_measured_yet` until a backtest has run (it runs automatically after a merge) | `trust.json` |
+| `GET /evidence` *extra* | for the Evidence page: labelled proof items (incidents with trace ids, commit and Entire checkpoint URLs, the quoted reasoning, before/after, PRs, gate, backtest, costs) | `evidence.json` |
 | `GET /aftercare` *extra* | progress of the post-merge job: `state` = `pulling`, `gating`, `backtesting`, `done` or `failed` | `aftercare.json` |
 | `GET /risks` | passed through from detection's `/risks` (`[RiskForecast]`) | `risks.json` |
 | `POST /webhooks/neatlogs` | stores the raw body and triggers a poll | |
