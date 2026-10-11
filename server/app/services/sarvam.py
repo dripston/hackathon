@@ -1,24 +1,23 @@
-import os
-
 from pipecat.services.sarvam.stt import SarvamSTTService
 from pipecat.services.sarvam.tts import SarvamTTSService
+from pipecat.transcriptions.language import Language
+
+from app.config import Settings
 
 
-def create_stt():
+def create_stt(settings: Settings):
     return SarvamSTTService(
-        api_key=os.environ["SARVAM_API_KEY"],
-        settings=SarvamSTTService.Settings(
-            model="saaras:v3",
-            mode="transcribe",
-        ),
+        api_key=settings.sarvam_api_key.get_secret_value(), sample_rate=16000,
+        mode="transcribe",
+        settings=SarvamSTTService.Settings(model=settings.sarvam_stt_model, language=None),
     )
 
 
-def create_tts():
+def create_tts(settings: Settings):
     return SarvamTTSService(
-        api_key=os.environ["SARVAM_API_KEY"],
+        api_key=settings.sarvam_api_key.get_secret_value(), sample_rate=24000,
         settings=SarvamTTSService.Settings(
-            model="bulbul:v3",
-            voice="shubh",
+            model=settings.sarvam_tts_model, voice=settings.sarvam_tts_voice,
+            language=Language(settings.sarvam_tts_language),
         ),
     )
