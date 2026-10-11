@@ -41,7 +41,11 @@ def has_unresolved(store: StateStore, detection: str) -> str | None:
 def _from_neatlogs(detections: list[str], now: datetime) -> dict[str, list[str]]:
     """{detection: [trace_id, ...]} for detections over threshold in the window."""
     start, end = _iso(now - timedelta(minutes=WINDOW_MIN)), _iso(now)
-    known = {d.get("name"): d for d in neatlogs_mcp.list_detections()}
+    known = {}
+    for d in neatlogs_mcp.list_detections():
+        for key in (d.get("name"), d.get("slug"), d.get("display_name")):
+            if key:
+                known[key] = d
     hits: dict[str, list[str]] = {}
     for name in detections:
         d = known.get(name)

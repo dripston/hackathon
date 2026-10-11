@@ -69,13 +69,28 @@ def call_many(calls: list[tuple[str, dict]]) -> list[Any]:
     except NeatlogsUnavailable:
         raise
     except Exception as e:
-        raise NeatlogsUnavailable(f"neatlogs MCP failed: {e}") from e
+        raise NeatlogsUnavailable(f"neatlogs MCP failed: {_leaf(e)}") from e
+
+
+def _leaf(e: BaseException) -> str:
+    """The real error inside anyio/asyncio exception groups."""
+    while isinstance(e, BaseExceptionGroup) and e.exceptions:
+        e = e.exceptions[0]
+    return f"{type(e).__name__}: {e}"
 
 
 # ---- typed helpers ----
 
 def list_detections() -> list[dict]:
-    return (call("list_detections", {"limit": 100}) or {}).get("detections", [])
+    """Verified live 2026-10-11: {"total", "detections": [{id, slug, display_name, is_active, ...}]}.
+    Each item gets a `name` (display_name, else slug) so callers can match our detection names."""
+    out = []
+    for d in (call("list_detections", {"limit": 100}) or {}).get("detections", []):
+        d = dict(d)
+        d.setdefault("name", d.get("display_name") or d.get("slug"))
+        d.setdefault("enabled", d.get("is_active", True))
+        out.append(d)
+    return out
 
 
 def detection_count(name: str, start_iso: str, end_iso: str) -> int:
@@ -87,10 +102,14 @@ def detection_count(name: str, start_iso: str, end_iso: str) -> int:
 
 
 def search_traces(query: str, limit: int = 20, date_range: str | None = None) -> list[dict]:
+    """Verified live: {"total", "totalRelation", "mode", "results": [...]}; an empty query is rejected."""
+    if not query:
+        return []
     args: dict = {"query": query, "limit": limit}
     if date_range:
         args["filters"] = {"date_range": date_range}
-    return (call("search_traces", args) or {}).get("traces", [])
+    r = call("search_traces", args) or {}
+    return r.get("results", r.get("traces", []))
 
 
 def trace_context(trace_id: str) -> dict:
