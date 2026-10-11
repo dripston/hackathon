@@ -204,7 +204,7 @@ class Pipeline:
         note = ""
         if accepted:
             diag = self.store.read(inc.id, "diagnosis", Diagnosis)
-            wt = apply.worktrees_root() / f"{inc.id}-attempt-{accepted.fix.attempt}"
+            wt = apply.worktree_for(inc.id, accepted.fix.attempt)
             mock = self.store.is_mock(inc.id)
             out = ship.ship(inc, diag, self._scenarios(inc.id), accepted.fix, wt, baseline, accepted.result,
                             res.cost_usd, duration, mock, allow_mock_pr=self.ship_mock)

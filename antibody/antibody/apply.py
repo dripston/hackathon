@@ -7,6 +7,7 @@ patient service from the worktree on a spare port and point the family replay at
 
 import logging
 import os
+import re
 import shutil
 import socket
 import stat
@@ -46,6 +47,8 @@ def create(incident_id: str, attempt: int, rel_path: str, new_content: str, mess
     branch = branch_name(incident_id, attempt)
     path = worktrees_root() / f"{incident_id}-attempt-{attempt}"
     remove(path, branch)
+    if path.exists():  # Windows can keep a folder locked (indexers, AV); use a fresh name rather than fail
+        path = worktrees_root() / f"{incident_id}-attempt-{attempt}-{int(time.time())}"
     git_tools.git("worktree", "add", "-b", branch, str(path), base)
     target = path / rel_path
     target.parent.mkdir(parents=True, exist_ok=True)
@@ -152,7 +155,7 @@ def _kill_tree(proc: subprocess.Popen) -> None:
 def cleanup(incident_id: str, keep_attempt: int | None = None) -> None:
     """Remove this incident's attempt worktrees and local branches, except `keep_attempt`."""
     for path in worktrees_root().glob(f"{incident_id}-attempt-*"):
-        n = int(path.name.rsplit("-", 1)[1])
+        n = int(re.search(r"-attempt-(\d+)", path.name).group(1))
         if n != keep_attempt:
             remove(path, branch_name(incident_id, n))
     for b in git_tools.git("branch", "--list", f"antibody/{incident_id}/attempt-*", "--format=%(refname:short)",
@@ -160,3 +163,16 @@ def cleanup(incident_id: str, keep_attempt: int | None = None) -> None:
         n = int(b.rsplit("-", 1)[1])
         if n != keep_attempt:
             git_tools.git("branch", "-D", b, check=False)
+
+
+def worktree_for(incident_id: str, attempt: int) -> Path:
+    """The worktree directory holding this attempt's branch (it may carry a suffix, see create)."""
+    out = git_tools.git("worktree", "list", "--porcelain", check=False)
+    branch = f"refs/heads/{branch_name(incident_id, attempt)}"
+    path = None
+    for line in out.splitlines():
+        if line.startswith("worktree "):
+            path = Path(line[len("worktree "):])
+        elif line.strip() == f"branch {branch}" and path is not None:
+            return path
+    return worktrees_root() / f"{incident_id}-attempt-{attempt}"

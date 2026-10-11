@@ -1,4 +1,4 @@
-"""antibody watch | handle | gate | backtest | costs | serve | stub-serve | approve"""
+"""antibody watch | handle | demo | gate | backtest | costs | evidence | serve | stub-serve | approve"""
 
 import argparse
 import json
@@ -81,6 +81,26 @@ def cmd_costs(a) -> int:
     return 0
 
 
+def cmd_demo(a) -> int:
+    from . import tracing
+    from .demo import run
+
+    tracing.init()
+    try:
+        return run(a.file, ship_mock=a.ship_mock, pause=a.pause)
+    finally:
+        tracing.shutdown()
+
+
+def cmd_evidence(a) -> int:
+    from .costs import report
+    from .evidence import write
+
+    report()  # refresh cost numbers first
+    print(f"wrote {write()}")
+    return 0
+
+
 def cmd_approve(a) -> int:
     from .pipeline import ApprovalError, approve
     from .state import StateStore
@@ -129,6 +149,15 @@ def main(argv: list[str] | None = None) -> int:
 
     c = sub.add_parser("costs", help="cost per incident (ledger and neatlogs), for the business plan")
     c.set_defaults(fn=cmd_costs)
+
+    d = sub.add_parser("demo", help="run one incident end to end with narrated output (for the video)")
+    d.add_argument("--file", default="fixtures/incidents/sample.json")
+    d.add_argument("--ship-mock", action="store_true")
+    d.add_argument("--pause", type=float, default=0.6, help="seconds between stages, for readability")
+    d.set_defaults(fn=cmd_demo)
+
+    e = sub.add_parser("evidence", help="export labelled proof (incidents, PRs, gate, backtest, costs) as JSON")
+    e.set_defaults(fn=cmd_evidence)
 
     ap = sub.add_parser("approve", help="approve a fix with the exact phrase")
     ap.add_argument("incident")

@@ -20,7 +20,10 @@ FIX_SYSTEM = (
     "code), the change that caused the failure, the failing scenarios with the checks they failed, "
     "the original reasoning for that change, and any earlier attempts that were rejected. "
     "Make the SMALLEST edit that removes the failure while keeping the goal the original change was "
-    "made for: don't just revert it if its intent can be kept safely. Don't touch unrelated parts. "
+    "made for: don't just revert it if its intent can be kept safely. If a requirement can conflict "
+    "with the guard you add, say what the agent must do when both can't be met. If earlier attempts "
+    "were rejected, read why they still failed and make a materially different change. "
+    "Don't touch unrelated parts. "
     "Reply with JSON only: {\"description\": \"one plain sentence\", \"edits\": [{\"find\": \"exact "
     "text copied from the file\", \"replace\": \"new text\"}]}. Each `find` must appear exactly once in "
     "the file; keep edits short."
@@ -76,7 +79,7 @@ def propose(diag: Diagnosis, content: str, family_result: FamilyResult, scenario
     failing = [
         {"scenario": v.scenario_id, "role": sc_by_id[v.scenario_id].role, "domain": sc_by_id[v.scenario_id].domain,
          "faults": [f"{f.tool}@{f.at_call}:{f.error.code}" for f in sc_by_id[v.scenario_id].faults],
-         "failed_checks": v.failed_checks}
+         "failed_checks": v.failed_checks, "evidence": v.evidence[:2]}
         for v in family_result.verdicts if not v.passed
     ][:6]
     new = None
@@ -88,7 +91,8 @@ def propose(diag: Diagnosis, content: str, family_result: FamilyResult, scenario
             "change_that_caused_it": change_diff,
             "previous_attempts_that_failed": [
                 {"description": p.get("description"), "diff": p.get("diff"),
-                 "still_failing": [f.get("failed_checks") for f in (p.get("failing") or [])][:5]
+                 "still_failing": [{"checks": f.get("failed_checks"), "evidence": (f.get("evidence") or [])[:1]}
+                                   for f in (p.get("failing") or [])][:4]
                  if isinstance(p.get("failing"), list) else p.get("failing")}
                 for p in (previous or [])],
         }, separators=(",", ":"))

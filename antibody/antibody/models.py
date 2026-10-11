@@ -138,6 +138,7 @@ class Verdict(BaseModel):
     run_id: str
     trace_id: str | None = None
     synthetic_tool_calls: int = 0
+    evidence: list[str] = []  # scorer's evidence for each failed check (extra; not in the contract shape)
 
 
 class FamilyResult(BaseModel):

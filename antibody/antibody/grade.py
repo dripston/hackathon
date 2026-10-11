@@ -11,6 +11,7 @@ def verdict(scenario: Scenario, run: AgentRun, score: RunScore) -> Verdict:
     return Verdict(
         scenario_id=scenario.id, passed=not failed, failed_checks=failed, run_id=run.run_id,
         trace_id=run.trace_id, synthetic_tool_calls=sum(1 for s in run.steps if s.kind == "tool" and s.synthetic),
+        evidence=[f"{cid}: {by_id[cid].evidence}" for cid in failed if cid in by_id and by_id[cid].evidence],
     )
 
 
