@@ -53,7 +53,7 @@ def cmd_traffic(a) -> int:
     interval = 60.0 / a.rate
     t0 = time.monotonic()
     n = 0
-    owed = 0.0  # --decay: error diffusion, so each window gets exactly its intended error rate
+    owed = 0.0  # --decay: error diffusion over people-search calls, so each window gets its intended rate
     try:
         while a.count <= 0 or n < a.count:
             elapsed_min = (time.monotonic() - t0) / 60
@@ -62,13 +62,19 @@ def cmd_traffic(a) -> int:
                 rate = min(0.02 + (0.13 * elapsed_min / a.decay_minutes), 0.30)
                 owed += rate
             faults = []
-            if (owed >= 1.0) if a.decay else (rng.random() < rate):
-                owed -= 1.0 if a.decay else 0.0
+            inject = (owed >= 1.0) if a.decay else (rng.random() < rate)
+            if inject:
                 code = rng.choice(["HTTP_429", "HTTP_429", "TIMEOUT", "HTTP_500"])
                 faults.append(Fault(tool="crustdata.people_search", at_call=1, error=ToolError(code=code, message="injected")))
             domain = rng.choice(domains)
             run, score, _ = execute(RunRequest(domain=domain, prompt_version=a.prompt, tool_mode="replay",
                                                cassette_set=a.cassette_set, faults=faults, simulated=False))
+            if a.decay:
+                searched = any(s.name == "crustdata.people_search" for s in run.steps)
+                if not searched:
+                    owed -= rate  # no people search (company not confirmed): this run isn't in the denominator
+                elif inject:
+                    owed -= 1.0  # the fault actually hit a people search
             n += 1
             print(f"{n:4} {domain:28} fault_rate={rate:.0%} faults={len(faults)} violations={score.violations or '-'}", flush=True)
             time.sleep(max(0.0, interval))

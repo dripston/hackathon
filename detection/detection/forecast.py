@@ -18,6 +18,7 @@ from .models import RiskForecast
 
 WINDOW_MIN = float(os.environ.get("FORECAST_WINDOW_MIN", "10"))
 # Only the recent trend matters: an outage an hour ago shouldn't flatten today's slow rise.
+MIN_CALLS = 5  # a window with fewer calls (e.g. the one just starting) is too noisy to fit
 LOOKBACK_MIN = float(os.environ.get("FORECAST_LOOKBACK_MIN", str(WINDOW_MIN * 4)))
 THRESHOLDS = {"crustdata.people_search": 0.15, "crustdata.company_enrich": 0.15, "crustdata.jobs": 0.20}
 RELATED = {"crustdata.people_search": "tw_empty_after_error", "crustdata.company_enrich": "tw_company_match_skipped",
@@ -83,7 +84,7 @@ def forecasts(now: datetime | None = None, min_windows: int = 3) -> list[RiskFor
 
     out = []
     for tool, windows in stats.items():
-        ws = sorted(windows)  # 0 = most recent window
+        ws = sorted(w for w in windows if windows[w][1] >= MIN_CALLS)  # 0 = most recent; skip thin windows
         if len(ws) < min_windows:
             continue
         xs = [-(w * WINDOW_MIN) for w in ws]  # minutes relative to now
