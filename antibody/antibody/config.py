@@ -1,4 +1,4 @@
-"""Settings from environment / antibody/.env. Model IDs come only from env."""
+"""Settings from the environment / the repo's single .env (at the repo root). Model IDs come only from env."""
 
 import os
 from functools import lru_cache
@@ -12,9 +12,11 @@ ANTIBODY_DIR = Path(__file__).resolve().parent.parent  # the antibody/ project f
 # throwaway worktree, so a reintroduced bug never touches the real main).
 REPO_ROOT = Path(os.environ.get("ANTIBODY_REPO_ROOT") or ANTIBODY_DIR.parent).resolve()
 
-# Export antibody/.env to the process environment too: boto3 reads AWS_* (including
+ENV_FILE = ANTIBODY_DIR.parent / ".env"  # one .env for the whole repo (see /.env.example)
+
+# Export the .env to the process environment too: boto3 reads AWS_* (including
 # AWS_BEARER_TOKEN_BEDROCK) only from os.environ, not from pydantic settings. Never overrides real env.
-load_dotenv(ANTIBODY_DIR / ".env", override=False)
+load_dotenv(ENV_FILE, override=False)
 
 
 def _use_certifi() -> None:
@@ -33,7 +35,7 @@ _use_certifi()
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=ANTIBODY_DIR / ".env", extra="ignore")
+    model_config = SettingsConfigDict(env_file=ENV_FILE, extra="ignore")
 
     neatlogs_api_key: str = ""
     neatlogs_mcp_url: str = "https://ingest.neatlogs.com/mcp"

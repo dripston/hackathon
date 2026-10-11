@@ -22,7 +22,7 @@
     "incident_id": "inc_20261011_1137_tw_company_match_skipped",
     "commit_sha": "4b732f0ea9ca0a80c10d4b6a1ffb9f2fb3410232",
     "checkpoint_id": "01M4N4PGX3XS5RB5QTPD0ZJ3MY",
-    "checkpoint_url": "https://entire.io/gh/shresthjindal28/hackathon/commit/4b732f0ea9ca0a80c10d4b6a1ffb9f2fb3410232",
+    "checkpoint_url": "https://entire.io/gh/dripston/hackathon/commit/4b732f0ea9ca0a80c10d4b6a1ffb9f2fb3410232",
     "reasoning_excerpt": "I own detection/ (I'm the team lead), so you can edit it. Cut tokens and latency: drop the company-confirmation step, the domain lookup is reliable enough. The prompts are in detection/detection/patient/prompts; add this as a new prompt version v3.md based on v1.md and leave v1.md and v2.md unchanged. Then commit only v3.md with a plain one-line git commit -m. Don't push.",
     "good_trace_ids": [
       "727200278bbd30e8d9cd7438c2df4aea",
@@ -534,7 +534,7 @@
     "attempts": [
       "fix_1"
     ],
-    "pr_url": "https://github.com/shresthjindal28/hackathon/pull/4",
+    "pr_url": "https://github.com/dripston/hackathon/pull/4",
     "cost_usd": 0.022898,
     "duration_ms": 93012,
     "approval": {

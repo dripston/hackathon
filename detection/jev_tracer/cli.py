@@ -113,7 +113,7 @@ def main(argv=None) -> int:
     args = parser().parse_args(argv)
     from .runtime import configure_runtime
 
-    logger = configure_runtime(ROOT, args.log_level)
+    logger = configure_runtime(ROOT.parent, args.log_level)  # the repo's single .env, at the repo root
     try:
         if args.command == "demo":
             from .sample_agent import local_endpoint, observe_sample

@@ -70,11 +70,11 @@ re-checks the exact phrase anyway.
 
 ```bash
 cd voice
-cp .env.example .env     # then fill in the three secrets
+cp ../.env.example ../.env   # one .env for the whole repo, at the root; fill in the three secrets
 uv sync                  # creates .venv and installs dependencies
 ```
 
-Required variables in `.env`:
+Required variables in the repo-root `.env`:
 
 | Variable | Purpose |
 | --- | --- |
@@ -82,8 +82,8 @@ Required variables in `.env`:
 | `GROQ_API_KEY` | Groq LLM access |
 | `SARVAM_API_KEY` | Sarvam STT + TTS access |
 
-See `.env.example` for the full list (models, limits, language defaults).
-Secrets live only in `.env`, which is git-ignored.
+See the root `.env.example` for the full list (models, limits, language defaults).
+Secrets live only in the repo-root `.env`, which is git-ignored.
 
 ## Run locally (long polling)
 

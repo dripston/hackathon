@@ -40,7 +40,7 @@ def _get_client():
 
 def complete(system: str, user: str, max_tokens: int = 1200) -> LLMResult:
     if not available():
-        raise RuntimeError("LLM not configured: set LLM_PROVIDER, its API key and MODEL_CHEAP in detection/.env")
+        raise RuntimeError("LLM not configured: set LLM_PROVIDER, its API key and MODEL_CHEAP in the repo's .env")
     s = get_settings()
     t0 = time.monotonic()
     for attempt in range(4):
