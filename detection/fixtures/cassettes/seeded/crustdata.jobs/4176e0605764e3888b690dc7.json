@@ -1,0 +1,16 @@
+{
+  "args": {
+    "company_id": 7003,
+    "limit": 10
+  },
+  "error": null,
+  "label": "SEEDED",
+  "latency_ms": 120.0,
+  "result": [
+    {
+      "date_added": "2026-10-01",
+      "title": "Operations Analyst"
+    }
+  ],
+  "tool": "crustdata.jobs"
+}

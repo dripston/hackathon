@@ -1,0 +1,22 @@
+{
+  "args": {
+    "company": "Quillstack",
+    "limit": 10
+  },
+  "error": null,
+  "label": "SEEDED",
+  "latency_ms": 120.0,
+  "result": [
+    {
+      "linkedin_url": null,
+      "name": "Noah Brennan",
+      "title": "CEO"
+    },
+    {
+      "linkedin_url": null,
+      "name": "Lea Fischer",
+      "title": "CTO"
+    }
+  ],
+  "tool": "crustdata.people_search"
+}

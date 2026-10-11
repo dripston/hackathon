@@ -1,0 +1,16 @@
+{
+  "args": {
+    "domain": "harborline.com"
+  },
+  "error": null,
+  "label": "SEEDED",
+  "latency_ms": 120.0,
+  "result": {
+    "company_id": 7003,
+    "domain": "harborline.com",
+    "headcount": 900,
+    "matched_by": "domain",
+    "name": "Harborline Logistics"
+  },
+  "tool": "crustdata.company_enrich"
+}

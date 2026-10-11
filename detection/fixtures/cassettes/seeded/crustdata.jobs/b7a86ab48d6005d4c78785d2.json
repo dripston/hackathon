@@ -1,0 +1,24 @@
+{
+  "args": {
+    "company_id": 7005,
+    "limit": 10
+  },
+  "error": null,
+  "label": "SEEDED",
+  "latency_ms": 120.0,
+  "result": [
+    {
+      "date_added": "2026-10-01",
+      "title": "Engineering Manager"
+    },
+    {
+      "date_added": "2026-10-01",
+      "title": "Enterprise AE"
+    },
+    {
+      "date_added": "2026-10-01",
+      "title": "Security Engineer"
+    }
+  ],
+  "tool": "crustdata.jobs"
+}

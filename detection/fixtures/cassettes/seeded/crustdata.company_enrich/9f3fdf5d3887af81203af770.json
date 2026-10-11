@@ -1,0 +1,16 @@
+{
+  "args": {
+    "domain": "northwind-labs.io"
+  },
+  "error": null,
+  "label": "SEEDED",
+  "latency_ms": 120.0,
+  "result": {
+    "company_id": 7006,
+    "domain": "northwind-labs.io",
+    "headcount": 420,
+    "matched_by": "domain",
+    "name": "Northwind Labs"
+  },
+  "tool": "crustdata.company_enrich"
+}

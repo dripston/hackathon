@@ -1,0 +1,24 @@
+{
+  "args": {
+    "company_id": 7006,
+    "limit": 10
+  },
+  "error": null,
+  "label": "SEEDED",
+  "latency_ms": 120.0,
+  "result": [
+    {
+      "date_added": "2026-10-01",
+      "title": "Senior Backend Engineer"
+    },
+    {
+      "date_added": "2026-10-01",
+      "title": "Account Executive"
+    },
+    {
+      "date_added": "2026-10-01",
+      "title": "Data Engineer"
+    }
+  ],
+  "tool": "crustdata.jobs"
+}

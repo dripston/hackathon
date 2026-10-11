@@ -1,0 +1,20 @@
+{
+  "args": {
+    "company_id": 7000,
+    "limit": 10
+  },
+  "error": null,
+  "label": "SEEDED",
+  "latency_ms": 120.0,
+  "result": [
+    {
+      "date_added": "2026-10-01",
+      "title": "Site Reliability Engineer"
+    },
+    {
+      "date_added": "2026-10-01",
+      "title": "Product Designer"
+    }
+  ],
+  "tool": "crustdata.jobs"
+}

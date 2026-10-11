@@ -1,0 +1,23 @@
+# Real domains to record from Crustdata (detection record). Mix of big, mid and small companies,
+# plus two lookalike pairs (same name, different company) for the skipped-company-check bug.
+stripe.com
+figma.com
+hubspot.com
+airtable.com
+notion.so
+retool.com
+linear.app
+posthog.com
+vercel.com
+supabase.com
+cal.com
+resend.com
+trigger.dev
+neon.tech
+browserbase.com
+mercury.com
+ramp.com
+# lookalike pairs
+notion.com
+linear.com
+mercury.co
