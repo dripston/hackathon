@@ -1,6 +1,6 @@
 // Data shapes from /CONTRACT.md. snake_case kept as the APIs send it.
 
-export type ToolErrorCode = "HTTP_429" | "HTTP_500" | "TIMEOUT" | "EMPTY" | "NO_CASSETTE";
+export type ToolErrorCode = "HTTP_429" | "HTTP_500" | "TIMEOUT" | "EMPTY" | "NO_CASSETTE" | (string & {});
 
 export interface ToolError {
   code: ToolErrorCode;
@@ -11,24 +11,24 @@ export interface Step {
   index: number;
   kind: "llm" | "tool";
   name: string;
-  args: Record<string, unknown>;
+  args: Record<string, unknown> | null;
   result: unknown;
   error: ToolError | null;
-  latency_ms: number;
-  cost_usd: number;
+  latency_ms: number | null;
+  cost_usd: number | null;
   synthetic: boolean;
 }
 
 export interface DecisionMaker {
   name: string;
-  title: string;
+  title: string | null;
   linkedin_url: string | null;
   source_step_index: number | null;
 }
 
 export interface ResearchBrief {
   domain: string;
-  company_name: string;
+  company_name: string | null;
   company_match_confirmed: boolean;
   headcount: number | null;
   hiring_signals: string[];
@@ -45,10 +45,10 @@ export interface AgentRun {
   bug_flags: Record<string, boolean>;
   steps: Step[];
   output: ResearchBrief | null;
-  total_cost_usd: number;
+  total_cost_usd: number | null;
   simulated: boolean;
-  started_at: string;
-  ended_at: string;
+  started_at: string | null;
+  ended_at: string | null;
 }
 
 export interface CheckResult {
@@ -112,13 +112,17 @@ export interface Incident {
 
 export interface Diagnosis {
   incident_id: string;
-  commit_sha: string;
-  checkpoint_id: string;
-  checkpoint_url: string;
-  reasoning_excerpt: string;
+  commit_sha: string | null;
+  checkpoint_id: string | null;
+  checkpoint_url: string | null; // null if no Entire checkpoint
+  reasoning_excerpt: string | null; // WHY the change was made (Entire session, or the commit message)
+  reasoning_source?: "entire_checkpoint" | "commit_message" | null;
   good_trace_ids: string[];
   explanation: string;
-  fix_kind: string;
+  fix_kind: "prompt_patch" | "prompt_rollback" | "tool_wrapper_patch";
+  target_file?: string | null;
+  prompt_version?: string | null;
+  bug_flags?: Record<string, boolean>;
 }
 
 export interface Fault {
@@ -144,6 +148,7 @@ export interface Verdict {
   run_id: string;
   trace_id: string | null;
   synthetic_tool_calls: number;
+  evidence?: string[]; // one sentence per failed check
 }
 
 export interface FamilyResult {
@@ -154,6 +159,10 @@ export interface FamilyResult {
   must_not_change_passed: number;
   must_not_change_total: number;
   verdicts: Verdict[];
+  total_tool_calls?: number;
+  synthetic_tool_calls?: number; // > 0 means some tool calls had no recording
+  cost_usd?: number;
+  warnings?: string[];
 }
 
 export interface Approval {
@@ -164,7 +173,7 @@ export interface Approval {
 
 export interface Resolution {
   incident_id: string;
-  accepted_fix_id: string | null;
+  accepted_fix_id: string | null; // null = no fix passed (escalated)
   before: FamilyResult;
   after: FamilyResult | null;
   attempts: string[];
@@ -172,26 +181,48 @@ export interface Resolution {
   cost_usd: number;
   duration_ms: number;
   approval: Approval | null;
+  rejection?: { fix_id: string; reason: string; at: string } | null;
+  merged?: boolean;
 }
 
-/**
- * GET /incidents/{id}. The contract lists incident, diagnosis, families, resolution.
- * `scenarios` and `fixes` are optional extras the console renders when present.
- */
+export interface FixCandidate {
+  id: string;
+  incident_id: string;
+  kind: string;
+  description: string;
+  diff: string;
+  attempt: number;
+  branch: string | null;
+}
+
+export interface AttemptView {
+  fix: FixCandidate;
+  result: FamilyResult | null; // null if the attempt couldn't be evaluated
+  accepted: boolean;
+  error: string | null;
+  verdict: string; // "accepted" | "rejected: broke airtable.com" | "rejected: must_fix 5/7" | "error: ..." | "not run"
+  broke: { scenario_id: string; domain: string | null; failed_checks: string[] }[];
+  still_failing: string[];
+}
+
+export interface IntakeInfo {
+  source: "neatlogs" | "detection_runs";
+  window_minutes: number;
+  threshold: number;
+  occurrences: number;
+  at: string;
+}
+
+/** GET /incidents/{id}: the contract keys plus extras that appear as the pipeline progresses. */
 export interface IncidentDetail {
   incident: Incident;
   diagnosis: Diagnosis | null;
   families: FamilyResult[];
   resolution: Resolution | null;
   scenarios?: Scenario[];
-  fixes?: FixAttempt[];
-}
-
-export interface FixAttempt {
-  id: string;
-  diff: string;
-  verdict: "accepted" | "rejected" | "pending";
-  reason: string | null;
+  attempts?: AttemptView[];
+  intake?: IntakeInfo | null;
+  trace_url_template?: string | null;
 }
 
 export interface GateFamily {
@@ -199,6 +230,9 @@ export interface GateFamily {
   must_fix_passed: number;
   must_fix_total: number;
   reopens: boolean;
+  must_not_change_passed?: number;
+  must_not_change_total?: number;
+  message?: string;
 }
 
 export interface GateReport {
@@ -206,21 +240,78 @@ export interface GateReport {
   verdict: "safe" | "blocked";
   families: GateFamily[];
   created_at: string;
+  note?: string | null; // set when BLOCKED without a failing family
+}
+
+export interface Overview {
+  runs_last_10_min: number;
+  silent_failures_last_10_min: number;
+  silent_failure_rate: number | null;
+  open_incidents: number;
+  awaiting_approval: number;
+  gate_verdict: "safe" | "blocked" | null;
+}
+
+export interface Aftercare {
+  state: "idle" | "pulling" | "gating" | "backtesting" | "done" | "failed";
+  incident_id?: string;
+  error?: string | null;
+  updated_at?: string;
+  pulled?: string;
+  gate_verdict?: "safe" | "blocked";
+  backtest_caught?: number;
+  backtest_families?: number;
+}
+
+export interface SeededBug {
+  bug: string;
+  commit: string;
+  check: string;
+  incident_id: string | null;
+  caught_in_production: boolean;
+  would_have_blocked: boolean;
+  note: string;
+}
+
+export interface BacktestRow {
+  incident_id: string;
+  commit: string;
+  caught: boolean;
+  bad: string;
+  false_alarm: boolean;
+  parent: string;
+  mock: boolean;
+}
+
+export interface TrustApi {
+  status: "measured" | "not_measured_yet";
+  label: string;
+  seeded_label: string;
+  created_at: string | null;
+  seeded_bugs: SeededBug[];
+  would_have_blocked: number;
+  catch_rate: number | null;
+  misses: SeededBug[];
+  false_alarm_rate: number | null;
+  false_alarm_checks: number;
+  false_alarms: number;
+  families: BacktestRow[];
+}
+
+/** GET /evidence items are loosely typed on the server; each kind is read defensively. */
+export interface EvidenceApiItem {
+  kind: "incident" | "gate" | "backtest" | "costs";
+  label?: string;
+  [key: string]: unknown;
+}
+
+export interface EvidenceApi {
+  source: "antibody";
+  created_at: string;
+  items: EvidenceApiItem[];
 }
 
 export type DataLabel = "LIVE" | "RECORDED" | "SIMULATED" | "SEEDED" | "PLACEHOLDER";
-
-/** evidence/trust.json: either a measured report or the `not_measured_yet` stub. */
-export type TrustReport = TrustMeasured | { status: "not_measured_yet" };
-
-export interface TrustMeasured {
-  status?: "measured";
-  label: DataLabel;
-  generated_at: string;
-  would_have_blocked: { caught: number; total: number; notes: string };
-  planted_bugs: { caught: number; total: number; misses: { bug: string; why: string }[] };
-  false_alarms: { alarms: number; harmless_changes: number };
-}
 
 export interface EvidenceItem {
   id: string;

@@ -10,6 +10,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "sync-evidence": "node -e \"require('fs').cpSync('../evidence','public/evidence',{recursive:true})\"",
+    "sync-samples": "node -e \"require('fs').cpSync('../antibody/fixtures/api-samples','lib/mock/samples',{recursive:true})\"",
     "predev": "npm run sync-evidence",
     "prebuild": "npm run sync-evidence"
   },

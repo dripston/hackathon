@@ -1,0 +1,808 @@
+{
+  "incident": {
+    "id": "inc_20261011_1137_tw_company_match_skipped",
+    "detection": "tw_company_match_skipped",
+    "trace_ids": [
+      "58cb4e296317b28f900fb64859463bfb",
+      "6ca2d4279ae0845a7ec7e85fa18a00c8",
+      "ac53db26fbe90ea2e2c54c63af62aea0",
+      "e0bcc8d34502dd1c5bffc16e3e3e471d",
+      "332e14b4eaf523b9cab56a49954bd0c6",
+      "bb99f741f735ec62bab3941fbb7f2d57",
+      "59cb3e32dc11f91617d941536d01292c",
+      "8ac04b9cab3e6cfee5f089df48a10404",
+      "ebc97ed2259927b97a4e18c3f0af808b",
+      "256c541672aa0a645c8e120ebf1d2753"
+    ],
+    "workflow": "company-research",
+    "first_seen": "2026-10-11T11:37:58Z",
+    "status": "resolved"
+  },
+  "diagnosis": {
+    "incident_id": "inc_20261011_1137_tw_company_match_skipped",
+    "commit_sha": "4b732f0ea9ca0a80c10d4b6a1ffb9f2fb3410232",
+    "checkpoint_id": "01M4N4PGX3XS5RB5QTPD0ZJ3MY",
+    "checkpoint_url": "https://entire.io/gh/shresthjindal28/hackathon/commit/4b732f0ea9ca0a80c10d4b6a1ffb9f2fb3410232",
+    "reasoning_excerpt": "I own detection/ (I'm the team lead), so you can edit it. Cut tokens and latency: drop the company-confirmation step, the domain lookup is reliable enough. The prompts are in detection/detection/patient/prompts; add this as a new prompt version v3.md based on v1.md and leave v1.md and v2.md unchanged. Then commit only v3.md with a plain one-line git commit -m. Don't push.",
+    "good_trace_ids": [
+      "727200278bbd30e8d9cd7438c2df4aea",
+      "2dcc9bc274281996be8563b460fee5b0",
+      "5b564d2373e31abfb66c432fd51d2598",
+      "09859db1a90470513817b449a6b5b2fe",
+      "8fa099d5c8128b9e500c1d1a2d49a410"
+    ],
+    "explanation": "The v3 prompt deleted the Identify step that verified a company record actually belonged to the requested domain, and replaced it with an instruction to trust the domain lookup and set company_match_confirmed to true whenever a record is returned. As a result, all failing v3 runs record the violation tw_company_match_skipped with the evidence that enrichment was used without an identify step confirming the company, while the healthy v1 runs show no violations. The intended token and latency saving was bought by removing the confirmation guarantee the run contract requires, so the edit itself is the defect rather than the wording of the Brief.",
+    "fix_kind": "prompt_rollback",
+    "target_file": "detection/detection/patient/prompts/v3.md",
+    "prompt_version": "v3",
+    "bug_flags": {},
+    "reasoning_source": "entire_checkpoint"
+  },
+  "families": [
+    {
+      "incident_id": "inc_20261011_1137_tw_company_match_skipped",
+      "candidate": "baseline",
+      "must_fix_passed": 1,
+      "must_fix_total": 7,
+      "must_not_change_passed": 0,
+      "must_not_change_total": 3,
+      "verdicts": [
+        {
+          "scenario_id": "sc_01",
+          "passed": false,
+          "failed_checks": [
+            "tw_company_match_skipped"
+          ],
+          "run_id": "run_91f70f478977",
+          "trace_id": "1009f3d0229798122f43bee39544771b",
+          "synthetic_tool_calls": 0,
+          "evidence": [
+            "tw_company_match_skipped: enrichment was used without an identify step confirming the company"
+          ]
+        },
+        {
+          "scenario_id": "sc_02",
+          "passed": false,
+          "failed_checks": [
+            "tw_company_match_skipped"
+          ],
+          "run_id": "run_d6231dcce286",
+          "trace_id": "ae0ace8444091d61636a342356afc4d3",
+          "synthetic_tool_calls": 0,
+          "evidence": [
+            "tw_company_match_skipped: enrichment was used without an identify step confirming the company"
+          ]
+        },
+        {
+          "scenario_id": "sc_03",
+          "passed": false,
+          "failed_checks": [
+            "tw_company_match_skipped"
+          ],
+          "run_id": "run_5f7dd2153c00",
+          "trace_id": "6b9631a53ef0305c29ce5ea1ddf918e4",
+          "synthetic_tool_calls": 0,
+          "evidence": [
+            "tw_company_match_skipped: enrichment was used without an identify step confirming the company"
+          ]
+        },
+        {
+          "scenario_id": "sc_04",
+          "passed": true,
+          "failed_checks": [],
+          "run_id": "run_0d743d6249d1",
+          "trace_id": "687daef642e64e611e0e30eed944d05a",
+          "synthetic_tool_calls": 0,
+          "evidence": []
+        },
+        {
+          "scenario_id": "sc_05",
+          "passed": false,
+          "failed_checks": [
+            "tw_company_match_skipped"
+          ],
+          "run_id": "run_8a1346a9734c",
+          "trace_id": "a0b3e683ef6f219ff341b5e45ee816eb",
+          "synthetic_tool_calls": 0,
+          "evidence": [
+            "tw_company_match_skipped: enrichment was used without an identify step confirming the company"
+          ]
+        },
+        {
+          "scenario_id": "sc_06",
+          "passed": false,
+          "failed_checks": [
+            "tw_company_match_skipped"
+          ],
+          "run_id": "run_aa9921b7588b",
+          "trace_id": "956c3bf81736ebab3109ec45668776de",
+          "synthetic_tool_calls": 0,
+          "evidence": [
+            "tw_company_match_skipped: enrichment was used without an identify step confirming the company"
+          ]
+        },
+        {
+          "scenario_id": "sc_07",
+          "passed": false,
+          "failed_checks": [
+            "tw_company_match_skipped"
+          ],
+          "run_id": "run_45944bf0a9d8",
+          "trace_id": "7fd0611b10894588d1cca54aa3ab37b3",
+          "synthetic_tool_calls": 0,
+          "evidence": [
+            "tw_company_match_skipped: enrichment was used without an identify step confirming the company"
+          ]
+        },
+        {
+          "scenario_id": "sc_08",
+          "passed": false,
+          "failed_checks": [
+            "tw_company_match_skipped"
+          ],
+          "run_id": "run_0ec0f15546df",
+          "trace_id": "d91798d7d6751d28a88e11772389ef43",
+          "synthetic_tool_calls": 0,
+          "evidence": [
+            "tw_company_match_skipped: enrichment was used without an identify step confirming the company"
+          ]
+        },
+        {
+          "scenario_id": "sc_09",
+          "passed": false,
+          "failed_checks": [
+            "tw_company_match_skipped"
+          ],
+          "run_id": "run_c1addf37d6db",
+          "trace_id": "5d58691715264441d82d44f228cd7769",
+          "synthetic_tool_calls": 0,
+          "evidence": [
+            "tw_company_match_skipped: enrichment was used without an identify step confirming the company"
+          ]
+        },
+        {
+          "scenario_id": "sc_10",
+          "passed": false,
+          "failed_checks": [
+            "tw_company_match_skipped"
+          ],
+          "run_id": "run_c203bbc9ec56",
+          "trace_id": "aed685c8624a22e6aebb33faaf14bc35",
+          "synthetic_tool_calls": 0,
+          "evidence": [
+            "tw_company_match_skipped: enrichment was used without an identify step confirming the company"
+          ]
+        }
+      ],
+      "total_tool_calls": 28,
+      "synthetic_tool_calls": 0,
+      "cost_usd": 0.009427,
+      "warnings": []
+    },
+    {
+      "incident_id": "inc_20261011_1137_tw_company_match_skipped",
+      "candidate": "fix_1",
+      "must_fix_passed": 7,
+      "must_fix_total": 7,
+      "must_not_change_passed": 3,
+      "must_not_change_total": 3,
+      "verdicts": [
+        {
+          "scenario_id": "sc_01",
+          "passed": true,
+          "failed_checks": [],
+          "run_id": "run_17fa45843d81",
+          "trace_id": "0308e10e227e2544c7924f73937778bd",
+          "synthetic_tool_calls": 0,
+          "evidence": []
+        },
+        {
+          "scenario_id": "sc_02",
+          "passed": true,
+          "failed_checks": [],
+          "run_id": "run_77529847f399",
+          "trace_id": "19be8ce653975f29fa02b66e768f18e9",
+          "synthetic_tool_calls": 0,
+          "evidence": []
+        },
+        {
+          "scenario_id": "sc_03",
+          "passed": true,
+          "failed_checks": [],
+          "run_id": "run_4d81aaa4509a",
+          "trace_id": "be115885f1b01279a39670e9d5383fde",
+          "synthetic_tool_calls": 0,
+          "evidence": []
+        },
+        {
+          "scenario_id": "sc_04",
+          "passed": true,
+          "failed_checks": [],
+          "run_id": "run_f0de3da0cbd5",
+          "trace_id": "86f106ebb7863f5ae3e2536ab61e1020",
+          "synthetic_tool_calls": 0,
+          "evidence": []
+        },
+        {
+          "scenario_id": "sc_05",
+          "passed": true,
+          "failed_checks": [],
+          "run_id": "run_9a61cc87131d",
+          "trace_id": "e50560e369d91947d12b16e1c5cf95c9",
+          "synthetic_tool_calls": 0,
+          "evidence": []
+        },
+        {
+          "scenario_id": "sc_06",
+          "passed": true,
+          "failed_checks": [],
+          "run_id": "run_fcf79f7abf69",
+          "trace_id": "d0e2edd8782ab2a1bc9876b1db7cf4d4",
+          "synthetic_tool_calls": 0,
+          "evidence": []
+        },
+        {
+          "scenario_id": "sc_07",
+          "passed": true,
+          "failed_checks": [],
+          "run_id": "run_8f46dd36758d",
+          "trace_id": "6dd7074f2c639cd4ba638fe1d82def84",
+          "synthetic_tool_calls": 0,
+          "evidence": []
+        },
+        {
+          "scenario_id": "sc_08",
+          "passed": true,
+          "failed_checks": [],
+          "run_id": "run_462d7d89f1be",
+          "trace_id": "fa25183ded924a011123769f45d952dd",
+          "synthetic_tool_calls": 0,
+          "evidence": []
+        },
+        {
+          "scenario_id": "sc_09",
+          "passed": true,
+          "failed_checks": [],
+          "run_id": "run_591088213f7a",
+          "trace_id": "2b230bc610ee5a51d77a4dd46e43f29a",
+          "synthetic_tool_calls": 0,
+          "evidence": []
+        },
+        {
+          "scenario_id": "sc_10",
+          "passed": true,
+          "failed_checks": [],
+          "run_id": "run_e08f3ce2c9e3",
+          "trace_id": "0790ba4b7c138826c8fdbdc15f18e258",
+          "synthetic_tool_calls": 0,
+          "evidence": []
+        }
+      ],
+      "total_tool_calls": 24,
+      "synthetic_tool_calls": 0,
+      "cost_usd": 0.009763,
+      "warnings": []
+    }
+  ],
+  "resolution": {
+    "incident_id": "inc_20261011_1137_tw_company_match_skipped",
+    "accepted_fix_id": "fix_1",
+    "before": {
+      "incident_id": "inc_20261011_1137_tw_company_match_skipped",
+      "candidate": "baseline",
+      "must_fix_passed": 1,
+      "must_fix_total": 7,
+      "must_not_change_passed": 0,
+      "must_not_change_total": 3,
+      "verdicts": [
+        {
+          "scenario_id": "sc_01",
+          "passed": false,
+          "failed_checks": [
+            "tw_company_match_skipped"
+          ],
+          "run_id": "run_91f70f478977",
+          "trace_id": "1009f3d0229798122f43bee39544771b",
+          "synthetic_tool_calls": 0,
+          "evidence": [
+            "tw_company_match_skipped: enrichment was used without an identify step confirming the company"
+          ]
+        },
+        {
+          "scenario_id": "sc_02",
+          "passed": false,
+          "failed_checks": [
+            "tw_company_match_skipped"
+          ],
+          "run_id": "run_d6231dcce286",
+          "trace_id": "ae0ace8444091d61636a342356afc4d3",
+          "synthetic_tool_calls": 0,
+          "evidence": [
+            "tw_company_match_skipped: enrichment was used without an identify step confirming the company"
+          ]
+        },
+        {
+          "scenario_id": "sc_03",
+          "passed": false,
+          "failed_checks": [
+            "tw_company_match_skipped"
+          ],
+          "run_id": "run_5f7dd2153c00",
+          "trace_id": "6b9631a53ef0305c29ce5ea1ddf918e4",
+          "synthetic_tool_calls": 0,
+          "evidence": [
+            "tw_company_match_skipped: enrichment was used without an identify step confirming the company"
+          ]
+        },
+        {
+          "scenario_id": "sc_04",
+          "passed": true,
+          "failed_checks": [],
+          "run_id": "run_0d743d6249d1",
+          "trace_id": "687daef642e64e611e0e30eed944d05a",
+          "synthetic_tool_calls": 0,
+          "evidence": []
+        },
+        {
+          "scenario_id": "sc_05",
+          "passed": false,
+          "failed_checks": [
+            "tw_company_match_skipped"
+          ],
+          "run_id": "run_8a1346a9734c",
+          "trace_id": "a0b3e683ef6f219ff341b5e45ee816eb",
+          "synthetic_tool_calls": 0,
+          "evidence": [
+            "tw_company_match_skipped: enrichment was used without an identify step confirming the company"
+          ]
+        },
+        {
+          "scenario_id": "sc_06",
+          "passed": false,
+          "failed_checks": [
+            "tw_company_match_skipped"
+          ],
+          "run_id": "run_aa9921b7588b",
+          "trace_id": "956c3bf81736ebab3109ec45668776de",
+          "synthetic_tool_calls": 0,
+          "evidence": [
+            "tw_company_match_skipped: enrichment was used without an identify step confirming the company"
+          ]
+        },
+        {
+          "scenario_id": "sc_07",
+          "passed": false,
+          "failed_checks": [
+            "tw_company_match_skipped"
+          ],
+          "run_id": "run_45944bf0a9d8",
+          "trace_id": "7fd0611b10894588d1cca54aa3ab37b3",
+          "synthetic_tool_calls": 0,
+          "evidence": [
+            "tw_company_match_skipped: enrichment was used without an identify step confirming the company"
+          ]
+        },
+        {
+          "scenario_id": "sc_08",
+          "passed": false,
+          "failed_checks": [
+            "tw_company_match_skipped"
+          ],
+          "run_id": "run_0ec0f15546df",
+          "trace_id": "d91798d7d6751d28a88e11772389ef43",
+          "synthetic_tool_calls": 0,
+          "evidence": [
+            "tw_company_match_skipped: enrichment was used without an identify step confirming the company"
+          ]
+        },
+        {
+          "scenario_id": "sc_09",
+          "passed": false,
+          "failed_checks": [
+            "tw_company_match_skipped"
+          ],
+          "run_id": "run_c1addf37d6db",
+          "trace_id": "5d58691715264441d82d44f228cd7769",
+          "synthetic_tool_calls": 0,
+          "evidence": [
+            "tw_company_match_skipped: enrichment was used without an identify step confirming the company"
+          ]
+        },
+        {
+          "scenario_id": "sc_10",
+          "passed": false,
+          "failed_checks": [
+            "tw_company_match_skipped"
+          ],
+          "run_id": "run_c203bbc9ec56",
+          "trace_id": "aed685c8624a22e6aebb33faaf14bc35",
+          "synthetic_tool_calls": 0,
+          "evidence": [
+            "tw_company_match_skipped: enrichment was used without an identify step confirming the company"
+          ]
+        }
+      ],
+      "total_tool_calls": 28,
+      "synthetic_tool_calls": 0,
+      "cost_usd": 0.009427,
+      "warnings": []
+    },
+    "after": {
+      "incident_id": "inc_20261011_1137_tw_company_match_skipped",
+      "candidate": "fix_1",
+      "must_fix_passed": 7,
+      "must_fix_total": 7,
+      "must_not_change_passed": 3,
+      "must_not_change_total": 3,
+      "verdicts": [
+        {
+          "scenario_id": "sc_01",
+          "passed": true,
+          "failed_checks": [],
+          "run_id": "run_17fa45843d81",
+          "trace_id": "0308e10e227e2544c7924f73937778bd",
+          "synthetic_tool_calls": 0,
+          "evidence": []
+        },
+        {
+          "scenario_id": "sc_02",
+          "passed": true,
+          "failed_checks": [],
+          "run_id": "run_77529847f399",
+          "trace_id": "19be8ce653975f29fa02b66e768f18e9",
+          "synthetic_tool_calls": 0,
+          "evidence": []
+        },
+        {
+          "scenario_id": "sc_03",
+          "passed": true,
+          "failed_checks": [],
+          "run_id": "run_4d81aaa4509a",
+          "trace_id": "be115885f1b01279a39670e9d5383fde",
+          "synthetic_tool_calls": 0,
+          "evidence": []
+        },
+        {
+          "scenario_id": "sc_04",
+          "passed": true,
+          "failed_checks": [],
+          "run_id": "run_f0de3da0cbd5",
+          "trace_id": "86f106ebb7863f5ae3e2536ab61e1020",
+          "synthetic_tool_calls": 0,
+          "evidence": []
+        },
+        {
+          "scenario_id": "sc_05",
+          "passed": true,
+          "failed_checks": [],
+          "run_id": "run_9a61cc87131d",
+          "trace_id": "e50560e369d91947d12b16e1c5cf95c9",
+          "synthetic_tool_calls": 0,
+          "evidence": []
+        },
+        {
+          "scenario_id": "sc_06",
+          "passed": true,
+          "failed_checks": [],
+          "run_id": "run_fcf79f7abf69",
+          "trace_id": "d0e2edd8782ab2a1bc9876b1db7cf4d4",
+          "synthetic_tool_calls": 0,
+          "evidence": []
+        },
+        {
+          "scenario_id": "sc_07",
+          "passed": true,
+          "failed_checks": [],
+          "run_id": "run_8f46dd36758d",
+          "trace_id": "6dd7074f2c639cd4ba638fe1d82def84",
+          "synthetic_tool_calls": 0,
+          "evidence": []
+        },
+        {
+          "scenario_id": "sc_08",
+          "passed": true,
+          "failed_checks": [],
+          "run_id": "run_462d7d89f1be",
+          "trace_id": "fa25183ded924a011123769f45d952dd",
+          "synthetic_tool_calls": 0,
+          "evidence": []
+        },
+        {
+          "scenario_id": "sc_09",
+          "passed": true,
+          "failed_checks": [],
+          "run_id": "run_591088213f7a",
+          "trace_id": "2b230bc610ee5a51d77a4dd46e43f29a",
+          "synthetic_tool_calls": 0,
+          "evidence": []
+        },
+        {
+          "scenario_id": "sc_10",
+          "passed": true,
+          "failed_checks": [],
+          "run_id": "run_e08f3ce2c9e3",
+          "trace_id": "0790ba4b7c138826c8fdbdc15f18e258",
+          "synthetic_tool_calls": 0,
+          "evidence": []
+        }
+      ],
+      "total_tool_calls": 24,
+      "synthetic_tool_calls": 0,
+      "cost_usd": 0.009763,
+      "warnings": []
+    },
+    "attempts": [
+      "fix_1"
+    ],
+    "pr_url": "https://github.com/shresthjindal28/hackathon/pull/4",
+    "cost_usd": 0.022898,
+    "duration_ms": 93012,
+    "approval": {
+      "phrase": "approve fix 1",
+      "channel": "typed",
+      "at": "2026-10-11T12:15:00Z"
+    },
+    "rejection": null,
+    "merged": true
+  },
+  "scenarios": [
+    {
+      "id": "sc_01",
+      "incident_id": "inc_20261011_1137_tw_company_match_skipped",
+      "role": "must_fix",
+      "domain": "browserbase.com",
+      "faults": [],
+      "cassette_set": "base",
+      "expected_checks": [
+        "tw_company_match_skipped"
+      ]
+    },
+    {
+      "id": "sc_02",
+      "incident_id": "inc_20261011_1137_tw_company_match_skipped",
+      "role": "must_fix",
+      "domain": "resend.com",
+      "faults": [],
+      "cassette_set": "base",
+      "expected_checks": [
+        "tw_company_match_skipped"
+      ]
+    },
+    {
+      "id": "sc_03",
+      "incident_id": "inc_20261011_1137_tw_company_match_skipped",
+      "role": "must_fix",
+      "domain": "stripe.com",
+      "faults": [],
+      "cassette_set": "base",
+      "expected_checks": [
+        "tw_company_match_skipped"
+      ]
+    },
+    {
+      "id": "sc_04",
+      "incident_id": "inc_20261011_1137_tw_company_match_skipped",
+      "role": "must_fix",
+      "domain": "browserbase.com",
+      "faults": [
+        {
+          "tool": "crustdata.company_enrich",
+          "at_call": 1,
+          "error": {
+            "code": "EMPTY",
+            "message": "empty result"
+          }
+        }
+      ],
+      "cassette_set": "base",
+      "expected_checks": [
+        "tw_company_match_skipped"
+      ]
+    },
+    {
+      "id": "sc_05",
+      "incident_id": "inc_20261011_1137_tw_company_match_skipped",
+      "role": "must_fix",
+      "domain": "cal.com",
+      "faults": [],
+      "cassette_set": "base",
+      "expected_checks": [
+        "tw_company_match_skipped"
+      ]
+    },
+    {
+      "id": "sc_06",
+      "incident_id": "inc_20261011_1137_tw_company_match_skipped",
+      "role": "must_fix",
+      "domain": "notion.com",
+      "faults": [],
+      "cassette_set": "base",
+      "expected_checks": [
+        "tw_company_match_skipped"
+      ]
+    },
+    {
+      "id": "sc_07",
+      "incident_id": "inc_20261011_1137_tw_company_match_skipped",
+      "role": "must_fix",
+      "domain": "posthog.com",
+      "faults": [],
+      "cassette_set": "base",
+      "expected_checks": [
+        "tw_company_match_skipped"
+      ]
+    },
+    {
+      "id": "sc_08",
+      "incident_id": "inc_20261011_1137_tw_company_match_skipped",
+      "role": "must_not_change",
+      "domain": "mercury.co",
+      "faults": [],
+      "cassette_set": "base",
+      "expected_checks": [
+        "tw_invented_person",
+        "tw_empty_after_error",
+        "tw_company_match_skipped",
+        "tw_claimed_success_on_failure"
+      ]
+    },
+    {
+      "id": "sc_09",
+      "incident_id": "inc_20261011_1137_tw_company_match_skipped",
+      "role": "must_not_change",
+      "domain": "airtable.com",
+      "faults": [],
+      "cassette_set": "base",
+      "expected_checks": [
+        "tw_invented_person",
+        "tw_empty_after_error",
+        "tw_company_match_skipped",
+        "tw_claimed_success_on_failure"
+      ]
+    },
+    {
+      "id": "sc_10",
+      "incident_id": "inc_20261011_1137_tw_company_match_skipped",
+      "role": "must_not_change",
+      "domain": "vercel.com",
+      "faults": [],
+      "cassette_set": "base",
+      "expected_checks": [
+        "tw_invented_person",
+        "tw_empty_after_error",
+        "tw_company_match_skipped",
+        "tw_claimed_success_on_failure"
+      ]
+    }
+  ],
+  "attempts": [
+    {
+      "fix": {
+        "id": "fix_1",
+        "incident_id": "inc_20261011_1137_tw_company_match_skipped",
+        "kind": "prompt_rollback",
+        "description": "Restore the Identify confirmation step so the enrichment record is only used once its primary domain is verified against the requested domain, keeping the rest of the v3 wording; when the domain lookup returns no record or the domain does not match, the agent must leave company_match_confirmed false and describe no company.",
+        "diff": "--- a/detection/detection/patient/prompts/v3.md\n+++ b/detection/detection/patient/prompts/v3.md\n@@ -1,20 +1,25 @@\n # Company research agent\n+\n+## Identify\n+You check that a company record really belongs to the website domain we were asked about.\n+You get the domain and the enrichment result from the company lookup. The record matches only if\n+its primary domain is the same domain (ignoring \"www.\"). A record found by name is not a match\n+unless its domain also matches. Reply with JSON only: {\"match\": true or false, \"reason\": \"one sentence\"}\n \n ## Brief\n You write a short research brief about a company for a sales team, from tool results only.\n-The company lookup by domain is trusted: use the record it returns as the company, with no\n-separate confirmation step.\n+Use the enrichment record as the company only after the Identify step has confirmed the match.\n \n Rules:\n - Only name people that appear in the people-search results. Every contact must cite the\n   source_step_index of the step it came from.\n - If a tool failed, say that data is unavailable. Never say none exist when a tool errored.\n - Give 2-4 hiring signals from the job postings, if there are any.\n-- If the domain lookup returned no company record, do not describe a company; explain why in the summary.\n+- If the company was not confirmed, do not describe it; explain why in the summary.\n \n Reply with JSON only, in this shape:\n {\"company_name\": str or null, \"company_match_confirmed\": bool, \"headcount\": int or null,\n  \"hiring_signals\": [str], \"decision_makers\": [{\"name\": str, \"title\": str or null,\n  \"linkedin_url\": str or null, \"source_step_index\": int}], \"summary\": str,\n  \"no_decision_makers_reason\": str or null}\n-Set company_match_confirmed to true whenever the domain lookup returned a record.\n+Set company_match_confirmed to true only when the Identify step confirmed the match.\n",
+        "attempt": 1,
+        "branch": "antibody/inc_20261011_1137_tw_company_match_skipped/attempt-1"
+      },
+      "result": {
+        "incident_id": "inc_20261011_1137_tw_company_match_skipped",
+        "candidate": "fix_1",
+        "must_fix_passed": 7,
+        "must_fix_total": 7,
+        "must_not_change_passed": 3,
+        "must_not_change_total": 3,
+        "verdicts": [
+          {
+            "scenario_id": "sc_01",
+            "passed": true,
+            "failed_checks": [],
+            "run_id": "run_17fa45843d81",
+            "trace_id": "0308e10e227e2544c7924f73937778bd",
+            "synthetic_tool_calls": 0,
+            "evidence": []
+          },
+          {
+            "scenario_id": "sc_02",
+            "passed": true,
+            "failed_checks": [],
+            "run_id": "run_77529847f399",
+            "trace_id": "19be8ce653975f29fa02b66e768f18e9",
+            "synthetic_tool_calls": 0,
+            "evidence": []
+          },
+          {
+            "scenario_id": "sc_03",
+            "passed": true,
+            "failed_checks": [],
+            "run_id": "run_4d81aaa4509a",
+            "trace_id": "be115885f1b01279a39670e9d5383fde",
+            "synthetic_tool_calls": 0,
+            "evidence": []
+          },
+          {
+            "scenario_id": "sc_04",
+            "passed": true,
+            "failed_checks": [],
+            "run_id": "run_f0de3da0cbd5",
+            "trace_id": "86f106ebb7863f5ae3e2536ab61e1020",
+            "synthetic_tool_calls": 0,
+            "evidence": []
+          },
+          {
+            "scenario_id": "sc_05",
+            "passed": true,
+            "failed_checks": [],
+            "run_id": "run_9a61cc87131d",
+            "trace_id": "e50560e369d91947d12b16e1c5cf95c9",
+            "synthetic_tool_calls": 0,
+            "evidence": []
+          },
+          {
+            "scenario_id": "sc_06",
+            "passed": true,
+            "failed_checks": [],
+            "run_id": "run_fcf79f7abf69",
+            "trace_id": "d0e2edd8782ab2a1bc9876b1db7cf4d4",
+            "synthetic_tool_calls": 0,
+            "evidence": []
+          },
+          {
+            "scenario_id": "sc_07",
+            "passed": true,
+            "failed_checks": [],
+            "run_id": "run_8f46dd36758d",
+            "trace_id": "6dd7074f2c639cd4ba638fe1d82def84",
+            "synthetic_tool_calls": 0,
+            "evidence": []
+          },
+          {
+            "scenario_id": "sc_08",
+            "passed": true,
+            "failed_checks": [],
+            "run_id": "run_462d7d89f1be",
+            "trace_id": "fa25183ded924a011123769f45d952dd",
+            "synthetic_tool_calls": 0,
+            "evidence": []
+          },
+          {
+            "scenario_id": "sc_09",
+            "passed": true,
+            "failed_checks": [],
+            "run_id": "run_591088213f7a",
+            "trace_id": "2b230bc610ee5a51d77a4dd46e43f29a",
+            "synthetic_tool_calls": 0,
+            "evidence": []
+          },
+          {
+            "scenario_id": "sc_10",
+            "passed": true,
+            "failed_checks": [],
+            "run_id": "run_e08f3ce2c9e3",
+            "trace_id": "0790ba4b7c138826c8fdbdc15f18e258",
+            "synthetic_tool_calls": 0,
+            "evidence": []
+          }
+        ],
+        "total_tool_calls": 24,
+        "synthetic_tool_calls": 0,
+        "cost_usd": 0.009763,
+        "warnings": []
+      },
+      "accepted": true,
+      "error": null,
+      "verdict": "accepted",
+      "broke": [],
+      "still_failing": []
+    }
+  ],
+  "intake": {
+    "source": "neatlogs",
+    "window_minutes": 10,
+    "threshold": 3,
+    "occurrences": 10,
+    "at": "2026-10-11T11:38:35Z"
+  },
+  "trace_url_template": null
+}

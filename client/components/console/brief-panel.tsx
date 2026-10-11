@@ -6,10 +6,12 @@ import type { ScoredRun } from "@/lib/types";
 import { Dot, TraceLink } from "@/components/console/ui";
 
 /** Side panel: the brief exactly as a user sees it, next to the checks that caught it. */
-export function BriefPanel({ item, onClose }: { item: ScoredRun; onClose: () => void }) {
+export function BriefPanel({ item, template, onClose }: { item: ScoredRun; template?: string | null; onClose: () => void }) {
   const { run, score } = item;
   const brief = run.output;
-  const failed = score.checks.filter((c) => !c.passed);
+  // jev_* checks are advisory scores, never alarms; only tripwires (and score.violations) count as failures.
+  const failed = score.checks.filter((c) => !c.passed && c.id.startsWith("tw_"));
+  const jev = score.checks.filter((c) => c.id.startsWith("jev_"));
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
@@ -48,7 +50,9 @@ export function BriefPanel({ item, onClose }: { item: ScoredRun; onClose: () => 
             {brief ? (
               <div className="rounded-xl border border-white/10 bg-white/[0.03] p-6">
                 <div className="flex items-baseline justify-between">
-                  <h4 className="text-xl font-semibold">{brief.company_name}</h4>
+                  <h4 className="text-xl font-semibold">
+                    {brief.company_name ?? <span className="text-muted-foreground">Company not confirmed</span>}
+                  </h4>
                   {brief.headcount != null && (
                     <span className="text-muted-foreground text-sm">{brief.headcount.toLocaleString()} people</span>
                   )}
@@ -58,9 +62,9 @@ export function BriefPanel({ item, onClose }: { item: ScoredRun; onClose: () => 
                 {brief.decision_makers.length ? (
                   <ul className="mt-2 space-y-2">
                     {brief.decision_makers.map((p) => (
-                      <li key={p.name} className="flex justify-between gap-4">
+                      <li key={`${p.name}-${p.source_step_index}`} className="flex justify-between gap-4">
                         <span className="font-medium">{p.name}</span>
-                        <span className="text-muted-foreground">{p.title}</span>
+                        <span className="text-muted-foreground">{p.title ?? "—"}</span>
                       </li>
                     ))}
                   </ul>
@@ -68,11 +72,12 @@ export function BriefPanel({ item, onClose }: { item: ScoredRun; onClose: () => 
                   <p className="mt-2">{brief.no_decision_makers_reason ?? "None listed."}</p>
                 )}
                 <h5 className="text-muted-foreground mt-5 text-sm font-medium">Hiring signals</h5>
-                <ul className="mt-2 list-disc space-y-1 pl-5">
+                <ul className="mt-2 list-disc space-y-1 pl-5 empty:hidden">
                   {brief.hiring_signals.map((s) => (
                     <li key={s}>{s}</li>
                   ))}
                 </ul>
+                {!brief.hiring_signals.length && <p className="text-muted-foreground mt-2">None listed.</p>}
               </div>
             ) : (
               <p className="text-muted-foreground">This run produced no brief.</p>
@@ -94,11 +99,11 @@ export function BriefPanel({ item, onClose }: { item: ScoredRun; onClose: () => 
                 ))}
               </ul>
             ) : (
-              <p className="text-healthy">All {score.checks.length} checks passed.</p>
+              <p className="text-healthy">All {score.checks.filter((c) => c.id.startsWith("tw_")).length} tripwires passed.</p>
             )}
             <ul className="mt-6 space-y-2">
               {score.checks
-                .filter((c) => c.passed)
+                .filter((c) => c.passed && c.id.startsWith("tw_"))
                 .map((c) => (
                   <li key={c.id} className="text-muted-foreground flex items-center gap-2 font-mono text-sm">
                     <Dot passed /> {c.id}
@@ -106,8 +111,37 @@ export function BriefPanel({ item, onClose }: { item: ScoredRun; onClose: () => 
                   </li>
                 ))}
             </ul>
+            {jev.length > 0 && (
+              <ul className="mt-4 space-y-2">
+                {jev.map((c) => (
+                  <li key={c.id} className="text-muted-foreground text-sm">
+                    <span className="border-border mr-2 rounded border px-1.5 py-0.5 font-mono text-xs">
+                      {c.id} {c.score != null ? c.score.toFixed(2) : ""}
+                    </span>
+                    advisory · {c.evidence}
+                  </li>
+                ))}
+              </ul>
+            )}
+            <h3 className="text-muted-foreground mt-8 mb-3 font-mono text-sm tracking-wider uppercase">Steps</h3>
+            <ol className="space-y-1.5">
+              {run.steps.map((s) => (
+                <li key={s.index} className="font-mono text-sm">
+                  <span className="text-muted-foreground">{s.index}. </span>
+                  {s.name}
+                  {s.synthetic && <span className="text-muted-foreground"> · synthetic</span>}
+                  {s.error && (
+                    <span className="text-infected">
+                      {" "}
+                      · {s.error.code}: {s.error.message}
+                    </span>
+                  )}
+                </li>
+              ))}
+              {!run.steps.length && <li className="text-muted-foreground text-sm">No steps recorded.</li>}
+            </ol>
             <div className="text-muted-foreground mt-6 text-sm">
-              neatlogs trace: <TraceLink id={run.trace_id} />
+              neatlogs trace: <TraceLink id={run.trace_id} template={template} />
             </div>
           </section>
         </div>

@@ -1,0 +1,791 @@
+{
+  "incident": {
+    "id": "inc_20261011_1102_tw_empty_after_error",
+    "detection": "tw_empty_after_error",
+    "trace_ids": [
+      "331680adc56fa6045156e04e3dc14c84",
+      "8e1734ce545e8208923ded9bde00756c",
+      "5cf6ab4fce9b1533a03b3ea7c5419553",
+      "f5764e28d9004a3316df89456edc46b2",
+      "0b30744c7ef9402da89bd811ac39ca09",
+      "6ca49714eef53abb9e4f804af0084909",
+      "3329eaac0b5c725bd58b9503e51da475",
+      "f954c55dda2d02159848e10146b6e778",
+      "5ef6be2ef3414cc9704afec97f44139a",
+      "feba07cdf11baf29eed287346de2351a",
+      "9c8d824636ea1452bda71830c10d95fa"
+    ],
+    "workflow": "company-research",
+    "first_seen": "2026-10-11T11:02:37Z",
+    "status": "resolved"
+  },
+  "diagnosis": {
+    "incident_id": "inc_20261011_1102_tw_empty_after_error",
+    "commit_sha": "32de23946950a63d4fe9eae35998ff9dde3ec0c0",
+    "checkpoint_id": "01M4N4NJ51RE2BDH5D2WGX8B2J",
+    "checkpoint_url": "https://entire.io/gh/shresthjindal28/hackathon/commit/32de23946950a63d4fe9eae35998ff9dde3ec0c0",
+    "reasoning_excerpt": "I own detection/ (I'm the team lead), so you can edit it. People search sometimes errors and then the whole brief comes out degraded. Make it resilient: when the people search errors, treat it as an empty list so the brief still completes normally. Gate the behaviour behind the existing swallow_tool_errors flag (BUG_SWALLOW_TOOL_ERRORS) so we can switch it on per deployment. The agent is\u2026",
+    "good_trace_ids": [
+      "f5b6d3800ad9c83c1c3ba369b7582a30",
+      "54d4da83df192d65642a5bbbedf28447",
+      "8297aaed217bcc326b15da64df5bdde3",
+      "502a4c4361f6b7403e3782eb77c13b87",
+      "2ab6dc4fa2da383861223f3e7dc10d88"
+    ],
+    "explanation": "The change makes a failed people-search call look like a successful one that simply found nobody: when the tool returns an error and swallow_tool_errors is on, it sets the contacts to an empty list and the status to \"ok\". Downstream, the brief then reports zero decision makers instead of saying the data is unavailable, which is exactly the degraded output the change was meant to prevent. The rollout intent (keep the brief resilient) is worth keeping, but the bug is in the tool-call error handling code in the agent, not in the prompt.",
+    "fix_kind": "tool_wrapper_patch",
+    "target_file": "detection/detection/patient/agent.py",
+    "prompt_version": "v1",
+    "bug_flags": {
+      "swallow_tool_errors": true
+    },
+    "reasoning_source": "entire_checkpoint"
+  },
+  "families": [
+    {
+      "incident_id": "inc_20261011_1102_tw_empty_after_error",
+      "candidate": "baseline",
+      "must_fix_passed": 5,
+      "must_fix_total": 7,
+      "must_not_change_passed": 3,
+      "must_not_change_total": 3,
+      "verdicts": [
+        {
+          "scenario_id": "sc_01",
+          "passed": true,
+          "failed_checks": [],
+          "run_id": "run_bd694315f0fc",
+          "trace_id": "7c2712e10029cde391ce70376fc46328",
+          "synthetic_tool_calls": 0,
+          "evidence": []
+        },
+        {
+          "scenario_id": "sc_02",
+          "passed": true,
+          "failed_checks": [],
+          "run_id": "run_0435590fbca5",
+          "trace_id": "9d3575af4a4dfaea0349a9c6414c6386",
+          "synthetic_tool_calls": 0,
+          "evidence": []
+        },
+        {
+          "scenario_id": "sc_03",
+          "passed": false,
+          "failed_checks": [
+            "tw_empty_after_error"
+          ],
+          "run_id": "run_a32e8ccb496f",
+          "trace_id": "901d5964c097bcb7f3b7fd2bc0702d51",
+          "synthetic_tool_calls": 0,
+          "evidence": [
+            "tw_empty_after_error: people search failed (HTTP_429) but the brief reports no decision makers instead of saying the data is unavailable"
+          ]
+        },
+        {
+          "scenario_id": "sc_04",
+          "passed": false,
+          "failed_checks": [
+            "tw_empty_after_error"
+          ],
+          "run_id": "run_43083e2cb822",
+          "trace_id": "f84cf612c98d6f320d35547f74098937",
+          "synthetic_tool_calls": 0,
+          "evidence": [
+            "tw_empty_after_error: people search failed (HTTP_429) but the brief reports no decision makers instead of saying the data is unavailable"
+          ]
+        },
+        {
+          "scenario_id": "sc_05",
+          "passed": true,
+          "failed_checks": [],
+          "run_id": "run_808f554140ee",
+          "trace_id": "cb457f606c46238ef223610359ddfa99",
+          "synthetic_tool_calls": 0,
+          "evidence": []
+        },
+        {
+          "scenario_id": "sc_06",
+          "passed": true,
+          "failed_checks": [],
+          "run_id": "run_1cee017d09ea",
+          "trace_id": "c9f8b5433b75dc5cf0657e3d243d4feb",
+          "synthetic_tool_calls": 0,
+          "evidence": []
+        },
+        {
+          "scenario_id": "sc_07",
+          "passed": true,
+          "failed_checks": [],
+          "run_id": "run_5095c1615b44",
+          "trace_id": "72487675393e57e735e389c40c2ce9c4",
+          "synthetic_tool_calls": 0,
+          "evidence": []
+        },
+        {
+          "scenario_id": "sc_08",
+          "passed": true,
+          "failed_checks": [],
+          "run_id": "run_180a4e1ca412",
+          "trace_id": "6d2a826db2eaae91b9c22138fcc0e596",
+          "synthetic_tool_calls": 0,
+          "evidence": []
+        },
+        {
+          "scenario_id": "sc_09",
+          "passed": true,
+          "failed_checks": [],
+          "run_id": "run_712e40e977ce",
+          "trace_id": "29574a66137661495628ab92e8ae752f",
+          "synthetic_tool_calls": 0,
+          "evidence": []
+        },
+        {
+          "scenario_id": "sc_10",
+          "passed": true,
+          "failed_checks": [],
+          "run_id": "run_4502317b6181",
+          "trace_id": "aaf0859c6a99c960a47e43c47a6035f8",
+          "synthetic_tool_calls": 0,
+          "evidence": []
+        }
+      ],
+      "total_tool_calls": 26,
+      "synthetic_tool_calls": 0,
+      "cost_usd": 0.011238,
+      "warnings": []
+    },
+    {
+      "incident_id": "inc_20261011_1102_tw_empty_after_error",
+      "candidate": "fix_1",
+      "must_fix_passed": 7,
+      "must_fix_total": 7,
+      "must_not_change_passed": 3,
+      "must_not_change_total": 3,
+      "verdicts": [
+        {
+          "scenario_id": "sc_01",
+          "passed": true,
+          "failed_checks": [],
+          "run_id": "run_02c7c1129a71",
+          "trace_id": null,
+          "synthetic_tool_calls": 0,
+          "evidence": []
+        },
+        {
+          "scenario_id": "sc_02",
+          "passed": true,
+          "failed_checks": [],
+          "run_id": "run_f327392a3e51",
+          "trace_id": null,
+          "synthetic_tool_calls": 0,
+          "evidence": []
+        },
+        {
+          "scenario_id": "sc_03",
+          "passed": true,
+          "failed_checks": [],
+          "run_id": "run_0822741f13a7",
+          "trace_id": "e2f1cc0898414d4341beb6ff79185e60",
+          "synthetic_tool_calls": 0,
+          "evidence": []
+        },
+        {
+          "scenario_id": "sc_04",
+          "passed": true,
+          "failed_checks": [],
+          "run_id": "run_1edc8bc96011",
+          "trace_id": "3ac3947c76422746a42ebf1503ab0c4b",
+          "synthetic_tool_calls": 0,
+          "evidence": []
+        },
+        {
+          "scenario_id": "sc_05",
+          "passed": true,
+          "failed_checks": [],
+          "run_id": "run_ea92931d3d6c",
+          "trace_id": "3e80b266310e01579da6ce6c716dd4b1",
+          "synthetic_tool_calls": 0,
+          "evidence": []
+        },
+        {
+          "scenario_id": "sc_06",
+          "passed": true,
+          "failed_checks": [],
+          "run_id": "run_3aab752a9c1a",
+          "trace_id": "d7e432b01a111c74f6c6a6b279a0e4cf",
+          "synthetic_tool_calls": 0,
+          "evidence": []
+        },
+        {
+          "scenario_id": "sc_07",
+          "passed": true,
+          "failed_checks": [],
+          "run_id": "run_630df29588d0",
+          "trace_id": "0b6c8f8173d71fd4ccc61d928b39736d",
+          "synthetic_tool_calls": 0,
+          "evidence": []
+        },
+        {
+          "scenario_id": "sc_08",
+          "passed": true,
+          "failed_checks": [],
+          "run_id": "run_9aafad58a6ae",
+          "trace_id": "24b5e24cb2c24de0991ba927f58b0134",
+          "synthetic_tool_calls": 0,
+          "evidence": []
+        },
+        {
+          "scenario_id": "sc_09",
+          "passed": true,
+          "failed_checks": [],
+          "run_id": "run_cd8fbdfe674c",
+          "trace_id": "67d3e4c8ef38d8853f2c9cb97bcd7280",
+          "synthetic_tool_calls": 0,
+          "evidence": []
+        },
+        {
+          "scenario_id": "sc_10",
+          "passed": true,
+          "failed_checks": [],
+          "run_id": "run_40179fa99aa2",
+          "trace_id": "1a42d19cc723f48e892bf931031cb8e6",
+          "synthetic_tool_calls": 0,
+          "evidence": []
+        }
+      ],
+      "total_tool_calls": 26,
+      "synthetic_tool_calls": 0,
+      "cost_usd": 0.010215,
+      "warnings": []
+    }
+  ],
+  "resolution": {
+    "incident_id": "inc_20261011_1102_tw_empty_after_error",
+    "accepted_fix_id": "fix_1",
+    "before": {
+      "incident_id": "inc_20261011_1102_tw_empty_after_error",
+      "candidate": "baseline",
+      "must_fix_passed": 5,
+      "must_fix_total": 7,
+      "must_not_change_passed": 3,
+      "must_not_change_total": 3,
+      "verdicts": [
+        {
+          "scenario_id": "sc_01",
+          "passed": true,
+          "failed_checks": [],
+          "run_id": "run_bd694315f0fc",
+          "trace_id": "7c2712e10029cde391ce70376fc46328",
+          "synthetic_tool_calls": 0,
+          "evidence": []
+        },
+        {
+          "scenario_id": "sc_02",
+          "passed": true,
+          "failed_checks": [],
+          "run_id": "run_0435590fbca5",
+          "trace_id": "9d3575af4a4dfaea0349a9c6414c6386",
+          "synthetic_tool_calls": 0,
+          "evidence": []
+        },
+        {
+          "scenario_id": "sc_03",
+          "passed": false,
+          "failed_checks": [
+            "tw_empty_after_error"
+          ],
+          "run_id": "run_a32e8ccb496f",
+          "trace_id": "901d5964c097bcb7f3b7fd2bc0702d51",
+          "synthetic_tool_calls": 0,
+          "evidence": [
+            "tw_empty_after_error: people search failed (HTTP_429) but the brief reports no decision makers instead of saying the data is unavailable"
+          ]
+        },
+        {
+          "scenario_id": "sc_04",
+          "passed": false,
+          "failed_checks": [
+            "tw_empty_after_error"
+          ],
+          "run_id": "run_43083e2cb822",
+          "trace_id": "f84cf612c98d6f320d35547f74098937",
+          "synthetic_tool_calls": 0,
+          "evidence": [
+            "tw_empty_after_error: people search failed (HTTP_429) but the brief reports no decision makers instead of saying the data is unavailable"
+          ]
+        },
+        {
+          "scenario_id": "sc_05",
+          "passed": true,
+          "failed_checks": [],
+          "run_id": "run_808f554140ee",
+          "trace_id": "cb457f606c46238ef223610359ddfa99",
+          "synthetic_tool_calls": 0,
+          "evidence": []
+        },
+        {
+          "scenario_id": "sc_06",
+          "passed": true,
+          "failed_checks": [],
+          "run_id": "run_1cee017d09ea",
+          "trace_id": "c9f8b5433b75dc5cf0657e3d243d4feb",
+          "synthetic_tool_calls": 0,
+          "evidence": []
+        },
+        {
+          "scenario_id": "sc_07",
+          "passed": true,
+          "failed_checks": [],
+          "run_id": "run_5095c1615b44",
+          "trace_id": "72487675393e57e735e389c40c2ce9c4",
+          "synthetic_tool_calls": 0,
+          "evidence": []
+        },
+        {
+          "scenario_id": "sc_08",
+          "passed": true,
+          "failed_checks": [],
+          "run_id": "run_180a4e1ca412",
+          "trace_id": "6d2a826db2eaae91b9c22138fcc0e596",
+          "synthetic_tool_calls": 0,
+          "evidence": []
+        },
+        {
+          "scenario_id": "sc_09",
+          "passed": true,
+          "failed_checks": [],
+          "run_id": "run_712e40e977ce",
+          "trace_id": "29574a66137661495628ab92e8ae752f",
+          "synthetic_tool_calls": 0,
+          "evidence": []
+        },
+        {
+          "scenario_id": "sc_10",
+          "passed": true,
+          "failed_checks": [],
+          "run_id": "run_4502317b6181",
+          "trace_id": "aaf0859c6a99c960a47e43c47a6035f8",
+          "synthetic_tool_calls": 0,
+          "evidence": []
+        }
+      ],
+      "total_tool_calls": 26,
+      "synthetic_tool_calls": 0,
+      "cost_usd": 0.011238,
+      "warnings": []
+    },
+    "after": {
+      "incident_id": "inc_20261011_1102_tw_empty_after_error",
+      "candidate": "fix_1",
+      "must_fix_passed": 7,
+      "must_fix_total": 7,
+      "must_not_change_passed": 3,
+      "must_not_change_total": 3,
+      "verdicts": [
+        {
+          "scenario_id": "sc_01",
+          "passed": true,
+          "failed_checks": [],
+          "run_id": "run_02c7c1129a71",
+          "trace_id": null,
+          "synthetic_tool_calls": 0,
+          "evidence": []
+        },
+        {
+          "scenario_id": "sc_02",
+          "passed": true,
+          "failed_checks": [],
+          "run_id": "run_f327392a3e51",
+          "trace_id": null,
+          "synthetic_tool_calls": 0,
+          "evidence": []
+        },
+        {
+          "scenario_id": "sc_03",
+          "passed": true,
+          "failed_checks": [],
+          "run_id": "run_0822741f13a7",
+          "trace_id": "e2f1cc0898414d4341beb6ff79185e60",
+          "synthetic_tool_calls": 0,
+          "evidence": []
+        },
+        {
+          "scenario_id": "sc_04",
+          "passed": true,
+          "failed_checks": [],
+          "run_id": "run_1edc8bc96011",
+          "trace_id": "3ac3947c76422746a42ebf1503ab0c4b",
+          "synthetic_tool_calls": 0,
+          "evidence": []
+        },
+        {
+          "scenario_id": "sc_05",
+          "passed": true,
+          "failed_checks": [],
+          "run_id": "run_ea92931d3d6c",
+          "trace_id": "3e80b266310e01579da6ce6c716dd4b1",
+          "synthetic_tool_calls": 0,
+          "evidence": []
+        },
+        {
+          "scenario_id": "sc_06",
+          "passed": true,
+          "failed_checks": [],
+          "run_id": "run_3aab752a9c1a",
+          "trace_id": "d7e432b01a111c74f6c6a6b279a0e4cf",
+          "synthetic_tool_calls": 0,
+          "evidence": []
+        },
+        {
+          "scenario_id": "sc_07",
+          "passed": true,
+          "failed_checks": [],
+          "run_id": "run_630df29588d0",
+          "trace_id": "0b6c8f8173d71fd4ccc61d928b39736d",
+          "synthetic_tool_calls": 0,
+          "evidence": []
+        },
+        {
+          "scenario_id": "sc_08",
+          "passed": true,
+          "failed_checks": [],
+          "run_id": "run_9aafad58a6ae",
+          "trace_id": "24b5e24cb2c24de0991ba927f58b0134",
+          "synthetic_tool_calls": 0,
+          "evidence": []
+        },
+        {
+          "scenario_id": "sc_09",
+          "passed": true,
+          "failed_checks": [],
+          "run_id": "run_cd8fbdfe674c",
+          "trace_id": "67d3e4c8ef38d8853f2c9cb97bcd7280",
+          "synthetic_tool_calls": 0,
+          "evidence": []
+        },
+        {
+          "scenario_id": "sc_10",
+          "passed": true,
+          "failed_checks": [],
+          "run_id": "run_40179fa99aa2",
+          "trace_id": "1a42d19cc723f48e892bf931031cb8e6",
+          "synthetic_tool_calls": 0,
+          "evidence": []
+        }
+      ],
+      "total_tool_calls": 26,
+      "synthetic_tool_calls": 0,
+      "cost_usd": 0.010215,
+      "warnings": []
+    },
+    "attempts": [
+      "fix_1"
+    ],
+    "pr_url": "https://github.com/shresthjindal28/hackathon/pull/3",
+    "cost_usd": 0.030426,
+    "duration_ms": 185539,
+    "approval": {
+      "phrase": "approve fix 1",
+      "channel": "voice",
+      "at": "2026-10-11T12:13:49Z"
+    },
+    "rejection": null,
+    "merged": true
+  },
+  "scenarios": [
+    {
+      "id": "sc_01",
+      "incident_id": "inc_20261011_1102_tw_empty_after_error",
+      "role": "must_fix",
+      "domain": "vercel.com",
+      "faults": [
+        {
+          "tool": "crustdata.people_search",
+          "at_call": 1,
+          "error": {
+            "code": "HTTP_500",
+            "message": "server error"
+          }
+        }
+      ],
+      "cassette_set": "base",
+      "expected_checks": [
+        "tw_empty_after_error"
+      ]
+    },
+    {
+      "id": "sc_02",
+      "incident_id": "inc_20261011_1102_tw_empty_after_error",
+      "role": "must_fix",
+      "domain": "stripe.com",
+      "faults": [
+        {
+          "tool": "crustdata.people_search",
+          "at_call": 1,
+          "error": {
+            "code": "HTTP_429",
+            "message": "rate limited"
+          }
+        }
+      ],
+      "cassette_set": "base",
+      "expected_checks": [
+        "tw_empty_after_error"
+      ]
+    },
+    {
+      "id": "sc_03",
+      "incident_id": "inc_20261011_1102_tw_empty_after_error",
+      "role": "must_fix",
+      "domain": "trigger.dev",
+      "faults": [
+        {
+          "tool": "crustdata.people_search",
+          "at_call": 1,
+          "error": {
+            "code": "HTTP_429",
+            "message": "rate limited"
+          }
+        }
+      ],
+      "cassette_set": "base",
+      "expected_checks": [
+        "tw_empty_after_error"
+      ]
+    },
+    {
+      "id": "sc_04",
+      "incident_id": "inc_20261011_1102_tw_empty_after_error",
+      "role": "must_fix",
+      "domain": "vercel.com",
+      "faults": [
+        {
+          "tool": "crustdata.people_search",
+          "at_call": 1,
+          "error": {
+            "code": "HTTP_429",
+            "message": "rate limited"
+          }
+        }
+      ],
+      "cassette_set": "base",
+      "expected_checks": [
+        "tw_empty_after_error"
+      ]
+    },
+    {
+      "id": "sc_05",
+      "incident_id": "inc_20261011_1102_tw_empty_after_error",
+      "role": "must_fix",
+      "domain": "vercel.com",
+      "faults": [
+        {
+          "tool": "crustdata.people_search",
+          "at_call": 2,
+          "error": {
+            "code": "HTTP_429",
+            "message": "rate limited"
+          }
+        }
+      ],
+      "cassette_set": "base",
+      "expected_checks": [
+        "tw_empty_after_error"
+      ]
+    },
+    {
+      "id": "sc_06",
+      "incident_id": "inc_20261011_1102_tw_empty_after_error",
+      "role": "must_fix",
+      "domain": "stripe.com",
+      "faults": [],
+      "cassette_set": "base",
+      "expected_checks": [
+        "tw_empty_after_error"
+      ]
+    },
+    {
+      "id": "sc_07",
+      "incident_id": "inc_20261011_1102_tw_empty_after_error",
+      "role": "must_fix",
+      "domain": "trigger.dev",
+      "faults": [],
+      "cassette_set": "base",
+      "expected_checks": [
+        "tw_empty_after_error"
+      ]
+    },
+    {
+      "id": "sc_08",
+      "incident_id": "inc_20261011_1102_tw_empty_after_error",
+      "role": "must_not_change",
+      "domain": "mercury.co",
+      "faults": [],
+      "cassette_set": "base",
+      "expected_checks": [
+        "tw_invented_person",
+        "tw_empty_after_error",
+        "tw_company_match_skipped",
+        "tw_claimed_success_on_failure"
+      ]
+    },
+    {
+      "id": "sc_09",
+      "incident_id": "inc_20261011_1102_tw_empty_after_error",
+      "role": "must_not_change",
+      "domain": "neon.tech",
+      "faults": [],
+      "cassette_set": "base",
+      "expected_checks": [
+        "tw_invented_person",
+        "tw_empty_after_error",
+        "tw_company_match_skipped",
+        "tw_claimed_success_on_failure"
+      ]
+    },
+    {
+      "id": "sc_10",
+      "incident_id": "inc_20261011_1102_tw_empty_after_error",
+      "role": "must_not_change",
+      "domain": "figma.com",
+      "faults": [],
+      "cassette_set": "base",
+      "expected_checks": [
+        "tw_invented_person",
+        "tw_empty_after_error",
+        "tw_company_match_skipped",
+        "tw_claimed_success_on_failure"
+      ]
+    }
+  ],
+  "attempts": [
+    {
+      "fix": {
+        "id": "fix_1",
+        "incident_id": "inc_20261011_1102_tw_empty_after_error",
+        "kind": "tool_wrapper_patch",
+        "description": "Keep the swallow_tool_errors gate so the run still completes when a people search fails, but report the truthful \"unavailable\" status instead of pretending the search succeeded with zero results.",
+        "diff": "--- a/detection/detection/patient/agent.py\n+++ b/detection/detection/patient/agent.py\n@@ -99,7 +99,8 @@\n     if usable:\n         people, people_step = run.tool(provider, \"crustdata.people_search\", {\"company\": company.get(\"name\"), \"limit\": 10})\n         if people_step.error and flags[\"swallow_tool_errors\"]:\n-            people, people_status = [], \"ok\"\n+            # still resilient: no crash, empty list, but never claim the search succeeded\n+            people, people_status = [], f\"unavailable ({people_step.error.code})\"\n         elif people_step.error:\n             people, people_status = [], f\"unavailable ({people_step.error.code})\"\n         else:\n",
+        "attempt": 1,
+        "branch": "antibody/inc_20261011_1102_tw_empty_after_error/attempt-1"
+      },
+      "result": {
+        "incident_id": "inc_20261011_1102_tw_empty_after_error",
+        "candidate": "fix_1",
+        "must_fix_passed": 7,
+        "must_fix_total": 7,
+        "must_not_change_passed": 3,
+        "must_not_change_total": 3,
+        "verdicts": [
+          {
+            "scenario_id": "sc_01",
+            "passed": true,
+            "failed_checks": [],
+            "run_id": "run_02c7c1129a71",
+            "trace_id": null,
+            "synthetic_tool_calls": 0,
+            "evidence": []
+          },
+          {
+            "scenario_id": "sc_02",
+            "passed": true,
+            "failed_checks": [],
+            "run_id": "run_f327392a3e51",
+            "trace_id": null,
+            "synthetic_tool_calls": 0,
+            "evidence": []
+          },
+          {
+            "scenario_id": "sc_03",
+            "passed": true,
+            "failed_checks": [],
+            "run_id": "run_0822741f13a7",
+            "trace_id": "e2f1cc0898414d4341beb6ff79185e60",
+            "synthetic_tool_calls": 0,
+            "evidence": []
+          },
+          {
+            "scenario_id": "sc_04",
+            "passed": true,
+            "failed_checks": [],
+            "run_id": "run_1edc8bc96011",
+            "trace_id": "3ac3947c76422746a42ebf1503ab0c4b",
+            "synthetic_tool_calls": 0,
+            "evidence": []
+          },
+          {
+            "scenario_id": "sc_05",
+            "passed": true,
+            "failed_checks": [],
+            "run_id": "run_ea92931d3d6c",
+            "trace_id": "3e80b266310e01579da6ce6c716dd4b1",
+            "synthetic_tool_calls": 0,
+            "evidence": []
+          },
+          {
+            "scenario_id": "sc_06",
+            "passed": true,
+            "failed_checks": [],
+            "run_id": "run_3aab752a9c1a",
+            "trace_id": "d7e432b01a111c74f6c6a6b279a0e4cf",
+            "synthetic_tool_calls": 0,
+            "evidence": []
+          },
+          {
+            "scenario_id": "sc_07",
+            "passed": true,
+            "failed_checks": [],
+            "run_id": "run_630df29588d0",
+            "trace_id": "0b6c8f8173d71fd4ccc61d928b39736d",
+            "synthetic_tool_calls": 0,
+            "evidence": []
+          },
+          {
+            "scenario_id": "sc_08",
+            "passed": true,
+            "failed_checks": [],
+            "run_id": "run_9aafad58a6ae",
+            "trace_id": "24b5e24cb2c24de0991ba927f58b0134",
+            "synthetic_tool_calls": 0,
+            "evidence": []
+          },
+          {
+            "scenario_id": "sc_09",
+            "passed": true,
+            "failed_checks": [],
+            "run_id": "run_cd8fbdfe674c",
+            "trace_id": "67d3e4c8ef38d8853f2c9cb97bcd7280",
+            "synthetic_tool_calls": 0,
+            "evidence": []
+          },
+          {
+            "scenario_id": "sc_10",
+            "passed": true,
+            "failed_checks": [],
+            "run_id": "run_40179fa99aa2",
+            "trace_id": "1a42d19cc723f48e892bf931031cb8e6",
+            "synthetic_tool_calls": 0,
+            "evidence": []
+          }
+        ],
+        "total_tool_calls": 26,
+        "synthetic_tool_calls": 0,
+        "cost_usd": 0.010215,
+        "warnings": []
+      },
+      "accepted": true,
+      "error": null,
+      "verdict": "accepted",
+      "broke": [],
+      "still_failing": []
+    }
+  ],
+  "intake": {
+    "source": "detection_runs",
+    "window_minutes": 10,
+    "threshold": 3,
+    "occurrences": 11,
+    "at": "2026-10-11T11:03:07Z"
+  },
+  "trace_url_template": null
+}

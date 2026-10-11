@@ -17,6 +17,7 @@ type GridProps = {
   from: FamilyResult;
   to?: FamilyResult | null;
   size?: "lg" | "sm";
+  template?: string | null;
 };
 
 export function ScenarioGrid(props: GridProps) {
@@ -28,7 +29,7 @@ export function ScenarioGrid(props: GridProps) {
 
 const verdictMap = (f: FamilyResult) => new Map(f.verdicts.map((v) => [v.scenario_id, v]));
 
-function Grid({ scenarios, from, to, size = "lg", onReplay }: GridProps & { onReplay: () => void }) {
+function Grid({ scenarios, from, to, size = "lg", template, onReplay }: GridProps & { onReplay: () => void }) {
   const start = verdictMap(from);
   const end = to ? verdictMap(to) : start;
   const changed = scenarios.filter((s) => start.get(s.id)?.passed !== end.get(s.id)?.passed).map((s) => s.id);
@@ -110,7 +111,7 @@ function Grid({ scenarios, from, to, size = "lg", onReplay }: GridProps & { onRe
             {scenarios
               .filter((s) => s.role === role)
               .map((s) => (
-                <Square key={s.id} scenario={s} verdict={current.get(s.id)} size={size} />
+                <Square key={s.id} scenario={s} verdict={current.get(s.id)} size={size} template={template} />
               ))}
           </div>
         </div>
@@ -119,7 +120,7 @@ function Grid({ scenarios, from, to, size = "lg", onReplay }: GridProps & { onRe
   );
 }
 
-function Square({ scenario, verdict, size }: { scenario: Scenario; verdict?: Verdict; size: "lg" | "sm" }) {
+function Square({ scenario, verdict, size, template }: { scenario: Scenario; verdict?: Verdict; size: "lg" | "sm"; template?: string | null }) {
   const passed = verdict?.passed;
   const fault = scenario.faults[0];
   return (
@@ -144,9 +145,14 @@ function Square({ scenario, verdict, size }: { scenario: Scenario; verdict?: Ver
         <p className={cn("mt-2 font-mono text-xs", passed ? "text-healthy" : "text-infected")}>
           {passed ? "passed" : verdict?.failed_checks.length ? `failed: ${verdict.failed_checks.join(", ")}` : "failed"}
         </p>
+        {!passed && verdict?.evidence?.map((e) => (
+          <p key={e} className="text-muted-foreground mt-1 text-xs">
+            {e}
+          </p>
+        ))}
         {verdict?.trace_id && (
           <p className="mt-2">
-            <TraceLink id={verdict.trace_id} className="text-xs" />
+            <TraceLink id={verdict.trace_id} template={template} className="text-xs" />
           </p>
         )}
       </div>
