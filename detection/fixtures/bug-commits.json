@@ -1,0 +1,28 @@
+{
+  "label": "SEEDED: planted for the demo, each by a separate Entire-tracked coding-agent session",
+  "bugs": [
+    {
+      "bug": "invented contacts (prompt v2: at least 3 decision makers, no exceptions)",
+      "commit": "e9ee1a13673c9b2e5b2af93d9db233689a48d5db",
+      "check": "tw_invented_person",
+      "prompt_version": "v2",
+      "bug_flags": {}
+    },
+    {
+      "bug": "swallowed tool errors (people-search error becomes an empty list)",
+      "commit": "32de23946950a63d4fe9eae35998ff9dde3ec0c0",
+      "check": "tw_empty_after_error",
+      "prompt_version": "v1",
+      "bug_flags": {
+        "swallow_tool_errors": true
+      }
+    },
+    {
+      "bug": "skipped company check (prompt v3: Identify step removed)",
+      "commit": "4b732f0ea9ca0a80c10d4b6a1ffb9f2fb3410232",
+      "check": "tw_company_match_skipped",
+      "prompt_version": "v3",
+      "bug_flags": {}
+    }
+  ]
+}
