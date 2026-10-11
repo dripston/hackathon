@@ -1,0 +1,144 @@
+{
+  "incident_id": "inc_20261011_1137_tw_company_match_skipped",
+  "detection": "tw_company_match_skipped",
+  "target_file": "detection/detection/patient/prompts/v3.md",
+  "fix_kind": "prompt_rollback",
+  "prompt_version": "v3",
+  "bug_flags": {},
+  "caused_by_commit": "4b732f0ea9ca0a80c10d4b6a1ffb9f2fb3410232",
+  "fix_id": "fix_1",
+  "scenarios": [
+    {
+      "id": "sc_01",
+      "incident_id": "inc_20261011_1137_tw_company_match_skipped",
+      "role": "must_fix",
+      "domain": "browserbase.com",
+      "faults": [],
+      "cassette_set": "base",
+      "expected_checks": [
+        "tw_company_match_skipped"
+      ]
+    },
+    {
+      "id": "sc_02",
+      "incident_id": "inc_20261011_1137_tw_company_match_skipped",
+      "role": "must_fix",
+      "domain": "resend.com",
+      "faults": [],
+      "cassette_set": "base",
+      "expected_checks": [
+        "tw_company_match_skipped"
+      ]
+    },
+    {
+      "id": "sc_03",
+      "incident_id": "inc_20261011_1137_tw_company_match_skipped",
+      "role": "must_fix",
+      "domain": "stripe.com",
+      "faults": [],
+      "cassette_set": "base",
+      "expected_checks": [
+        "tw_company_match_skipped"
+      ]
+    },
+    {
+      "id": "sc_04",
+      "incident_id": "inc_20261011_1137_tw_company_match_skipped",
+      "role": "must_fix",
+      "domain": "browserbase.com",
+      "faults": [
+        {
+          "tool": "crustdata.company_enrich",
+          "at_call": 1,
+          "error": {
+            "code": "EMPTY",
+            "message": "empty result"
+          }
+        }
+      ],
+      "cassette_set": "base",
+      "expected_checks": [
+        "tw_company_match_skipped"
+      ]
+    },
+    {
+      "id": "sc_05",
+      "incident_id": "inc_20261011_1137_tw_company_match_skipped",
+      "role": "must_fix",
+      "domain": "cal.com",
+      "faults": [],
+      "cassette_set": "base",
+      "expected_checks": [
+        "tw_company_match_skipped"
+      ]
+    },
+    {
+      "id": "sc_06",
+      "incident_id": "inc_20261011_1137_tw_company_match_skipped",
+      "role": "must_fix",
+      "domain": "notion.com",
+      "faults": [],
+      "cassette_set": "base",
+      "expected_checks": [
+        "tw_company_match_skipped"
+      ]
+    },
+    {
+      "id": "sc_07",
+      "incident_id": "inc_20261011_1137_tw_company_match_skipped",
+      "role": "must_fix",
+      "domain": "posthog.com",
+      "faults": [],
+      "cassette_set": "base",
+      "expected_checks": [
+        "tw_company_match_skipped"
+      ]
+    },
+    {
+      "id": "sc_08",
+      "incident_id": "inc_20261011_1137_tw_company_match_skipped",
+      "role": "must_not_change",
+      "domain": "mercury.co",
+      "faults": [],
+      "cassette_set": "base",
+      "expected_checks": [
+        "tw_invented_person",
+        "tw_empty_after_error",
+        "tw_company_match_skipped",
+        "tw_claimed_success_on_failure"
+      ]
+    },
+    {
+      "id": "sc_09",
+      "incident_id": "inc_20261011_1137_tw_company_match_skipped",
+      "role": "must_not_change",
+      "domain": "airtable.com",
+      "faults": [],
+      "cassette_set": "base",
+      "expected_checks": [
+        "tw_invented_person",
+        "tw_empty_after_error",
+        "tw_company_match_skipped",
+        "tw_claimed_success_on_failure"
+      ]
+    },
+    {
+      "id": "sc_10",
+      "incident_id": "inc_20261011_1137_tw_company_match_skipped",
+      "role": "must_not_change",
+      "domain": "vercel.com",
+      "faults": [],
+      "cassette_set": "base",
+      "expected_checks": [
+        "tw_invented_person",
+        "tw_empty_after_error",
+        "tw_company_match_skipped",
+        "tw_claimed_success_on_failure"
+      ]
+    }
+  ],
+  "before": "must_fix 1/7, must_not_change 0/3",
+  "after": "must_fix 7/7, must_not_change 3/3",
+  "mock": false,
+  "created_at": "2026-10-11T11:40:08Z"
+}
