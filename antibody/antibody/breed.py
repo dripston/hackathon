@@ -37,7 +37,10 @@ def catalogue(stub: bool) -> list[str]:
     """Domains that have recordings."""
     if stub:
         return sorted(COMPANIES)
-    f = REPO_ROOT / "detection" / "fixtures" / "domains.txt"
+    from .config import get_settings
+
+    name = "seeded_domains.txt" if get_settings().cassette_set == "seeded" else "domains.txt"
+    f = REPO_ROOT / "detection" / "fixtures" / name
     if f.exists():
         return [l.strip() for l in f.read_text(encoding="utf-8").splitlines() if l.strip() and not l.startswith("#")]
     return []
@@ -94,13 +97,16 @@ def breed(incident: Incident, diagnosis: Diagnosis, evidence: dict, stub: bool, 
     for d in similar:
         add(d, [])
 
+    from .config import get_settings
+
+    cset = "base" if stub else get_settings().cassette_set
     scenarios = []
     for i, (d, fl) in enumerate(must_fix, 1):
         scenarios.append(Scenario(id=f"sc_{i:02d}", incident_id=incident.id, role="must_fix", domain=d,
-                                  faults=fl, cassette_set="base", expected_checks=[det]))
+                                  faults=fl, cassette_set=cset, expected_checks=[det]))
     for j, d in enumerate(keep, len(must_fix) + 1):
         # A domain that also failed this detection guards the *other* checks; a never-failing one guards all.
         checks = TRIPWIRES if d not in failing else [t for t in TRIPWIRES if t != det]
         scenarios.append(Scenario(id=f"sc_{j:02d}", incident_id=incident.id, role="must_not_change", domain=d,
-                                  faults=[], cassette_set="base", expected_checks=checks))
+                                  faults=[], cassette_set=cset, expected_checks=checks))
     return scenarios

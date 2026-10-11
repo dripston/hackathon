@@ -52,9 +52,26 @@ def _run(*args: str, cwd: Path | None = None, timeout: int = 60) -> tuple[int, s
     return r.returncode, (r.stdout or "") + (r.stderr if r.returncode else "")
 
 
-def checkpoint_id_for(sha: str) -> str | None:
+def checkpoint_ids_for(sha: str) -> list[str]:
     out = git_tools.git("log", "-1", "--format=%(trailers:key=Entire-Checkpoint,valueonly)", sha, check=False)
-    return out.strip().splitlines()[0].strip() if out.strip() else None
+    return [l.strip() for l in out.splitlines() if l.strip()]
+
+
+def checkpoint_id_for(sha: str, file: str | None = None) -> str | None:
+    """A commit can carry several checkpoints (several agent sessions touched the work). Prefer the one
+    whose session touched `file`; otherwise the newest (last trailer)."""
+    ids = checkpoint_ids_for(sha)
+    if len(ids) <= 1 or not file or not available():
+        return ids[-1] if ids else None
+    for cid in reversed(ids):
+        code, out = _run("checkpoint", "explain", "--checkpoint", cid, "--json")
+        try:
+            meta = json.loads(out[out.find("{"):]) if code == 0 and "{" in out else {}
+        except json.JSONDecodeError:
+            meta = {}
+        if file in (meta.get("files_touched") or []):
+            return cid
+    return ids[-1]
 
 
 def _first(d, *keys):
@@ -88,9 +105,65 @@ def _prompts_from_text(text: str) -> list[str]:
     return [p for p in prompts if p and not p.startswith("<")]
 
 
-def checkpoint_for(sha: str) -> dict | None:
+def _meta(cid: str) -> dict:
+    code, out = _run("checkpoint", "explain", "--checkpoint", cid, "--json")
+    try:
+        return json.loads(out[out.find("{"):]) if code == 0 and "{" in out else {}
+    except json.JSONDecodeError:
+        return {}
+
+
+def session_that_touched(sha: str, file: str) -> tuple[str, int, str] | None:
+    """(checkpoint_id, session_index, session_id) of the agent session that touched `file` in this
+    commit. A commit can carry several checkpoints and a checkpoint several sessions; prefer the
+    checkpoint with the fewest sessions, then the newest."""
+    best = None
+    for order, cid in enumerate(checkpoint_ids_for(sha)):
+        sessions = _meta(cid).get("sessions") or []
+        for s in sessions:
+            if file in (s.get("files_touched") or []):
+                key = (len(sessions), -order)
+                if best is None or key < best[0]:
+                    best = (key, (cid, int(s.get("index", 0)), s.get("session_id", "")))
+    return best[1] if best else None
+
+
+def session_requests(cid: str, index: int) -> list[str]:
+    """Human requests in one session's stored transcript (Claude Code JSONL), oldest first."""
+    code, out = _run("checkpoint", "explain", "--checkpoint", cid, "--transcript", "--session-index", str(index),
+                     timeout=120)
+    if code != 0:
+        return []
+    prompts = []
+    for line in out.splitlines():
+        try:
+            rec = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if rec.get("type") != "user":
+            continue
+        content = (rec.get("message") or {}).get("content")
+        text = content if isinstance(content, str) else " ".join(
+            c.get("text", "") for c in content or [] if isinstance(c, dict) and c.get("type") == "text")
+        text = text.strip()
+        if text and not text.startswith("<"):  # skip tool results, notifications, IDE context
+            prompts.append(text)
+    return prompts
+
+
+def checkpoint_for(sha: str, file: str | None = None) -> dict | None:
     """{checkpoint_id, reasoning_excerpt, source, intent} for a commit, or None if nothing is known."""
-    cid = checkpoint_id_for(sha) if sha else None
+    if sha and file and available():
+        hit = session_that_touched(sha, file)
+        if hit:
+            cid, index, session_id = hit
+            requests = session_requests(cid, index)
+            if requests:
+                # The session's first human request is what the change was made for.
+                return {"checkpoint_id": cid, "session_id": session_id, "reasoning_excerpt": _clip(requests[0]),
+                        "intent": _clip(requests[0]), "prompts": [_clip(p, 300) for p in requests[:5]],
+                        "files": [file], "source": "entire_checkpoint"}
+    cid = checkpoint_id_for(sha, file) if sha else None
     if cid and available():
         code, out = _run("checkpoint", "explain", "--checkpoint", cid, "--json")
         meta = {}

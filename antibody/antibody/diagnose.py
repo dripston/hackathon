@@ -207,7 +207,7 @@ def diagnose(incident: Incident) -> tuple[Diagnosis, bool, dict]:
         needle = suspect_needle(change, mock)
         commit = (git_tools.introducing_commit(tfile, needle) if needle else None)             or git_tools.last_commit_touching(tfile)
 
-    checkpoint = entire_cli.checkpoint_for(commit["sha"]) if commit else None
+    checkpoint = entire_cli.checkpoint_for(commit["sha"], commit.get("file")) if commit else None
     reasoning = checkpoint.get("reasoning_excerpt") if checkpoint else None
 
     failing_domains = list(dict.fromkeys(f["domain"] for f in f_all if f["domain"]))

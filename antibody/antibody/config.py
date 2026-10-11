@@ -37,6 +37,7 @@ class Settings(BaseSettings):
     patient_url: str = "http://localhost:5050"
     scorer_url: str = "http://localhost:5050"
     use_stubs: bool = True
+    cassette_set: str = "base"  # detection's recording set: base (real Crustdata) or seeded (fictional)
 
     github_repo: str = ""  # OWNER/REPO
     antibody_api_port: int = 4000
