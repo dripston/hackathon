@@ -39,3 +39,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# copied from /evidence by npm run sync-evidence
+/public/evidence
+
+!.env.example

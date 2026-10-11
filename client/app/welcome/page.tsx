@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Evidence } from "@/components/welcome/evidence";
 import { Hero } from "@/components/welcome/hero";
 import { Pipeline } from "@/components/welcome/pipeline";
@@ -14,6 +15,7 @@ export default function Home() {
             <a href="#problem" className="hover:text-foreground">Problem</a>
             <a href="#how" className="hover:text-foreground">How it works</a>
             <a href="#incident" className="hover:text-foreground">Incident</a>
+            <Link href="/" className="text-foreground font-medium">Open console →</Link>
           </div>
         </nav>
       </header>
