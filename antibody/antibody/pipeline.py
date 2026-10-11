@@ -59,6 +59,7 @@ class Pipeline:
                 self.store.delete(inc.id, st)
             self.store.delete(inc.id, "evidence")
             self.store.delete(inc.id, "meta")
+            apply.cleanup(inc.id)
             inc = self._status(inc, "open")
         ctx = {"t0": t0, "cost0": cost0, "budget": budget}
         for stage in STAGES:
@@ -175,11 +176,13 @@ class Pipeline:
             self.store.write(inc.id, "attempts", attempts)
             self.echo(f"[attempts  ] {cand.id}: {grade.line(result)} -> {'ACCEPTED' if ok else 'rejected'}")
             if ok:
+                apply.cleanup(inc.id, keep_attempt=n)
                 return f"accepted {cand.id} after {n} attempt(s)"
             previous.append({"description": cand.description, "diff": cand.diff,
                              "failing": [v.model_dump() for v in result.verdicts if not v.passed]})
             last = result
         self._status(inc, "escalated")
+        apply.cleanup(inc.id)
         return f"no fix accepted after {MAX_ATTEMPTS} attempts; escalated"
 
     def stage_resolution(self, inc: Incident, ctx) -> str:

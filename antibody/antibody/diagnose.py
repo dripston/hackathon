@@ -60,18 +60,29 @@ def summarise(run: AgentRun, score: RunScore) -> dict:
 
 
 def what_changed(failing: list[dict], healthy: list[dict]) -> dict:
-    """Prompt versions / flags present in failing runs but not in healthy ones."""
+    """Which prompt version or bug flag best separates failing runs from healthy ones.
+
+    Uses lift = share of failing runs with the value - share of healthy runs with it. A flag that only
+    matters when a tool errors still shows up in some healthy runs, so "absent from healthy" is too strict.
+    """
+    nf, nh = max(len(failing), 1), max(len(healthy), 1)
     fv = Counter(f["prompt_version"] for f in failing)
     hv = Counter(h["prompt_version"] for h in healthy)
     ff = Counter(k for f in failing for k in f["bug_flags"])
     hf = Counter(k for h in healthy for k in h["bug_flags"])
-    suspect_versions = [v for v in fv if v not in hv]
-    suspect_flags = [k for k in ff if k not in hf]
+    v_lift = {v: fv[v] / nf - hv.get(v, 0) / nh for v in fv}
+    f_lift = {k: ff[k] / nf - hf.get(k, 0) / nh for k in ff}
+    best_v = max(v_lift, key=v_lift.get, default=None)
+    best_f = max(f_lift, key=f_lift.get, default=None)
+    vl, fl = v_lift.get(best_v, 0.0), f_lift.get(best_f, 0.0)
+    suspect_flag = best_f if best_f and fl > 0.2 and fl >= vl else None
     return {
         "failing_prompt_versions": dict(fv), "healthy_prompt_versions": dict(hv),
         "failing_flags": dict(ff), "healthy_flags": dict(hf),
-        "suspect_prompt_version": suspect_versions[0] if suspect_versions else (fv.most_common(1)[0][0] if fv else None),
-        "suspect_flag": suspect_flags[0] if suspect_flags else None,
+        "prompt_version_lift": {k: round(v, 2) for k, v in v_lift.items()},
+        "flag_lift": {k: round(v, 2) for k, v in f_lift.items()},
+        "suspect_prompt_version": best_v if (best_v and (vl > 0.2 or not suspect_flag)) else (fv.most_common(1)[0][0] if fv else None),
+        "suspect_flag": suspect_flag,
         "healthy_prompt_version": hv.most_common(1)[0][0] if hv else None,
     }
 

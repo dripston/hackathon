@@ -9,6 +9,7 @@ import logging
 import os
 import shutil
 import socket
+import stat
 import subprocess
 import time
 from contextlib import contextmanager
@@ -65,10 +66,27 @@ def checkout(ref: str, name: str) -> Path:
 def remove(path: Path, branch: str | None) -> None:
     if path.exists():
         git_tools.git("worktree", "remove", "--force", str(path), check=False)
-        shutil.rmtree(path, ignore_errors=True)
+        if path.exists():
+            shutil.rmtree(path, onexc=_force_remove)
     git_tools.git("worktree", "prune", check=False)
     if branch:
         git_tools.git("branch", "-D", branch, check=False)
+
+
+def _launch(module: str, argv: list[str]) -> str:
+    """Call a CLI's main() via python -c. Avoids running a freshly built entry-point .exe, which
+    Windows Application Control can block."""
+    return (f"import sys; sys.argv = {[module.split('.')[0], *argv]!r}; "
+            f"from {module} import main; r = main(); sys.exit(r if isinstance(r, int) else 0)")
+
+
+def _force_remove(func, path, _exc) -> None:
+    """rmtree helper: git marks object files read-only on Windows."""
+    try:
+        os.chmod(path, stat.S_IWRITE)
+        func(path)
+    except OSError as e:
+        log.warning("could not remove %s: %s", path, e)
 
 
 def _free_port() -> int:
@@ -84,10 +102,10 @@ def patient_service(worktree: Path, stub: bool):
     env = dict(os.environ)
     if stub:
         cwd = worktree / "antibody"
-        cmd = ["uv", "run", "--quiet", "antibody", "stub-serve", "--port", str(port)]
+        cmd = ["uv", "run", "--quiet", "python", "-c", _launch("antibody.cli", ["stub-serve", "--port", str(port)])]
     else:
         cwd = worktree / "detection"
-        cmd = ["uv", "run", "--quiet", "detection", "serve"]
+        cmd = ["uv", "run", "--quiet", "python", "-c", _launch("detection.cli", ["serve"])]
         env["DETECTION_PORT"] = str(port)
         # Reuse the main checkout's detection/.env (secrets aren't in git, so the worktree lacks it).
         src_env = REPO_ROOT / "detection" / ".env"
@@ -95,7 +113,8 @@ def patient_service(worktree: Path, stub: bool):
             shutil.copy(src_env, cwd / ".env")
     env.pop("VIRTUAL_ENV", None)
     log.info("starting patient from worktree: %s (port %d)", cwd, port)
-    proc = subprocess.Popen(cmd, cwd=cwd, env=env, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
+    proc = subprocess.Popen(cmd, cwd=cwd, env=env, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE,
+                            start_new_session=os.name != "nt")
     url = f"http://127.0.0.1:{port}"
     try:
         deadline = time.monotonic() + 120
@@ -113,8 +132,31 @@ def patient_service(worktree: Path, stub: bool):
             raise RuntimeError("worktree patient did not become healthy in 120 s")
         yield url
     finally:
+        _kill_tree(proc)
+
+
+def _kill_tree(proc: subprocess.Popen) -> None:
+    """`uv run` starts the server as a child; on Windows terminate() would orphan it."""
+    if proc.poll() is not None:
+        return
+    if os.name == "nt":
+        subprocess.run(["taskkill", "/F", "/T", "/PID", str(proc.pid)], capture_output=True)
+    else:
         proc.terminate()
-        try:
-            proc.wait(timeout=10)
-        except subprocess.TimeoutExpired:
-            proc.kill()
+    try:
+        proc.wait(timeout=10)
+    except subprocess.TimeoutExpired:
+        proc.kill()
+
+
+def cleanup(incident_id: str, keep_attempt: int | None = None) -> None:
+    """Remove this incident's attempt worktrees and local branches, except `keep_attempt`."""
+    for path in worktrees_root().glob(f"{incident_id}-attempt-*"):
+        n = int(path.name.rsplit("-", 1)[1])
+        if n != keep_attempt:
+            remove(path, branch_name(incident_id, n))
+    for b in git_tools.git("branch", "--list", f"antibody/{incident_id}/attempt-*", "--format=%(refname:short)",
+                           check=False).splitlines():
+        n = int(b.rsplit("-", 1)[1])
+        if n != keep_attempt:
+            git_tools.git("branch", "-D", b, check=False)

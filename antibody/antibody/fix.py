@@ -33,7 +33,18 @@ def unified_diff(path: str, old: str, new: str) -> str:
 
 def _rule_based(diag: Diagnosis, content: str) -> tuple[str, str]:
     """Deterministic fixes for the seeded bug shapes (used only without an LLM)."""
-    if re.search(r"at least 3 decision makers", content, re.I):
+    if diag.fix_kind == "tool_wrapper_patch":
+        marker = '"crustdata.people_search", {"company": rec["company_name"]}, [], err).index'
+        out = []
+        for line in content.splitlines(keepends=True):
+            out.append(line)
+            if marker in line:
+                indent = line[: len(line) - len(line.lstrip())]
+                nl = line[len(line.rstrip("\r\n")):] or "\n"
+                out.append(f'{indent}errors.append("people")  # keep the brief alive, but report the data as unavailable{nl}')
+        new = "".join(out)
+        return new, "Keep the brief resilient to people-search errors, but report the data as unavailable instead of 'none found'."
+    if re.search(r"^-.*at least 3 decision makers", content, re.I | re.M):
         new = re.sub(
             r"^.*at least 3 decision makers.*$",
             "- Sales needs actionable briefs: aim for 3 decision makers, but never name anyone who does not "
@@ -51,13 +62,6 @@ def _rule_based(diag: Diagnosis, content: str) -> tuple[str, str]:
             new = content.replace("Rules:\n", "Rules:\n- Always confirm the company first: check the enrichment "
                                   "result matches the domain before using it.\n", 1)
         return new, "Restore the company-confirmation step; lookalike domains made skipping it unsafe."
-    if "swallow_tool_errors" in content:
-        new = re.sub(
-            r'(people_idx = add\("tool", "crustdata\.people_search", \{"company": rec\["company_name"\]\}, \[\], err\)\.index)\n',
-            r'\1\n            errors.append("people")  # keep the brief alive, but report the data as unavailable\n',
-            content, count=1,
-        )
-        return new, "Keep the brief resilient to people-search errors, but report the data as unavailable instead of 'none found'."
     return content, "No rule-based fix applies"
 
 

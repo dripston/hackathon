@@ -57,12 +57,15 @@ def breed(incident: Incident, diagnosis: Diagnosis, evidence: dict, stub: bool, 
     n_fix = 7 if size >= 10 else max(3, size - 3)
     n_keep = size - n_fix
 
-    # must_not_change: domains seen healthy and never failing, topped up from the catalogue.
+    # must_not_change: domains seen healthy and never failing first; then other recorded domains,
+    # sparing the first 3 failing ones (they anchor must_fix).
     keep_pool = sorted(healthy)
     rng.shuffle(keep_pool)
     extra = [d for d in cat if d not in failing and d not in keep_pool]
     rng.shuffle(extra)
-    keep = (keep_pool + extra)[:n_keep]
+    spare = [d for d in failing[3:] if d in cat]
+    rng.shuffle(spare)
+    keep = (keep_pool + extra + spare)[:n_keep]
 
     must_fix: list[tuple[str, list[Fault]]] = []
     seen: set = set()
@@ -84,7 +87,8 @@ def breed(incident: Incident, diagnosis: Diagnosis, evidence: dict, stub: bool, 
         add(anchor, [Fault(tool=tool, at_call=at, error=_err(code))], limit=n_fix - 2)
     # 3. the other failing domains, then similar recorded domains the incident hasn't touched
     for d in failing[1:]:
-        add(d, [])
+        if d not in keep:
+            add(d, [])
     similar = [d for d in cat if d not in failing and d not in keep]
     rng.shuffle(similar)
     for d in similar:
@@ -95,6 +99,8 @@ def breed(incident: Incident, diagnosis: Diagnosis, evidence: dict, stub: bool, 
         scenarios.append(Scenario(id=f"sc_{i:02d}", incident_id=incident.id, role="must_fix", domain=d,
                                   faults=fl, cassette_set="base", expected_checks=[det]))
     for j, d in enumerate(keep, len(must_fix) + 1):
+        # A domain that also failed this detection guards the *other* checks; a never-failing one guards all.
+        checks = TRIPWIRES if d not in failing else [t for t in TRIPWIRES if t != det]
         scenarios.append(Scenario(id=f"sc_{j:02d}", incident_id=incident.id, role="must_not_change", domain=d,
-                                  faults=[], cassette_set="base", expected_checks=TRIPWIRES))
+                                  faults=[], cassette_set="base", expected_checks=checks))
     return scenarios
