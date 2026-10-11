@@ -53,14 +53,17 @@ def cmd_traffic(a) -> int:
     interval = 60.0 / a.rate
     t0 = time.monotonic()
     n = 0
+    owed = 0.0  # --decay: error diffusion, so each window gets exactly its intended error rate
     try:
         while a.count <= 0 or n < a.count:
             elapsed_min = (time.monotonic() - t0) / 60
             rate = a.fault_rate
             if a.decay:
                 rate = min(0.02 + (0.13 * elapsed_min / a.decay_minutes), 0.30)
+                owed += rate
             faults = []
-            if rng.random() < rate:
+            if (owed >= 1.0) if a.decay else (rng.random() < rate):
+                owed -= 1.0 if a.decay else 0.0
                 code = rng.choice(["HTTP_429", "HTTP_429", "TIMEOUT", "HTTP_500"])
                 faults.append(Fault(tool="crustdata.people_search", at_call=1, error=ToolError(code=code, message="injected")))
             domain = rng.choice(domains)

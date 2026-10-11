@@ -16,9 +16,9 @@ from .checks.score import runs_path
 from .config import get_settings
 from .models import RiskForecast
 
-WINDOW_MIN = 10
+WINDOW_MIN = float(os.environ.get("FORECAST_WINDOW_MIN", "10"))
 # Only the recent trend matters: an outage an hour ago shouldn't flatten today's slow rise.
-LOOKBACK_MIN = float(os.environ.get("FORECAST_LOOKBACK_MIN", "40"))
+LOOKBACK_MIN = float(os.environ.get("FORECAST_LOOKBACK_MIN", str(WINDOW_MIN * 4)))
 THRESHOLDS = {"crustdata.people_search": 0.15, "crustdata.company_enrich": 0.15, "crustdata.jobs": 0.20}
 RELATED = {"crustdata.people_search": "tw_empty_after_error", "crustdata.company_enrich": "tw_company_match_skipped",
            "crustdata.jobs": "tw_claimed_success_on_failure"}
@@ -102,7 +102,7 @@ def forecasts(now: datetime | None = None, min_windows: int = 3) -> list[RiskFor
             trend_per_hour=round(b * 60, 4), eta_minutes=round(eta, 1),
             likelihood="likely" if likely else "possible", related_check=RELATED.get(tool),
             evidence=(f"{tool} errors rose from {first:.0%} to {current:.0%} over the last "
-                      f"{len(ws) * WINDOW_MIN} minutes (fit r2={r2:.2f})"),
+                      f"{len(ws) * WINDOW_MIN:g} minutes (fit r2={r2:.2f})"),
             created_at=now.isoformat(timespec="seconds").replace("+00:00", "Z"),
         ))
     return _with_outcomes(out, violations_after, now)

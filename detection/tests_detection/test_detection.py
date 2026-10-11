@@ -154,6 +154,8 @@ def test_forecast_sees_a_rising_error_rate_and_ignores_an_old_outage(tmp_path, m
             add(window * 10 + (i % 10) + 0.5, i < rate * 100)
     runs = tmp_path / "runs.jsonl"
     runs.write_text("\n".join(lines), encoding="utf-8")
+    monkeypatch.setattr(forecast, "WINDOW_MIN", 10.0)
+    monkeypatch.setattr(forecast, "LOOKBACK_MIN", 40.0)
     monkeypatch.setattr(forecast, "runs_path", lambda: runs)
     monkeypatch.setattr(forecast, "get_settings", lambda: SimpleNamespace(state_dir=tmp_path))
 
