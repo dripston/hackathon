@@ -12,7 +12,7 @@ import logging
 from collections import Counter
 from pathlib import Path
 
-from . import entire_cli, git_tools, llm
+from . import entire_cli, git_tools, llm, neatlogs_mcp
 from .config import ANTIBODY_DIR, REPO_ROOT, get_settings
 from .models import AgentRun, Diagnosis, Incident, RunScore
 from .scorer_client import ScorerClient
@@ -41,6 +41,28 @@ def split_runs(rows: list[dict], incident: Incident) -> tuple[list[tuple[AgentRu
         elif not score.violations:
             healthy.append((run, score))
     return failing, healthy
+
+
+def neatlogs_traces(trace_ids: list[str], limit: int = 5) -> list[dict]:
+    """The incident's traces as neatlogs saw them (antibody.* attributes). Empty if neatlogs is off."""
+    if not neatlogs_mcp.configured() or not trace_ids:
+        return []
+    out = []
+    try:
+        ctxs = neatlogs_mcp.call_many([("get_trace_context", {"trace_id": t}) for t in trace_ids[:limit]])
+    except neatlogs_mcp.NeatlogsUnavailable as e:
+        log.warning("diagnosis: could not fetch neatlogs traces (%s)", e)
+        return []
+    for tid, ctx in zip(trace_ids, ctxs):
+        attrs = neatlogs_mcp.trace_attributes(ctx or {})
+        out.append({
+            "trace_id": tid, "status": (ctx or {}).get("status"),
+            "prompt_version": attrs.get("antibody.prompt_version"), "bug_flags": attrs.get("antibody.bug_flags"),
+            "violations": attrs.get("antibody.violations"),
+            "tripwires": {k: v for k, v in attrs.items() if str(k).startswith(("antibody.tw.", "antibody.jev."))},
+            "cost": (ctx or {}).get("total_cost"),
+        })
+    return out
 
 
 def summarise(run: AgentRun, score: RunScore) -> dict:
@@ -143,6 +165,7 @@ def diagnose(incident: Incident) -> tuple[Diagnosis, bool, dict]:
 
     failing_domains = list(dict.fromkeys(f["domain"] for f in f_all if f["domain"]))
     evidence = {"failing": f_sum, "healthy": h_sum, "change": change, "commit": commit,
+                "neatlogs_traces": neatlogs_traces(incident.trace_ids),
                 "failing_domains": failing_domains,
                 "healthy_domains": [d for d in dict.fromkeys(h["domain"] for h in h_all if h["domain"])
                                     if d not in failing_domains],
@@ -167,8 +190,10 @@ def diagnose(incident: Incident) -> tuple[Diagnosis, bool, dict]:
         incident_id=incident.id,
         commit_sha=sha,
         checkpoint_id=checkpoint.get("checkpoint_id") if checkpoint else None,
-        checkpoint_url=f"https://entire.io/gh/{repo}/commit/{sha}" if (sha and repo and checkpoint) else None,
+        checkpoint_url=(f"https://entire.io/gh/{repo}/commit/{sha}"
+                        if (sha and repo and checkpoint and checkpoint.get("checkpoint_id")) else None),
         reasoning_excerpt=reasoning,
+        reasoning_source=checkpoint.get("source") if checkpoint else None,
         good_trace_ids=[h["trace_id"] for h in h_sum if h["trace_id"]],
         explanation=explanation,
         fix_kind=fix_kind,

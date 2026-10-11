@@ -10,7 +10,7 @@ import time
 from pathlib import Path
 from typing import Callable
 
-from . import apply, breed, diagnose, fix, git_tools, grade, llm, replay, ship
+from . import apply, breed, diagnose, fix, git_tools, grade, llm, replay, ship, tracing
 from .config import REPO_ROOT
 from .models import (Approval, Attempt, Diagnosis, FamilyResult, Incident, Resolution, Scenario)
 from .patient_client import PatientClient
@@ -71,7 +71,9 @@ class Pipeline:
                 self.echo(f"[{stage:<10}] skip (incident escalated)")
                 continue
             try:
-                msg = getattr(self, f"stage_{stage}")(inc, ctx)
+                with tracing.span(f"antibody.{stage}", kind="WORKFLOW" if stage == "diagnosis" else "CHAIN",
+                                  **{"antibody.incident_id": inc.id, "antibody.detection": inc.detection}):
+                    msg = getattr(self, f"stage_{stage}")(inc, ctx)
             except replay.CostCapExceeded as e:
                 self._status(inc, "escalated")
                 self.store.write(inc.id, "escalation", {"reason": f"cost cap reached: {e}", "at": now_iso()})
@@ -92,7 +94,8 @@ class Pipeline:
         self.store.write(inc.id, "evidence", evidence)
         self.store.write(inc.id, "diagnosis", diag)
         who = f"commit {diag.commit_sha[:8]}" if diag.commit_sha else "no commit found"
-        why = " + checkpoint reasoning" if diag.reasoning_excerpt else ""
+        why = {"entire_checkpoint": " + Entire checkpoint reasoning",
+               "commit_message": " + reasoning from commit message (no Entire checkpoint)"}.get(diag.reasoning_source or "", "")
         return f"{diag.fix_kind} on {diag.target_file} ({who}{why})"
 
     def stage_family(self, inc: Incident, ctx) -> str:

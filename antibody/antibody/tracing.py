@@ -50,3 +50,32 @@ def shutdown() -> None:
             getattr(_nl, fn)()
         except Exception:
             pass
+
+
+def span(name: str, kind: str = "CHAIN", **attrs):
+    """Context manager: a neatlogs span when tracing is on, a no-op otherwise. Yields the span or None."""
+    from contextlib import contextmanager
+
+    @contextmanager
+    def _cm():
+        if not init():
+            yield None
+            return
+        try:
+            cm = _nl.trace(name, kind=kind)
+            sp = cm.__enter__()
+        except Exception as e:
+            log.warning("neatlogs: span %s failed to start (%s)", name, e)
+            yield None
+            return
+        try:
+            for k, v in attrs.items():
+                try:
+                    sp.set_attribute(k, v)
+                except Exception:
+                    pass
+            yield sp
+        finally:
+            cm.__exit__(None, None, None)
+
+    return _cm()

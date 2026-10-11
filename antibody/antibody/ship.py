@@ -54,7 +54,8 @@ def pr_body(incident: Incident, diag: Diagnosis, fix: FixCandidate, before: Fami
         f"- Caused by: `{diag.commit_sha or 'unknown'}`" + (f" ([Entire checkpoint]({diag.checkpoint_url}))" if diag.checkpoint_url else ""),
     ]
     if diag.reasoning_excerpt:
-        lines += ["", "**Why that change was made (from the Entire checkpoint):**", "", f"> {diag.reasoning_excerpt}"]
+        src = "the Entire checkpoint" if diag.reasoning_source == "entire_checkpoint" else "the commit message"
+        lines += ["", f"**Why that change was made (from {src}):**", "", f"> {diag.reasoning_excerpt}"]
     lines += [
         "",
         f"## The fix ({fix.id}, {fix.kind})",
@@ -113,7 +114,7 @@ def ship(incident: Incident, diag: Diagnosis, scenarios: list[Scenario], fix: Fi
                           "--body-file", body_file, cwd=worktree).splitlines()[-1]
     Path(body_file).unlink(missing_ok=True)
     note = ""
-    trail = entire_cli.create_trail(title, pr_url, cwd=worktree)
+    trail = entire_cli.create_trail(title, pr_url, branch, get_settings().github_repo, cwd=worktree)
     if trail:
         note = f"Entire trail: {trail}"
     return {"pr_url": pr_url, "note": note}

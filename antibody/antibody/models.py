@@ -112,6 +112,7 @@ class Diagnosis(BaseModel):
     target_file: str | None = None
     prompt_version: str | None = None
     bug_flags: dict[str, bool] = {}
+    reasoning_source: str | None = None  # entire_checkpoint | commit_message
 
 
 class Fault(BaseModel):
