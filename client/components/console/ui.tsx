@@ -54,7 +54,9 @@ export function Stat({ label, value, tone }: { label: string; value: ReactNode; 
       <div className="text-muted-foreground text-sm">{label}</div>
       <div
         className={cn(
-          "mt-1 font-mono text-4xl font-semibold tabular-nums",
+          "mt-1 font-mono font-semibold tabular-nums",
+          // Words ("no gate run yet") don't fit the big-number size on one line.
+          typeof value === "string" && value.length > 6 ? "text-2xl leading-[2.5rem]" : "text-4xl",
           tone === "healthy" && "text-healthy",
           tone === "infected" && "text-infected",
         )}

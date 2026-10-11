@@ -34,7 +34,16 @@ export function IncidentView({ params }: { params: Promise<{ id: string }> }) {
   if (wantMs !== detailMs) setDetailMs(wantMs);
 
   // The brief is re-read when the status changes, since the text describes the current state.
-  const brief = usePoll(() => getBrief(incidentId), 0, `${incidentId}:${status ?? ""}`);
+  // Tag each brief with the status it was written for, so a stale one is never shown for a new state.
+  const briefStatus = status ?? "";
+  const brief = usePoll(
+    async () => {
+      const r = await getBrief(incidentId);
+      return { ...r, data: { text: r.data.text, forStatus: briefStatus } };
+    },
+    0,
+    `${incidentId}:${briefStatus}`,
+  );
 
   // After an approval Antibody pulls main, gates it and refreshes the backtest; poll that every 3s.
   const [aftercareMs, setAftercareMs] = useState(0);
@@ -58,7 +67,8 @@ export function IncidentView({ params }: { params: Promise<{ id: string }> }) {
       d={detail.data}
       mock={detail.mock}
       poll={detail}
-      brief={brief.data?.text}
+      brief={brief.data && brief.data.forStatus === briefStatus ? brief.data.text : undefined}
+      briefUpdating={!!brief.data && brief.data.forStatus !== briefStatus}
       aftercare={aftercare.data}
       onDecided={() => {
         setJustDecided(true);
@@ -74,6 +84,7 @@ function Loaded({
   mock,
   poll,
   brief,
+  briefUpdating,
   aftercare,
   onDecided,
 }: {
@@ -81,6 +92,7 @@ function Loaded({
   mock: boolean;
   poll: Parameters<typeof PollNote>[0]["poll"];
   brief: string | undefined;
+  briefUpdating: boolean;
   aftercare: Aftercare | undefined;
   onDecided: () => void;
 }) {
@@ -271,13 +283,17 @@ function Loaded({
           )}
         </Stage>
 
-        <Stage n={6} title="Shipped" done={!!resolution?.pr_url}>
-          {resolution?.pr_url ? (
+        <Stage n={6} title="Shipped" done={!!(resolution?.pr_url || resolution?.merged)}>
+          {resolution && (resolution.pr_url || resolution.merged) ? (
             <dl className="grid gap-4 sm:grid-cols-4">
               <Fact label="Pull request">
-                <a href={resolution.pr_url} target="_blank" rel="noreferrer" className="underline decoration-dotted underline-offset-4">
-                  #{resolution.pr_url.split("/").pop()} ↗
-                </a>
+                {resolution.pr_url ? (
+                  <a href={resolution.pr_url} target="_blank" rel="noreferrer" className="underline decoration-dotted underline-offset-4">
+                    #{resolution.pr_url.split("/").pop()} ↗
+                  </a>
+                ) : (
+                  <span className="text-base">no PR (merged locally)</span>
+                )}
                 {resolution.merged && <span className="text-healthy ml-2 text-sm">Merged</span>}
               </Fact>
               <Fact label="Cost">${resolution.cost_usd.toFixed(2)}</Fact>
@@ -294,6 +310,8 @@ function Loaded({
                 )}
               </Fact>
             </dl>
+          ) : escalated ? (
+            <p className="text-muted-foreground">Nothing was shipped.</p>
           ) : (
             <Waiting>Ships as a pull request once approved.</Waiting>
           )}
@@ -333,10 +351,14 @@ function Loaded({
         </Stage>
       </ol>
 
-      {brief && (
+      {(brief || briefUpdating) && (
         <section className="border-border mt-4 rounded-xl border p-6">
           <h2 className="text-muted-foreground font-mono text-sm tracking-wider uppercase">What the on-call engineer heard</h2>
-          <p className="mt-3 text-lg leading-8">{brief}</p>
+          {brief ? (
+            <p className="mt-3 text-lg leading-8">{brief}</p>
+          ) : (
+            <p className="text-muted-foreground mt-3 animate-pulse text-lg">Updating the brief for the new status…</p>
+          )}
         </section>
       )}
     </div>

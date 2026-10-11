@@ -21,7 +21,11 @@ function describe(err: unknown): Outcome {
     case 409:
       return { tone: "warn", text: `${err.message}. Someone may have already approved (for example by voice); refreshing.` };
     case 502:
-      return { tone: "error", text: `Approved, but merge failed: ${err.message}. The approval is recorded; the PR is not merged.` };
+      // The backend message may already start with "Approved, but merge failed:", so don't repeat it.
+      return {
+        tone: "error",
+        text: `${/^approved, but merge failed/i.test(err.message) ? err.message : `Approved, but merge failed: ${err.message}`}. The approval is recorded; the PR is not merged.`,
+      };
     default:
       return { tone: "error", text: `${err.status}: ${err.message}` };
   }
