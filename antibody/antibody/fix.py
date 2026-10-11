@@ -76,17 +76,24 @@ def propose(diag: Diagnosis, content: str, family_result: FamilyResult, scenario
          "failed_checks": v.failed_checks}
         for v in family_result.verdicts if not v.passed
     ]
+    new = None
     if llm.available("strong"):
         user = json.dumps({
             "diagnosis": diag.model_dump(), "file_path": path, "file_content": content,
             "failing_scenarios": failing, "original_reasoning": diag.reasoning_excerpt,
             "previous_attempts_that_failed": previous or [],
         }, indent=1)
-        res = llm.complete("strong", FIX_SYSTEM, user, max_tokens=8000)
-        parsed = _parse(res.text)
-        new, desc, mock = parsed.get("content", content), parsed.get("description", "model fix"), False
-    else:
+        try:
+            parsed = _parse(llm.complete("strong", FIX_SYSTEM, user, max_tokens=8000).text)
+            if parsed.get("content"):
+                new, desc, mock = parsed["content"], parsed.get("description", "model fix"), False
+            else:
+                log.warning("fix: model reply had no file content; using the rule-based fix")
+        except Exception as e:
+            log.warning("fix: LLM call failed (%s); using the rule-based fix", e)
+    if new is None:
         new, desc = _rule_based(diag, content)
+        desc = f"[rule-based] {desc}"
         mock = True
     if not new.endswith("\n") and content.endswith("\n"):
         new += "\n"
@@ -102,6 +109,6 @@ def _parse(text: str) -> dict:
     if not m:
         return {}
     try:
-        return json.loads(m.group(0))
+        return json.loads(m.group(0), strict=False)  # models often put raw newlines inside strings
     except json.JSONDecodeError:
         return {}

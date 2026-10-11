@@ -114,7 +114,7 @@ def ship(incident: Incident, diag: Diagnosis, scenarios: list[Scenario], fix: Fi
                           "--body-file", body_file, cwd=worktree).splitlines()[-1]
     Path(body_file).unlink(missing_ok=True)
     note = ""
-    trail = entire_cli.create_trail(title, pr_url, branch, get_settings().github_repo, cwd=worktree)
+    trail = entire_cli.create_trail(title, pr_url, branch, git_tools.github_repo(), cwd=worktree)
     if trail:
         note = f"Entire trail: {trail}"
     return {"pr_url": pr_url, "note": note}

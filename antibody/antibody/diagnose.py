@@ -184,7 +184,7 @@ def diagnose(incident: Incident) -> tuple[Diagnosis, bool, dict]:
     else:
         mock = True  # explanation is a template, not a model
 
-    repo = get_settings().github_repo
+    repo = git_tools.github_repo()
     sha = commit["sha"] if commit else None
     diag = Diagnosis(
         incident_id=incident.id,
@@ -206,4 +206,4 @@ def diagnose(incident: Incident) -> tuple[Diagnosis, bool, dict]:
 
 def _parse_json(text: str) -> dict:
     start, end = text.find("{"), text.rfind("}")
-    return json.loads(text[start : end + 1]) if start >= 0 else {}
+    return json.loads(text[start : end + 1], strict=False) if start >= 0 else {}

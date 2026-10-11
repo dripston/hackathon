@@ -40,3 +40,16 @@ def show_file(ref: str, rel_path: str) -> str | None:
 
 def current_branch() -> str:
     return git("rev-parse", "--abbrev-ref", "HEAD")
+
+
+def github_repo() -> str:
+    """OWNER/REPO from GITHUB_REPO, else parsed from the origin remote."""
+    from .config import get_settings
+
+    if get_settings().github_repo:
+        return get_settings().github_repo
+    import re
+
+    url = git("remote", "get-url", "origin", check=False)
+    m = re.search(r"github\.com[:/]([^/]+/[^/.]+?)(?:\.git)?$", url)
+    return m.group(1) if m else ""

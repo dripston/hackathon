@@ -52,7 +52,20 @@ def available(tier: str = "strong") -> bool:
         return False
     if s.llm_provider == "anthropic":
         return bool(s.anthropic_api_key)
-    return s.llm_provider == "bedrock"
+    return s.llm_provider == "bedrock" and _aws_credentials()
+
+
+def _aws_credentials() -> bool:
+    import os
+
+    if os.environ.get("AWS_BEARER_TOKEN_BEDROCK"):
+        return True
+    try:
+        import boto3
+
+        return boto3.Session().get_credentials() is not None
+    except Exception:
+        return False
 
 
 def _price(tier: str) -> tuple[float, float]:

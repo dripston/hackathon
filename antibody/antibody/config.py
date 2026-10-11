@@ -3,10 +3,15 @@
 from functools import lru_cache
 from pathlib import Path
 
+from dotenv import load_dotenv
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 ANTIBODY_DIR = Path(__file__).resolve().parent.parent  # the antibody/ project folder
 REPO_ROOT = ANTIBODY_DIR.parent
+
+# Export antibody/.env to the process environment too: boto3 reads AWS_* (including
+# AWS_BEARER_TOKEN_BEDROCK) only from os.environ, not from pydantic settings. Never overrides real env.
+load_dotenv(ANTIBODY_DIR / ".env", override=False)
 
 
 class Settings(BaseSettings):

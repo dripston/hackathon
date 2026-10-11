@@ -106,3 +106,35 @@ def test_stub_swallowed_error_trips_empty_after_error():
 def test_stub_v3_skips_company_check_on_lookalike():
     run = patient.run("harborline.co", prompt_version="v3")
     assert "tw_company_match_skipped" in scorer.score(run).violations
+
+
+# --- the LLM fix path, with a fake model ---
+
+from antibody import fix, llm
+from antibody.models import Diagnosis, Scenario
+
+
+def _diag():
+    return Diagnosis(incident_id="i", explanation="x", fix_kind="prompt_patch", target_file="p/v2.md")
+
+
+def test_llm_fix_uses_model_content(monkeypatch):
+    monkeypatch.setattr(llm, "available", lambda tier="strong": True)
+    monkeypatch.setattr(llm, "complete", lambda *a, **k: llm.LLMResult(
+        text='Sure: {"description": "list fewer", "content": "new prompt\n"}', model="m",
+        input_tokens=1, output_tokens=1, cost_usd=0.0))
+    cand, new, mock = fix.propose(_diag(), "old prompt\n", fam(1, 1, 0, 0), [], 1)
+    assert new == "new prompt\n" and not mock and cand.description == "list fewer"
+    assert "-old prompt" in cand.diff and "+new prompt" in cand.diff
+
+
+def test_llm_fix_falls_back_when_model_fails(monkeypatch):
+    monkeypatch.setattr(llm, "available", lambda tier="strong": True)
+
+    def boom(*a, **k):
+        raise RuntimeError("bedrock down")
+
+    monkeypatch.setattr(llm, "complete", boom)
+    content = "- Sales needs actionable briefs: every brief must include at least 3 decision makers.\n"
+    cand, new, mock = fix.propose(_diag(), content, fam(1, 1, 0, 0), [], 1)
+    assert mock and cand.description.startswith("[rule-based]") and "fewer" in new
