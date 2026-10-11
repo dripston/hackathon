@@ -49,11 +49,12 @@ def build(store: StateStore, incident_id: str) -> str:
         s.append(why)
     accepted = next((a for a in attempts if a.accepted), None)
     if accepted and before:
-        s.append(f"Proposed fix {accepted.fix.attempt}: {accepted.fix.description.rstrip('.')}.")
-        s.append(f"Across {before.must_fix_total + before.must_not_change_total} simulated variants it went from "
-                 f"{before.must_fix_passed} of {before.must_fix_total} failures fixed to "
+        desc = accepted.fix.description.removeprefix("[rule-based] ").rstrip(".")
+        s.append(f"Proposed fix {accepted.fix.attempt}: {desc}.")
+        s.append(f"On {before.must_fix_total + before.must_not_change_total} simulated variants, the failing cases "
+                 f"went from {before.must_fix_passed} of {before.must_fix_total} passing to "
                  f"{accepted.result.must_fix_passed} of {accepted.result.must_fix_total}, "
-                 f"with {accepted.result.must_not_change_passed} of {accepted.result.must_not_change_total} healthy cases unchanged.")
+                 f"and {accepted.result.must_not_change_passed} of {accepted.result.must_not_change_total} healthy cases stayed correct.")
         if inc.status == "awaiting_approval":
             s.append(f"Say \"approve fix {accepted.fix.attempt}\" to merge it.")
     elif inc.status == "escalated":
