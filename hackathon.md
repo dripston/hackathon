@@ -29,6 +29,9 @@ neatlogs, Entire, cfo.ai, Crustdata, DeepSeek (`deepseek-flash`, Antibody and th
 - 2026-10-11: Jev (`jevals` Grounded on TypeSafe `jev-latest`) scores every run's brief against its tool results, about 0.8 s a run; advisory, never a violation
 - 2026-10-11: Operator API made console-ready: incident detail with scenarios and attempt verdicts, `/overview`, `/trust`, `/evidence`, a post-merge job (pull, gate main, backtest), and real response samples in `antibody/fixtures/api-samples/`
 - 2026-10-11: first real on-call loop: the Telegram bot called Rehaan about the incident, he said "approve fix 1" (voice) and PR #3 merged; the bot then called about the second, and a typed "approve fix 1" merged PR #4. Fixed what it showed: a double call (two checks racing) and a post-merge job that skipped the second merge
+- 2026-10-11: after the merges, Antibody pulled main and gated it: SAFE, both families pass (must_fix 7/7, must_not_change 3/3). Backtest (SIMULATED replay on real recordings): the gate blocks both causing commits (bug 1 re-opens at must_fix 3/7, bug 3 at 1/7), 0 false alarms on the clean parent, so the planted-bug catch rate is 2/3. The miss is bug 2, which never fired, so there was nothing to learn from
+- 2026-10-11: risk forecast on real traffic with people-search errors creeping up: "errors rose from 0% to 11% over the last 20 minutes (r2 0.88)", likely to cross 15% in about 6 minutes. With the bug-1 fix already merged, the related silent failure no longer happened: the brief now says the search failed
+- 2026-10-11: two infrastructure bugs found and fixed while proving it: a worktree service blocked on an unread stderr pipe, and HTTPS calls from server threads hung in Windows' certificate-chain check (truststore); TLS now verifies with certifi
 - 2026-10-11: voice agent linked: the Telegram bot calls the on-call engineer with the brief and merges only on the spoken or typed phrase "approve fix N" (the model can't approve)
 
 ## Demo

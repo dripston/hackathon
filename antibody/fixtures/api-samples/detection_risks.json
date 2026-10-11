@@ -1,1 +1,44 @@
-[]
+[
+  {
+    "id": "risk_people_search_202610111247",
+    "signal": "tool_error_rate",
+    "subject": "crustdata.people_search",
+    "current": 0.1765,
+    "threshold": 0.15,
+    "trend_per_hour": 0.4565,
+    "eta_minutes": 0.0,
+    "likelihood": "likely",
+    "related_check": "tw_empty_after_error",
+    "evidence": "crustdata.people_search errors rose from 7% to 18% over the last 20 minutes (fit r2=0.88)",
+    "created_at": "2026-10-11T12:47:14Z",
+    "outcome": "pending"
+  },
+  {
+    "id": "risk_people_search_202610111246",
+    "signal": "tool_error_rate",
+    "subject": "crustdata.people_search",
+    "current": 0.1176,
+    "threshold": 0.15,
+    "trend_per_hour": 0.214,
+    "eta_minutes": 9.1,
+    "likelihood": "likely",
+    "related_check": "tw_empty_after_error",
+    "evidence": "crustdata.people_search errors rose from 7% to 12% over the last 20 minutes (fit r2=0.85)",
+    "created_at": "2026-10-11T12:46:35Z",
+    "outcome": "pending"
+  },
+  {
+    "id": "risk_people_search_202610111239",
+    "signal": "tool_error_rate",
+    "subject": "crustdata.people_search",
+    "current": 0.1111,
+    "threshold": 0.15,
+    "trend_per_hour": 0.4,
+    "eta_minutes": 5.8,
+    "likelihood": "likely",
+    "related_check": "tw_empty_after_error",
+    "evidence": "crustdata.people_search errors rose from 0% to 11% over the last 20 minutes (fit r2=0.88)",
+    "created_at": "2026-10-11T12:39:52Z",
+    "outcome": "pending"
+  }
+]

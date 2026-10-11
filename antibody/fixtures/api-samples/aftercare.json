@@ -1,3 +1,10 @@
 {
-  "state": "idle"
+  "state": "done",
+  "incident_id": "inc_20261011_1137_tw_company_match_skipped",
+  "error": null,
+  "updated_at": "2026-10-11T12:45:57Z",
+  "pulled": "Already up to date.",
+  "gate_verdict": "safe",
+  "backtest_caught": 2,
+  "backtest_families": 2
 }

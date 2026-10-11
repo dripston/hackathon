@@ -19,6 +19,8 @@ Antibody watches neatlogs for silent failures in the patient agent. When one kee
 | `inc_20261011_1102_tw_empty_after_error` | detection run log (before the neatlogs detections existed) | `32de239`, with its Entire request quoted | one line: report "unavailable", not "ok" | must_fix 5/7 → 7/7, must_not_change 3/3 kept | #3, merged on a **spoken** "approve fix 1" to the Telegram bot |
 | `inc_20261011_1137_tw_company_match_skipped` | **neatlogs detection** | `4b732f0` (prompt v3 dropped the company check) | prompt rollback that restores the Identify step | must_fix 1/7 → 7/7, must_not_change 0/3 → 3/3 | #4, merged on a typed "approve fix 1" in Telegram |
 
+After both merges, the gate on `main` is SAFE (both families 7/7 and 3/3). The backtest blocks both causing commits and raises no false alarm on the clean parent. That's a planted-bug catch rate of 2/3: bug 2 never fired, so there was no family to learn from (`GET /trust`).
+
 The first pass of the first incident blamed the unchanged prompt, couldn't reproduce the failure, and **escalated instead of shipping**. The diagnosis was fixed (a flag on in every failing run is the suspect), and the rerun is above. Cost is about $0.03 and 3 minutes per incident.
 
 ## Run it

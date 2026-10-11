@@ -1,3 +1,25 @@
 {
-  "error": "No gate report yet"
+  "branch": "main",
+  "verdict": "safe",
+  "families": [
+    {
+      "incident_id": "inc_20261011_1102_tw_empty_after_error",
+      "must_fix_passed": 7,
+      "must_fix_total": 7,
+      "reopens": false,
+      "must_not_change_passed": 3,
+      "must_not_change_total": 3,
+      "message": "ok inc_20261011_1102_tw_empty_after_error: must_fix 7/7, must_not_change 3/3"
+    },
+    {
+      "incident_id": "inc_20261011_1137_tw_company_match_skipped",
+      "must_fix_passed": 7,
+      "must_fix_total": 7,
+      "reopens": false,
+      "must_not_change_passed": 3,
+      "must_not_change_total": 3,
+      "message": "ok inc_20261011_1137_tw_company_match_skipped: must_fix 7/7, must_not_change 3/3"
+    }
+  ],
+  "created_at": "2026-10-11T12:42:05Z"
 }

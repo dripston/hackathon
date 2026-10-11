@@ -16,7 +16,7 @@
     ],
     "workflow": "company-research",
     "first_seen": "2026-10-11T11:37:58Z",
-    "status": "awaiting_approval"
+    "status": "resolved"
   },
   {
     "id": "inc_20261011_1102_tw_empty_after_error",
@@ -36,6 +36,6 @@
     ],
     "workflow": "company-research",
     "first_seen": "2026-10-11T11:02:37Z",
-    "status": "awaiting_approval"
+    "status": "resolved"
   }
 ]
