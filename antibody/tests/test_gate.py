@@ -25,7 +25,7 @@ def family():
 def test_gate_blocks_buggy_and_passes_fixed(monkeypatch):
     files = {"bad": load("v2"), "good": FIXED}
     monkeypatch.setattr(git_tools, "show_file", lambda ref, path: files.get(ref))
-    monkeypatch.setattr(gate, "load_families", lambda *a: [family()])
+    monkeypatch.setattr(gate, "load_families", lambda *a, **k: [family()])
     st = StateStore()
     report, mock = gate.run_gate("bad", st, echo=lambda _: None)
     assert report.verdict == "blocked" and report.families[0].reopens and mock
@@ -40,7 +40,7 @@ def test_gate_blocks_buggy_and_passes_fixed(monkeypatch):
 def test_backtest_counts_catches_and_false_alarms(monkeypatch):
     files = {"abc": load("v2"), "abc^": FIXED, "clean1": FIXED}
     monkeypatch.setattr(git_tools, "show_file", lambda ref, path: files.get(ref))
-    monkeypatch.setattr(gate, "load_families", lambda *a: [family()])
+    monkeypatch.setattr(gate, "load_families", lambda *a, **k: [family()])
     s = gate.backtest(StateStore(), echo=lambda _: None, clean_refs=["clean1"])
     assert s["caught"] == 1 and s["detection_rate"] == 1.0
     assert s["false_alarms"] == 0 and s["clean_checks"] == 2

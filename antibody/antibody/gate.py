@@ -21,10 +21,24 @@ log = logging.getLogger("antibody.gate")
 IMMUNITY = REPO_ROOT / "antibody" / "fixtures" / "immunity"
 
 
-def load_families(directory: Path = IMMUNITY) -> list[dict]:
-    if not directory.exists():
-        return []
-    return [json.loads(p.read_text(encoding="utf-8")) for p in sorted(directory.glob("*.json"))]
+def load_families(directory: Path = IMMUNITY, ref: str | None = None) -> list[dict]:
+    """Immunity families in the working tree, plus any that git ref `ref` adds (a branch under review
+    can bring its own family, e.g. an Antibody fix branch)."""
+    fams = {}
+    if directory.exists():
+        for p in sorted(directory.glob("*.json")):
+            fam = json.loads(p.read_text(encoding="utf-8"))
+            fams[fam["incident_id"]] = fam
+    if ref:
+        rel = directory.relative_to(REPO_ROOT).as_posix()
+        names = git_tools.git("ls-tree", "--name-only", ref, f"{rel}/", check=False).splitlines()
+        for name in names:
+            if name.endswith(".json"):
+                text = git_tools.show_file(ref, name)
+                if text:
+                    fam = json.loads(text)
+                    fams.setdefault(fam["incident_id"], fam)
+    return [fams[k] for k in sorted(fams)]
 
 
 def check_family(fam: dict, ref: str, budget: replay.Budget | None = None) -> tuple[GateFamily | None, bool]:
@@ -66,7 +80,7 @@ def check_family(fam: dict, ref: str, budget: replay.Budget | None = None) -> tu
 
 def run_gate(head: str, store: StateStore | None = None, echo=print) -> tuple[GateReport, bool]:
     store = store or StateStore()
-    families = load_families()
+    families = load_families(ref=head)
     out: list[GateFamily] = []
     any_mock = False
     for fam in families:

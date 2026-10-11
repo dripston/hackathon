@@ -106,3 +106,27 @@ def test_empty_after_error_no_false_alarm_on_correct_reply():
     run = make_run([ENRICH, IDENT, PEOPLE_ERR], {"decision_makers": [], "no_decision_makers_reason":
         "People search results unavailable due to HTTP 429 rate limiting; no decision makers identified."})
     assert tw.tw_empty_after_error(run).passed
+
+
+# --- Jev (advisory score; never a violation) ---
+
+def test_jev_off_without_key_and_never_a_violation(monkeypatch):
+    from detection.checks import jev
+    from detection.checks.score import score_run
+
+    run = make_run([ENRICH, IDENT, PEOPLE], {"company_name": "X", "summary": "X sells widgets.",
+                                             "decision_makers": [{"name": "Ada Lovelace", "title": "CEO"}]})
+    assert jev.jev_grounded(run) is None  # JEV_ENABLED=0 in tests
+    monkeypatch.setattr(jev, "jev_grounded", lambda r: tw.CheckResult(id="jev_grounded", passed=False, score=0.2))
+    import detection.checks.score as score_mod
+    monkeypatch.setattr(score_mod, "jev_grounded", jev.jev_grounded)
+    s = score_run(run)
+    assert any(c.id == "jev_grounded" and c.score == 0.2 for c in s.checks) and "jev_grounded" not in s.violations
+
+
+def test_jev_reads_the_brief_as_sentences():
+    from detection.checks.jev import _final_answer
+
+    text = _final_answer({"company_name": "Stripe", "headcount": 8000, "summary": "Payments company.",
+                          "decision_makers": [{"name": "Ada", "title": "CEO"}], "hiring_signals": ["Hiring SREs"]})
+    assert text == "The company is Stripe with about 8000 employees. Payments company. Ada is CEO there. Hiring signal: Hiring SREs."

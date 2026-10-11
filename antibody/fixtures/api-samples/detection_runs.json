@@ -1,0 +1,3986 @@
+[
+  {
+    "run": {
+      "run_id": "run_2e23d834d324",
+      "trace_id": "58cb4e296317b28f900fb64859463bfb",
+      "input": {
+        "domain": "browserbase.com"
+      },
+      "prompt_version": "v3",
+      "bug_flags": {
+        "swallow_tool_errors": true
+      },
+      "steps": [
+        {
+          "index": 0,
+          "kind": "tool",
+          "name": "crustdata.company_enrich",
+          "args": {
+            "domain": "browserbase.com"
+          },
+          "result": {
+            "company_id": 1985131,
+            "domain": "browserbase.com",
+            "headcount": 85,
+            "matched_by": "domain",
+            "name": "Browserbase"
+          },
+          "error": null,
+          "latency_ms": 1110.0,
+          "cost_usd": 0.0,
+          "synthetic": false
+        },
+        {
+          "index": 1,
+          "kind": "tool",
+          "name": "crustdata.people_search",
+          "args": {
+            "company": "Browserbase",
+            "limit": 10
+          },
+          "result": [
+            {
+              "name": "Eli Bingham",
+              "title": "Head of Engineering"
+            },
+            {
+              "name": "Nick Feeney",
+              "title": "Head of Sales"
+            },
+            {
+              "name": "Paul Klein IV",
+              "title": "Founder & CEO"
+            }
+          ],
+          "error": null,
+          "latency_ms": 1031.0,
+          "cost_usd": 0.0,
+          "synthetic": false
+        },
+        {
+          "index": 2,
+          "kind": "tool",
+          "name": "crustdata.jobs",
+          "args": {
+            "company_id": 1985131,
+            "limit": 10
+          },
+          "result": [
+            {
+              "date_added": "2026-09-23T13:57:07",
+              "title": "Software Engineer (Dashboard) - New York"
+            },
+            {
+              "date_added": "2026-08-25T01:55:05",
+              "title": "Sales Engineer"
+            },
+            {
+              "date_added": "2026-08-22T01:56:04",
+              "title": "Technical Customer Success Manager (TCSM)"
+            },
+            {
+              "date_added": "2026-08-18T19:56:36",
+              "title": "Business Development Representative"
+            },
+            {
+              "date_added": "2026-08-14T12:46:02",
+              "title": "Software Engineer (Dashboard) - San Francisco"
+            },
+            {
+              "date_added": "2026-08-08T01:56:05",
+              "title": "Business Development Intern"
+            },
+            {
+              "date_added": "2026-07-17T19:59:31",
+              "title": "Account Executive"
+            },
+            {
+              "date_added": "2026-07-14T01:59:53",
+              "title": "Software Engineer (Dashboard) - New York"
+            },
+            {
+              "date_added": "2026-07-08T01:58:04",
+              "title": "Design Engineer"
+            },
+            {
+              "date_added": "2026-07-08T01:55:35",
+              "title": "Product Designer"
+            }
+          ],
+          "error": null,
+          "latency_ms": 985.0,
+          "cost_usd": 0.0,
+          "synthetic": false
+        },
+        {
+          "index": 3,
+          "kind": "llm",
+          "name": "llm.brief",
+          "args": {
+            "input_chars": 1316
+          },
+          "result": {
+            "text": "{\"company_name\": \"Browserbase\", \"company_match_confirmed\": true, \"headcount\": 85, \"hiring_signals\": [\"Sales Engineer posting (added 2026-08-25) \u2014 indicates demand for technical pre-sales support alongside the go-to-market team\", \"Technical Customer Success Manager (TCSM) posting (added 2026-08-22) \u2014 signals investment in post-sale technical onboarding and retention\", \"Business Development Representative (added 2026-08-18) plus Business Development Intern (added 2026-08-08) \u2014 early-stage outbound prospecting build-out\", \"Account Executive posting (added 2026-07-17) \u2014 direct sales capacity being added\", \"Multiple Software Engineer (Dashboard) roles across New York and San Francisco (added 2026-07-14, 2026-08-14, 2026-09-23) \u2014 continued product/dashboard engineering investment\"], \"decision_makers\": [{\"name\": \"Eli Bingham\", \"title\": \"Head of Engineering\", \"linkedin_url\": null, \"source_step_index\": 1}, {\"name\": \"Nick Feeney\", \"title\": \"Head of Sales\", \"linkedin_url\": null, \"source_step_index\": 1}, {\"name\": \"Paul Klein IV\", \"title\": \"Founder & CEO\", \"linkedin_url\": null, \"source_step_index\": 1}], \"summary\": \"Browserbase (browserbase.com) is a confirmed company record from the domain lookup with approximately 85 employees. The people search (step 1) surfaced three contacts: Paul Klein IV (Founder & CEO), Eli Bingham (Head of Engineering), and Nick Feeney (Head of Sales). The job postings feed is healthy and shows heavy go-to-market hiring \u2014 Account Executive, Business Development Representative, Business Development Intern, Sales Engineer, and Technical Customer Success Manager \u2014 alongside continued dashboard engineering hiring in New York and San Francisco, suggesting both a sales push and ongoing product investment. No LinkedIn URLs were returned by the people-search results.\", \"no_decision_makers_reason\": null}"
+          },
+          "error": null,
+          "latency_ms": 2937.0,
+          "cost_usd": 0.0009051,
+          "synthetic": false
+        }
+      ],
+      "output": {
+        "domain": "browserbase.com",
+        "company_name": "Browserbase",
+        "company_match_confirmed": true,
+        "headcount": 85,
+        "hiring_signals": [
+          "Sales Engineer posting (added 2026-08-25) \u2014 indicates demand for technical pre-sales support alongside the go-to-market team",
+          "Technical Customer Success Manager (TCSM) posting (added 2026-08-22) \u2014 signals investment in post-sale technical onboarding and retention",
+          "Business Development Representative (added 2026-08-18) plus Business Development Intern (added 2026-08-08) \u2014 early-stage outbound prospecting build-out",
+          "Account Executive posting (added 2026-07-17) \u2014 direct sales capacity being added",
+          "Multiple Software Engineer (Dashboard) roles across New York and San Francisco (added 2026-07-14, 2026-08-14, 2026-09-23) \u2014 continued product/dashboard engineering investment"
+        ],
+        "decision_makers": [
+          {
+            "name": "Eli Bingham",
+            "title": "Head of Engineering",
+            "linkedin_url": null,
+            "source_step_index": 1
+          },
+          {
+            "name": "Nick Feeney",
+            "title": "Head of Sales",
+            "linkedin_url": null,
+            "source_step_index": 1
+          },
+          {
+            "name": "Paul Klein IV",
+            "title": "Founder & CEO",
+            "linkedin_url": null,
+            "source_step_index": 1
+          }
+        ],
+        "summary": "Browserbase (browserbase.com) is a confirmed company record from the domain lookup with approximately 85 employees. The people search (step 1) surfaced three contacts: Paul Klein IV (Founder & CEO), Eli Bingham (Head of Engineering), and Nick Feeney (Head of Sales). The job postings feed is healthy and shows heavy go-to-market hiring \u2014 Account Executive, Business Development Representative, Business Development Intern, Sales Engineer, and Technical Customer Success Manager \u2014 alongside continued dashboard engineering hiring in New York and San Francisco, suggesting both a sales push and ongoing product investment. No LinkedIn URLs were returned by the people-search results.",
+        "no_decision_makers_reason": null
+      },
+      "total_cost_usd": 0.0009051,
+      "simulated": false,
+      "started_at": "2026-10-11T11:37:40.652Z",
+      "ended_at": "2026-10-11T11:37:43.599Z"
+    },
+    "score": {
+      "run_id": "run_2e23d834d324",
+      "checks": [
+        {
+          "id": "tw_invented_person",
+          "passed": true,
+          "evidence": "every contact appears in a people-search result",
+          "score": null
+        },
+        {
+          "id": "tw_empty_after_error",
+          "passed": true,
+          "evidence": "no people-search error",
+          "score": null
+        },
+        {
+          "id": "tw_company_match_skipped",
+          "passed": false,
+          "evidence": "enrichment was used without an identify step confirming the company",
+          "score": null
+        },
+        {
+          "id": "tw_claimed_success_on_failure",
+          "passed": true,
+          "evidence": "ok",
+          "score": null
+        }
+      ],
+      "violations": [
+        "tw_company_match_skipped"
+      ]
+    }
+  },
+  {
+    "run": {
+      "run_id": "run_81b86d5a84be",
+      "trace_id": "6ca2d4279ae0845a7ec7e85fa18a00c8",
+      "input": {
+        "domain": "resend.com"
+      },
+      "prompt_version": "v3",
+      "bug_flags": {
+        "swallow_tool_errors": true
+      },
+      "steps": [
+        {
+          "index": 0,
+          "kind": "tool",
+          "name": "crustdata.company_enrich",
+          "args": {
+            "domain": "resend.com"
+          },
+          "result": {
+            "company_id": 809934,
+            "domain": "resend.com",
+            "headcount": 78,
+            "matched_by": "domain",
+            "name": "Resend"
+          },
+          "error": null,
+          "latency_ms": 1015.0,
+          "cost_usd": 0.0,
+          "synthetic": false
+        },
+        {
+          "index": 1,
+          "kind": "tool",
+          "name": "crustdata.people_search",
+          "args": {
+            "company": "Resend",
+            "limit": 10
+          },
+          "result": [
+            {
+              "name": "Zeno Rocha",
+              "title": "Founder & CEO"
+            },
+            {
+              "name": "Bu Kinoshita",
+              "title": "Co-Founder & CTO"
+            },
+            {
+              "name": "Jonni Lundy",
+              "title": "Co-Founder and COO"
+            },
+            {
+              "name": "Tatira Andrade G. Santos",
+              "title": "Executive Assistant to the CEO and Founders"
+            },
+            {
+              "name": "Inga Amber",
+              "title": "Chief Executive Officer"
+            }
+          ],
+          "error": null,
+          "latency_ms": 1094.0,
+          "cost_usd": 0.0,
+          "synthetic": false
+        },
+        {
+          "index": 2,
+          "kind": "tool",
+          "name": "crustdata.jobs",
+          "args": {
+            "company_id": 809934,
+            "limit": 10
+          },
+          "result": [
+            {
+              "date_added": "2026-06-03T23:41:32",
+              "title": "Security Engineer, Platform"
+            },
+            {
+              "date_added": "2026-06-03T23:41:23",
+              "title": "Product Engineer"
+            },
+            {
+              "date_added": "2026-05-29T23:40:49",
+              "title": "Deliverability Engineer, Core Sending"
+            },
+            {
+              "date_added": "2026-05-29T23:40:27",
+              "title": "Backend Engineer (MTA), Core Sending"
+            },
+            {
+              "date_added": "2026-05-14T23:32:12",
+              "title": "Data Analyst, Trust & Safety"
+            },
+            {
+              "date_added": "2026-02-03T23:22:02",
+              "title": "DX Engineer (Technical Writer)"
+            },
+            {
+              "date_added": "2025-12-23T23:21:49",
+              "title": "Founding Account Executive"
+            },
+            {
+              "date_added": null,
+              "title": "Backend Engineer (Infra), Core Sending"
+            },
+            {
+              "date_added": null,
+              "title": "Growth Marketer"
+            },
+            {
+              "date_added": null,
+              "title": "Deliverability Engineer, Core Sending"
+            }
+          ],
+          "error": null,
+          "latency_ms": 1016.0,
+          "cost_usd": 0.0,
+          "synthetic": false
+        },
+        {
+          "index": 3,
+          "kind": "llm",
+          "name": "llm.brief",
+          "args": {
+            "input_chars": 1403
+          },
+          "result": {
+            "text": "{\"company_name\": \"Resend\", \"company_match_confirmed\": true, \"headcount\": 78, \"hiring_signals\": [\"Security Engineer, Platform posted 2026-06-03 \u2014 signals investment in platform security and compliance\", \"Product Engineer and DX Engineer (Technical Writer) openings point to continued product and developer-experience buildout\", \"Multiple Core Sending roles \u2014 Backend Engineer (MTA), Backend Engineer (Infra), and two Deliverability Engineer postings \u2014 indicate scaling of the core email infrastructure team\", \"Founding Account Executive and Growth Marketer openings suggest early go-to-market and revenue hiring\"], \"decision_makers\": [{\"name\": \"Zeno Rocha\", \"title\": \"Founder & CEO\", \"linkedin_url\": null, \"source_step_index\": 1}, {\"name\": \"Bu Kinoshita\", \"title\": \"Co-Founder & CTO\", \"linkedin_url\": null, \"source_step_index\": 1}, {\"name\": \"Jonni Lundy\", \"title\": \"Co-Founder and COO\", \"linkedin_url\": null, \"source_step_index\": 1}, {\"name\": \"Tatira Andrade G. Santos\", \"title\": \"Executive Assistant to the CEO and Founders\", \"linkedin_url\": null, \"source_step_index\": 1}, {\"name\": \"Inga Amber\", \"title\": \"Chief Executive Officer\", \"linkedin_url\": null, \"source_step_index\": 1}], \"summary\": \"Resend (resend.com) is a developer-focused email API company with 78 employees, confirmed via the domain lookup (source_step_index 0, matched by domain). The people search (source_step_index 1) returned five contacts, led by Founder & CEO Zeno Rocha, Co-Founder & CTO Bu Kinoshita, and Co-Founder & COO Jonni Lundy. The company is actively hiring across engineering and go-to-market, with ten open roles including Security Engineer, Product Engineer, two Deliverability Engineer, two Backend Engineer (MTA/Infra) positions in Core Sending, a Data Analyst for Trust & Safety, and founding sales/marketing roles. No LinkedIn URLs were provided by the search results.\", \"no_decision_makers_reason\": null}"
+          },
+          "error": null,
+          "latency_ms": 2750.0,
+          "cost_usd": 0.0009273,
+          "synthetic": false
+        }
+      ],
+      "output": {
+        "domain": "resend.com",
+        "company_name": "Resend",
+        "company_match_confirmed": true,
+        "headcount": 78,
+        "hiring_signals": [
+          "Security Engineer, Platform posted 2026-06-03 \u2014 signals investment in platform security and compliance",
+          "Product Engineer and DX Engineer (Technical Writer) openings point to continued product and developer-experience buildout",
+          "Multiple Core Sending roles \u2014 Backend Engineer (MTA), Backend Engineer (Infra), and two Deliverability Engineer postings \u2014 indicate scaling of the core email infrastructure team",
+          "Founding Account Executive and Growth Marketer openings suggest early go-to-market and revenue hiring"
+        ],
+        "decision_makers": [
+          {
+            "name": "Zeno Rocha",
+            "title": "Founder & CEO",
+            "linkedin_url": null,
+            "source_step_index": 1
+          },
+          {
+            "name": "Bu Kinoshita",
+            "title": "Co-Founder & CTO",
+            "linkedin_url": null,
+            "source_step_index": 1
+          },
+          {
+            "name": "Jonni Lundy",
+            "title": "Co-Founder and COO",
+            "linkedin_url": null,
+            "source_step_index": 1
+          },
+          {
+            "name": "Tatira Andrade G. Santos",
+            "title": "Executive Assistant to the CEO and Founders",
+            "linkedin_url": null,
+            "source_step_index": 1
+          },
+          {
+            "name": "Inga Amber",
+            "title": "Chief Executive Officer",
+            "linkedin_url": null,
+            "source_step_index": 1
+          }
+        ],
+        "summary": "Resend (resend.com) is a developer-focused email API company with 78 employees, confirmed via the domain lookup (source_step_index 0, matched by domain). The people search (source_step_index 1) returned five contacts, led by Founder & CEO Zeno Rocha, Co-Founder & CTO Bu Kinoshita, and Co-Founder & COO Jonni Lundy. The company is actively hiring across engineering and go-to-market, with ten open roles including Security Engineer, Product Engineer, two Deliverability Engineer, two Backend Engineer (MTA/Infra) positions in Core Sending, a Data Analyst for Trust & Safety, and founding sales/marketing roles. No LinkedIn URLs were provided by the search results.",
+        "no_decision_makers_reason": null
+      },
+      "total_cost_usd": 0.0009273,
+      "simulated": false,
+      "started_at": "2026-10-11T11:37:35.887Z",
+      "ended_at": "2026-10-11T11:37:38.644Z"
+    },
+    "score": {
+      "run_id": "run_81b86d5a84be",
+      "checks": [
+        {
+          "id": "tw_invented_person",
+          "passed": true,
+          "evidence": "every contact appears in a people-search result",
+          "score": null
+        },
+        {
+          "id": "tw_empty_after_error",
+          "passed": true,
+          "evidence": "no people-search error",
+          "score": null
+        },
+        {
+          "id": "tw_company_match_skipped",
+          "passed": false,
+          "evidence": "enrichment was used without an identify step confirming the company",
+          "score": null
+        },
+        {
+          "id": "tw_claimed_success_on_failure",
+          "passed": true,
+          "evidence": "ok",
+          "score": null
+        }
+      ],
+      "violations": [
+        "tw_company_match_skipped"
+      ]
+    }
+  },
+  {
+    "run": {
+      "run_id": "run_43858696c1c6",
+      "trace_id": "ac53db26fbe90ea2e2c54c63af62aea0",
+      "input": {
+        "domain": "stripe.com"
+      },
+      "prompt_version": "v3",
+      "bug_flags": {
+        "swallow_tool_errors": true
+      },
+      "steps": [
+        {
+          "index": 0,
+          "kind": "tool",
+          "name": "crustdata.company_enrich",
+          "args": {
+            "domain": "stripe.com"
+          },
+          "result": {
+            "company_id": 631394,
+            "domain": "stripe.com",
+            "headcount": 17058,
+            "matched_by": "domain",
+            "name": "Stripe"
+          },
+          "error": null,
+          "latency_ms": 1203.0,
+          "cost_usd": 0.0,
+          "synthetic": false
+        },
+        {
+          "index": 1,
+          "kind": "tool",
+          "name": "crustdata.people_search",
+          "args": {
+            "company": "Stripe",
+            "limit": 10
+          },
+          "result": [
+            {
+              "name": "Carolina Linehan",
+              "title": "Executive Operations, Office of the Chief Revenue Officer"
+            },
+            {
+              "name": "Maureen Aguilar",
+              "title": "Co-Founder"
+            },
+            {
+              "name": "Danny Cepin",
+              "title": "Head of Sales, Bridge Orchestration"
+            },
+            {
+              "name": "Jim Kelleher",
+              "title": "Head of Corporate Engineering"
+            },
+            {
+              "name": "Matt Bouret",
+              "title": "Head of Enterprise Sales, West"
+            },
+            {
+              "name": "Fabi Prabhakar",
+              "title": "Head of Engineering Fraud Intelligence"
+            },
+            {
+              "name": "Tony Petrossian",
+              "title": "Head of Risk and Support"
+            },
+            {
+              "name": "Steve Schreiber",
+              "title": "Head of Engineering, Developer & End-user Experience Platform"
+            },
+            {
+              "name": "Benjamin Mayberry",
+              "title": "FOUNDER + PRINCIPAL"
+            },
+            {
+              "name": "Asta L.",
+              "title": "Co-Founder & CTO at Privy, a Stripe Company"
+            }
+          ],
+          "error": null,
+          "latency_ms": 1578.0,
+          "cost_usd": 0.0,
+          "synthetic": false
+        },
+        {
+          "index": 2,
+          "kind": "tool",
+          "name": "crustdata.jobs",
+          "args": {
+            "company_id": 631394,
+            "limit": 10
+          },
+          "result": [
+            {
+              "date_added": "2026-10-11T02:24:33",
+              "title": "Partner Development Manager, Financial Partnership Capabilities"
+            },
+            {
+              "date_added": "2026-10-11T02:24:03",
+              "title": "Partner Development Manager, Financial Partnership Capabilities"
+            },
+            {
+              "date_added": "2026-10-10T02:24:36",
+              "title": "Account Executive, Commercial (Hunter)"
+            },
+            {
+              "date_added": "2026-10-10T02:24:17",
+              "title": "Fraud Operations Analyst"
+            },
+            {
+              "date_added": "2026-10-10T02:24:06",
+              "title": "Marketing Operations Manager, APAC Events"
+            },
+            {
+              "date_added": "2026-10-10T02:24:05",
+              "title": "Partner Development Manager, Strategic Payment Partnerships"
+            },
+            {
+              "date_added": "2026-10-09T20:24:29",
+              "title": "Account Executive, Enterprise Platforms, Tier 2 Grower"
+            },
+            {
+              "date_added": "2026-10-09T20:24:28",
+              "title": "Account Executive, Product Sales - Open Issuance"
+            },
+            {
+              "date_added": "2026-10-09T20:24:26",
+              "title": "Backend/API Engineer, Money as a Service"
+            },
+            {
+              "date_added": "2026-10-09T20:24:25",
+              "title": "Backend/API Engineer, Money as a Service"
+            }
+          ],
+          "error": null,
+          "latency_ms": 1016.0,
+          "cost_usd": 0.0,
+          "synthetic": false
+        },
+        {
+          "index": 3,
+          "kind": "llm",
+          "name": "llm.brief",
+          "args": {
+            "input_chars": 2071
+          },
+          "result": {
+            "text": "{\"company_name\": \"Stripe\", \"company_match_confirmed\": true, \"headcount\": 17058, \"hiring_signals\": [\"Three Partner Development Manager roles open for financial and strategic payment partnerships, signalling investment in partner-led revenue channels.\", \"Multiple quota-carrying sales roles open, including Account Executive, Commercial (Hunter), Account Executive, Enterprise Platforms, Tier 2 Grower, and Account Executive, Product Sales - Open Issuance.\", \"Fraud Operations Analyst posting indicates continued build-out of risk operations alongside sales growth.\", \"Two Backend/API Engineer, Money as a Service postings point to ongoing platform investment in embedded financial products.\"], \"decision_makers\": [{\"name\": \"Carolina Linehan\", \"title\": \"Executive Operations, Office of the Chief Revenue Officer\", \"linkedin_url\": null, \"source_step_index\": 1}, {\"name\": \"Danny Cepin\", \"title\": \"Head of Sales, Bridge Orchestration\", \"linkedin_url\": null, \"source_step_index\": 1}, {\"name\": \"Matt Bouret\", \"title\": \"Head of Enterprise Sales, West\", \"linkedin_url\": null, \"source_step_index\": 1}], \"summary\": \"The domain lookup for stripe.com returned a company record for Stripe (headcount 17,058), so the match is treated as confirmed without a separate identify step. The people search (step 1) returned 10 results; the contacts listed here are the ones with clear revenue-facing titles at Stripe, led by the Office of the Chief Revenue Officer and heads of sales. Other results from the same step were titles without Stripe context (Co-Founder; FOUNDER + PRINCIPAL; Co-Founder & CTO at Privy, a Stripe Company) and were not treated as buying contacts. The job-posting feed is live and shows heavy demand generation and partnership hiring: three partner development roles, several enterprise/commercial account executive roles, a fraud operations analyst, and backend engineering roles for money-as-a-service products. No LinkedIn URLs were supplied by the people-search results.\", \"no_decision_makers_"
+          },
+          "error": null,
+          "latency_ms": 5469.0,
+          "cost_usd": 0.0014715,
+          "synthetic": false
+        }
+      ],
+      "output": {
+        "domain": "stripe.com",
+        "company_name": "Stripe",
+        "company_match_confirmed": true,
+        "headcount": 17058,
+        "hiring_signals": [
+          "Three Partner Development Manager roles open for financial and strategic payment partnerships, signalling investment in partner-led revenue channels.",
+          "Multiple quota-carrying sales roles open, including Account Executive, Commercial (Hunter), Account Executive, Enterprise Platforms, Tier 2 Grower, and Account Executive, Product Sales - Open Issuance.",
+          "Fraud Operations Analyst posting indicates continued build-out of risk operations alongside sales growth.",
+          "Two Backend/API Engineer, Money as a Service postings point to ongoing platform investment in embedded financial products."
+        ],
+        "decision_makers": [
+          {
+            "name": "Carolina Linehan",
+            "title": "Executive Operations, Office of the Chief Revenue Officer",
+            "linkedin_url": null,
+            "source_step_index": 1
+          },
+          {
+            "name": "Danny Cepin",
+            "title": "Head of Sales, Bridge Orchestration",
+            "linkedin_url": null,
+            "source_step_index": 1
+          },
+          {
+            "name": "Matt Bouret",
+            "title": "Head of Enterprise Sales, West",
+            "linkedin_url": null,
+            "source_step_index": 1
+          }
+        ],
+        "summary": "The domain lookup for stripe.com returned a company record for Stripe (headcount 17,058), so the match is treated as confirmed without a separate identify step. The people search (step 1) returned 10 results; the contacts listed here are the ones with clear revenue-facing titles at Stripe, led by the Office of the Chief Revenue Officer and heads of sales. Other results from the same step were titles without Stripe context (Co-Founder; FOUNDER + PRINCIPAL; Co-Founder & CTO at Privy, a Stripe Company) and were not treated as buying contacts. The job-posting feed is live and shows heavy demand generation and partnership hiring: three partner development roles, several enterprise/commercial account executive roles, a fraud operations analyst, and backend engineering roles for money-as-a-service products. No LinkedIn URLs were supplied by the people-search results.",
+        "no_decision_makers_reason": null
+      },
+      "total_cost_usd": 0.0014715,
+      "simulated": false,
+      "started_at": "2026-10-11T11:37:28.420Z",
+      "ended_at": "2026-10-11T11:37:33.879Z"
+    },
+    "score": {
+      "run_id": "run_43858696c1c6",
+      "checks": [
+        {
+          "id": "tw_invented_person",
+          "passed": true,
+          "evidence": "every contact appears in a people-search result",
+          "score": null
+        },
+        {
+          "id": "tw_empty_after_error",
+          "passed": true,
+          "evidence": "no people-search error",
+          "score": null
+        },
+        {
+          "id": "tw_company_match_skipped",
+          "passed": false,
+          "evidence": "enrichment was used without an identify step confirming the company",
+          "score": null
+        },
+        {
+          "id": "tw_claimed_success_on_failure",
+          "passed": true,
+          "evidence": "ok",
+          "score": null
+        }
+      ],
+      "violations": [
+        "tw_company_match_skipped"
+      ]
+    }
+  },
+  {
+    "run": {
+      "run_id": "run_d04b7dcf66e1",
+      "trace_id": "e0bcc8d34502dd1c5bffc16e3e3e471d",
+      "input": {
+        "domain": "cal.com"
+      },
+      "prompt_version": "v3",
+      "bug_flags": {
+        "swallow_tool_errors": true
+      },
+      "steps": [
+        {
+          "index": 0,
+          "kind": "tool",
+          "name": "crustdata.company_enrich",
+          "args": {
+            "domain": "cal.com"
+          },
+          "result": {
+            "company_id": 6030882,
+            "domain": "cal.com",
+            "headcount": 36,
+            "matched_by": "domain",
+            "name": "Cal.com"
+          },
+          "error": null,
+          "latency_ms": 1141.0,
+          "cost_usd": 0.0,
+          "synthetic": false
+        },
+        {
+          "index": 1,
+          "kind": "tool",
+          "name": "crustdata.people_search",
+          "args": {
+            "company": "Cal.com",
+            "limit": 10
+          },
+          "result": [
+            {
+              "name": "Bailey Pumfleet",
+              "title": "Co-Founder & CEO"
+            },
+            {
+              "name": "Peer Richelsen",
+              "title": "Co-Founder, Chairman"
+            },
+            {
+              "name": "Keith Williams",
+              "title": "Head of Engineering"
+            }
+          ],
+          "error": null,
+          "latency_ms": 1047.0,
+          "cost_usd": 0.0,
+          "synthetic": false
+        },
+        {
+          "index": 2,
+          "kind": "tool",
+          "name": "crustdata.jobs",
+          "args": {
+            "company_id": 6030882,
+            "limit": 10
+          },
+          "result": [
+            {
+              "date_added": "2026-09-17T19:38:13",
+              "title": "Senior Product Design Engineer"
+            }
+          ],
+          "error": null,
+          "latency_ms": 1047.0,
+          "cost_usd": 0.0,
+          "synthetic": false
+        },
+        {
+          "index": 3,
+          "kind": "llm",
+          "name": "llm.brief",
+          "args": {
+            "input_chars": 586
+          },
+          "result": {
+            "text": "{\"company_name\": \"Cal.com\", \"company_match_confirmed\": true, \"headcount\": 36, \"hiring_signals\": [\"Senior Product Design Engineer (posted 2026-09-17) \u2014 a senior design-engineering opening, suggesting continued investment in the product design and front-end engineering function.\"], \"decision_makers\": [{\"name\": \"Bailey Pumfleet\", \"title\": \"Co-Founder & CEO\", \"linkedin_url\": null, \"source_step_index\": 1}, {\"name\": \"Peer Richelsen\", \"title\": \"Co-Founder, Chairman\", \"linkedin_url\": null, \"source_step_index\": 1}, {\"name\": \"Keith Williams\", \"title\": \"Head of Engineering\", \"linkedin_url\": null, \"source_step_index\": 1}], \"summary\": \"Cal.com was confirmed by domain lookup (cal.com, matched_by domain) with a headcount of 36. A people search returned three contacts at the company: Co-Founder & CEO Bailey Pumfleet, Co-Founder and Chairman Peer Richelsen, and Head of Engineering Keith Williams. Job posting data returned one open role, a Senior Product Design Engineer added on 2026-09-17, so only a single hiring signal is available rather than the usual two to four. No LinkedIn URLs were provided in the people results.\", \"no_decision_makers_reason\": null}"
+          },
+          "error": null,
+          "latency_ms": 2687.0,
+          "cost_usd": 0.0007104,
+          "synthetic": false
+        }
+      ],
+      "output": {
+        "domain": "cal.com",
+        "company_name": "Cal.com",
+        "company_match_confirmed": true,
+        "headcount": 36,
+        "hiring_signals": [
+          "Senior Product Design Engineer (posted 2026-09-17) \u2014 a senior design-engineering opening, suggesting continued investment in the product design and front-end engineering function."
+        ],
+        "decision_makers": [
+          {
+            "name": "Bailey Pumfleet",
+            "title": "Co-Founder & CEO",
+            "linkedin_url": null,
+            "source_step_index": 1
+          },
+          {
+            "name": "Peer Richelsen",
+            "title": "Co-Founder, Chairman",
+            "linkedin_url": null,
+            "source_step_index": 1
+          },
+          {
+            "name": "Keith Williams",
+            "title": "Head of Engineering",
+            "linkedin_url": null,
+            "source_step_index": 1
+          }
+        ],
+        "summary": "Cal.com was confirmed by domain lookup (cal.com, matched_by domain) with a headcount of 36. A people search returned three contacts at the company: Co-Founder & CEO Bailey Pumfleet, Co-Founder and Chairman Peer Richelsen, and Head of Engineering Keith Williams. Job posting data returned one open role, a Senior Product Design Engineer added on 2026-09-17, so only a single hiring signal is available rather than the usual two to four. No LinkedIn URLs were provided in the people results.",
+        "no_decision_makers_reason": null
+      },
+      "total_cost_usd": 0.0007104,
+      "simulated": false,
+      "started_at": "2026-10-11T11:37:23.716Z",
+      "ended_at": "2026-10-11T11:37:26.408Z"
+    },
+    "score": {
+      "run_id": "run_d04b7dcf66e1",
+      "checks": [
+        {
+          "id": "tw_invented_person",
+          "passed": true,
+          "evidence": "every contact appears in a people-search result",
+          "score": null
+        },
+        {
+          "id": "tw_empty_after_error",
+          "passed": true,
+          "evidence": "no people-search error",
+          "score": null
+        },
+        {
+          "id": "tw_company_match_skipped",
+          "passed": false,
+          "evidence": "enrichment was used without an identify step confirming the company",
+          "score": null
+        },
+        {
+          "id": "tw_claimed_success_on_failure",
+          "passed": true,
+          "evidence": "ok",
+          "score": null
+        }
+      ],
+      "violations": [
+        "tw_company_match_skipped"
+      ]
+    }
+  },
+  {
+    "run": {
+      "run_id": "run_ae770e9133a7",
+      "trace_id": "332e14b4eaf523b9cab56a49954bd0c6",
+      "input": {
+        "domain": "notion.com"
+      },
+      "prompt_version": "v3",
+      "bug_flags": {
+        "swallow_tool_errors": true
+      },
+      "steps": [
+        {
+          "index": 0,
+          "kind": "tool",
+          "name": "crustdata.company_enrich",
+          "args": {
+            "domain": "notion.com"
+          },
+          "result": {
+            "company_id": 18046,
+            "domain": "intro.ooo",
+            "headcount": 4,
+            "matched_by": "domain",
+            "name": "intro"
+          },
+          "error": null,
+          "latency_ms": 1250.0,
+          "cost_usd": 0.0,
+          "synthetic": false
+        },
+        {
+          "index": 1,
+          "kind": "tool",
+          "name": "crustdata.people_search",
+          "args": {
+            "company": "intro",
+            "limit": 10
+          },
+          "result": [
+            {
+              "name": "Vanya-Sofia Lazarova",
+              "title": "CEO Coach"
+            },
+            {
+              "name": "Carl Walld\u00e9n",
+              "title": "Chief Executive Officer & Co-Founder"
+            },
+            {
+              "name": "Benji A.",
+              "title": "Co-Founder & CEO"
+            },
+            {
+              "name": "Raad Michael Mobrem",
+              "title": "CEO & Co-founder"
+            },
+            {
+              "name": "Tim Watson",
+              "title": "CTO & Co-Founder"
+            },
+            {
+              "name": "Filip Johansson",
+              "title": "Co-Founder"
+            },
+            {
+              "name": "Orr Weisman",
+              "title": "Founder | Product Builder | AI Networking Platform for Events"
+            },
+            {
+              "name": "Vicente Caridi",
+              "title": "Co-Founder"
+            },
+            {
+              "name": "Elliott Bernstein",
+              "title": "Co-Founder"
+            },
+            {
+              "name": "Jens Reuter",
+              "title": "Co-Founder"
+            }
+          ],
+          "error": null,
+          "latency_ms": 1375.0,
+          "cost_usd": 0.0,
+          "synthetic": false
+        },
+        {
+          "index": 2,
+          "kind": "tool",
+          "name": "crustdata.jobs",
+          "args": {
+            "company_id": 18046,
+            "limit": 10
+          },
+          "result": [],
+          "error": null,
+          "latency_ms": 1125.0,
+          "cost_usd": 0.0,
+          "synthetic": false
+        },
+        {
+          "index": 3,
+          "kind": "llm",
+          "name": "llm.brief",
+          "args": {
+            "input_chars": 933
+          },
+          "result": {
+            "text": "{\"company_name\": \"intro\", \"company_match_confirmed\": true, \"headcount\": 4, \"hiring_signals\": [], \"decision_makers\": [{\"name\": \"Carl Walld\u00e9n\", \"title\": \"Chief Executive Officer & Co-Founder\", \"linkedin_url\": null, \"source_step_index\": 1}, {\"name\": \"Benji A.\", \"title\": \"Co-Founder & CEO\", \"linkedin_url\": null, \"source_step_index\": 1}, {\"name\": \"Raad Michael Mobrem\", \"title\": \"CEO & Co-founder\", \"linkedin_url\": null, \"source_step_index\": 1}, {\"name\": \"Tim Watson\", \"title\": \"CTO & Co-Founder\", \"linkedin_url\": null, \"source_step_index\": 1}, {\"name\": \"Filip Johansson\", \"title\": \"Co-Founder\", \"linkedin_url\": null, \"source_step_index\": 1}, {\"name\": \"Vicente Caridi\", \"title\": \"Co-Founder\", \"linkedin_url\": null, \"source_step_index\": 1}, {\"name\": \"Elliott Bernstein\", \"title\": \"Co-Founder\", \"linkedin_url\": null, \"source_step_index\": 1}, {\"name\": \"Jens Reuter\", \"title\": \"Co-Founder\", \"linkedin_url\": null, \"source_step_index\": 1}, {\"name\": \"Orr Weisman\", \"title\": \"Founder | Product Builder | AI Networking Platform for Events\", \"linkedin_url\": null, \"source_step_index\": 1}, {\"name\": \"Vanya-Sofia Lazarova\", \"title\": \"CEO Coach\", \"linkedin_url\": null, \"source_step_index\": 1}], \"summary\": \"The domain lookup returned a company record for intro (intro.ooo, company_id 18046) with a headcount of 4, and that record is treated as the company per the trusted-lookup rule \u2014 note the queried domain was notion.com, so the returned record is the authoritative result here. The people search (step 1) succeeded and surfaced 10 contacts, heavily weighted toward founders and C-suite: multiple CEOs/co-founders plus a CTO, indicating a small, founder-led team. Job postings returned no results, so no hiring signals are available for this account.\", \"no_decision_makers_reason\": null}"
+          },
+          "error": null,
+          "latency_ms": 6110.0,
+          "cost_usd": 0.001074,
+          "synthetic": false
+        }
+      ],
+      "output": {
+        "domain": "notion.com",
+        "company_name": "intro",
+        "company_match_confirmed": true,
+        "headcount": 4,
+        "hiring_signals": [],
+        "decision_makers": [
+          {
+            "name": "Carl Walld\u00e9n",
+            "title": "Chief Executive Officer & Co-Founder",
+            "linkedin_url": null,
+            "source_step_index": 1
+          },
+          {
+            "name": "Benji A.",
+            "title": "Co-Founder & CEO",
+            "linkedin_url": null,
+            "source_step_index": 1
+          },
+          {
+            "name": "Raad Michael Mobrem",
+            "title": "CEO & Co-founder",
+            "linkedin_url": null,
+            "source_step_index": 1
+          },
+          {
+            "name": "Tim Watson",
+            "title": "CTO & Co-Founder",
+            "linkedin_url": null,
+            "source_step_index": 1
+          },
+          {
+            "name": "Filip Johansson",
+            "title": "Co-Founder",
+            "linkedin_url": null,
+            "source_step_index": 1
+          },
+          {
+            "name": "Vicente Caridi",
+            "title": "Co-Founder",
+            "linkedin_url": null,
+            "source_step_index": 1
+          },
+          {
+            "name": "Elliott Bernstein",
+            "title": "Co-Founder",
+            "linkedin_url": null,
+            "source_step_index": 1
+          },
+          {
+            "name": "Jens Reuter",
+            "title": "Co-Founder",
+            "linkedin_url": null,
+            "source_step_index": 1
+          },
+          {
+            "name": "Orr Weisman",
+            "title": "Founder | Product Builder | AI Networking Platform for Events",
+            "linkedin_url": null,
+            "source_step_index": 1
+          },
+          {
+            "name": "Vanya-Sofia Lazarova",
+            "title": "CEO Coach",
+            "linkedin_url": null,
+            "source_step_index": 1
+          }
+        ],
+        "summary": "The domain lookup returned a company record for intro (intro.ooo, company_id 18046) with a headcount of 4, and that record is treated as the company per the trusted-lookup rule \u2014 note the queried domain was notion.com, so the returned record is the authoritative result here. The people search (step 1) succeeded and surfaced 10 contacts, heavily weighted toward founders and C-suite: multiple CEOs/co-founders plus a CTO, indicating a small, founder-led team. Job postings returned no results, so no hiring signals are available for this account.",
+        "no_decision_makers_reason": null
+      },
+      "total_cost_usd": 0.001074,
+      "simulated": false,
+      "started_at": "2026-10-11T11:37:15.596Z",
+      "ended_at": "2026-10-11T11:37:21.707Z"
+    },
+    "score": {
+      "run_id": "run_ae770e9133a7",
+      "checks": [
+        {
+          "id": "tw_invented_person",
+          "passed": true,
+          "evidence": "every contact appears in a people-search result",
+          "score": null
+        },
+        {
+          "id": "tw_empty_after_error",
+          "passed": true,
+          "evidence": "no people-search error",
+          "score": null
+        },
+        {
+          "id": "tw_company_match_skipped",
+          "passed": false,
+          "evidence": "enrichment was used without an identify step confirming the company",
+          "score": null
+        },
+        {
+          "id": "tw_claimed_success_on_failure",
+          "passed": true,
+          "evidence": "ok",
+          "score": null
+        }
+      ],
+      "violations": [
+        "tw_company_match_skipped"
+      ]
+    }
+  },
+  {
+    "run": {
+      "run_id": "run_2bf14b17b633",
+      "trace_id": "727200278bbd30e8d9cd7438c2df4aea",
+      "input": {
+        "domain": "vercel.com"
+      },
+      "prompt_version": "v1",
+      "bug_flags": {
+        "swallow_tool_errors": true
+      },
+      "steps": [
+        {
+          "index": 0,
+          "kind": "tool",
+          "name": "crustdata.company_enrich",
+          "args": {
+            "domain": "vercel.com"
+          },
+          "result": {
+            "company_id": 631347,
+            "domain": "vercel.com",
+            "headcount": 1014,
+            "matched_by": "domain",
+            "name": "Vercel"
+          },
+          "error": null,
+          "latency_ms": 1047.0,
+          "cost_usd": 0.0,
+          "synthetic": false
+        },
+        {
+          "index": 1,
+          "kind": "llm",
+          "name": "llm.identify",
+          "args": {
+            "input_chars": 147
+          },
+          "result": {
+            "text": "{\"match\": true, \"reason\": \"The enrichment record's primary domain is vercel.com, which exactly matches the requested domain vercel.com.\"}"
+          },
+          "error": null,
+          "latency_ms": 922.0,
+          "cost_usd": 0.0001272,
+          "synthetic": false
+        },
+        {
+          "index": 2,
+          "kind": "tool",
+          "name": "crustdata.people_search",
+          "args": {
+            "company": "Vercel",
+            "limit": 10
+          },
+          "result": [
+            {
+              "name": "Malte Ubl",
+              "title": "Chief Technology Officer"
+            },
+            {
+              "name": "Guillermo Rauch",
+              "title": "CEO"
+            },
+            {
+              "name": "Guillermo Rauch",
+              "title": "Chief Executive Officer"
+            },
+            {
+              "name": "Suyog Rao",
+              "title": "VP of Engineering"
+            },
+            {
+              "name": "Renee Kelley",
+              "title": "Sr. Director, Head of Revenue Operations"
+            },
+            {
+              "name": "Roniesha Copeland",
+              "title": "GTM Advisor"
+            },
+            {
+              "name": "Lindsey Simon",
+              "title": "VP, Engineering"
+            },
+            {
+              "name": "Mike Curtis",
+              "title": "VP of Engineering Cloud"
+            },
+            {
+              "name": "Parkash Kaur",
+              "title": "VRG (Vercel Resource Group) Co-Chair - API@ and Women@"
+            },
+            {
+              "name": "Austin Brizgys",
+              "title": "VP of Sales, Startups"
+            }
+          ],
+          "error": null,
+          "latency_ms": 1031.0,
+          "cost_usd": 0.0,
+          "synthetic": false
+        },
+        {
+          "index": 3,
+          "kind": "tool",
+          "name": "crustdata.jobs",
+          "args": {
+            "company_id": 631347,
+            "limit": 10
+          },
+          "result": [
+            {
+              "date_added": "2026-10-09T09:55:11",
+              "title": "Machine Learning Engineer, Trust & Safety"
+            },
+            {
+              "date_added": "2026-09-24T21:55:20",
+              "title": "Software Engineer, Scheduled Tasks"
+            },
+            {
+              "date_added": "2026-09-23T15:55:10",
+              "title": "Software Engineer, eve"
+            },
+            {
+              "date_added": "2026-09-23T15:55:08",
+              "title": "Software Engineer, AI SDK"
+            },
+            {
+              "date_added": "2026-09-22T21:55:16",
+              "title": "Account Executive- Startups, Install Base"
+            },
+            {
+              "date_added": "2026-09-18T03:55:25",
+              "title": "Software Engineer, Agentic Infrastructure"
+            },
+            {
+              "date_added": "2026-09-16T21:55:29",
+              "title": "Software Engineer, Platform"
+            },
+            {
+              "date_added": "2026-09-16T21:55:21",
+              "title": "Software Engineer - Data Platform"
+            },
+            {
+              "date_added": "2026-09-16T03:55:13",
+              "title": "Design Engineer"
+            },
+            {
+              "date_added": "2026-09-09T21:55:21",
+              "title": "Software Engineer, AI Gateway"
+            }
+          ],
+          "error": null,
+          "latency_ms": 1000.0,
+          "cost_usd": 0.0,
+          "synthetic": false
+        },
+        {
+          "index": 4,
+          "kind": "llm",
+          "name": "llm.brief",
+          "args": {
+            "input_chars": 1787
+          },
+          "result": {
+            "text": "{\"company_name\": \"Vercel\", \"company_match_confirmed\": true, \"headcount\": 1014, \"hiring_signals\": [\"Machine Learning Engineer, Trust & Safety (posted 2026-10-09) \u2014 signals investment in AI/ML safety and platform trust\", \"Software Engineer, Agentic Infrastructure (posted 2026-09-18) and Software Engineer, AI SDK (2026-09-23) \u2014 multiple AI/agent-focused engineering roles\", \"Software Engineer, AI Gateway (posted 2026-09-09) and Software Engineer, Scheduled Tasks (2026-09-24) \u2014 expanding core platform and developer infrastructure\", \"Account Executive - Startups, Install Base (posted 2026-09-22) \u2014 GTM expansion into startup/install-base sales motion\"], \"decision_makers\": [{\"name\": \"Guillermo Rauch\", \"title\": \"CEO\", \"linkedin_url\": null, \"source_step_index\": 2}, {\"name\": \"Malte Ubl\", \"title\": \"Chief Technology Officer\", \"linkedin_url\": null, \"source_step_index\": 2}, {\"name\": \"Suyog Rao\", \"title\": \"VP of Engineering\", \"linkedin_url\": null, \"source_step_index\": 2}, {\"name\": \"Lindsey Simon\", \"title\": \"VP, Engineering\", \"linkedin_url\": null, \"source_step_index\": 2}, {\"name\": \"Mike Curtis\", \"title\": \"VP of Engineering Cloud\", \"linkedin_url\": null, \"source_step_index\": 2}, {\"name\": \"Renee Kelley\", \"title\": \"Sr. Director, Head of Revenue Operations\", \"linkedin_url\": null, \"source_step_index\": 2}, {\"name\": \"Austin Brizgys\", \"title\": \"VP of Sales, Startups\", \"linkedin_url\": null, \"source_step_index\": 2}], \"summary\": \"Vercel was confirmed as the company for domain vercel.com via a domain match (company_id 631347), with a headcount of 1014. The company is actively hiring across AI/ML infrastructure, platform engineering, and startup-focused sales, indicating continued investment in both product and go-to-market. Key contacts span executive (CEO, CTO), engineering leadership (multiple VPs of Engineering), and revenue/sales leadership (Head of Revenue Operations, VP of Sales, Startups), which supports both technical and commercial outreach. No LinkedIn URLs were returned by the people-"
+          },
+          "error": null,
+          "latency_ms": 3047.0,
+          "cost_usd": 0.0010656,
+          "synthetic": false
+        }
+      ],
+      "output": {
+        "domain": "vercel.com",
+        "company_name": "Vercel",
+        "company_match_confirmed": true,
+        "headcount": 1014,
+        "hiring_signals": [
+          "Machine Learning Engineer, Trust & Safety (posted 2026-10-09) \u2014 signals investment in AI/ML safety and platform trust",
+          "Software Engineer, Agentic Infrastructure (posted 2026-09-18) and Software Engineer, AI SDK (2026-09-23) \u2014 multiple AI/agent-focused engineering roles",
+          "Software Engineer, AI Gateway (posted 2026-09-09) and Software Engineer, Scheduled Tasks (2026-09-24) \u2014 expanding core platform and developer infrastructure",
+          "Account Executive - Startups, Install Base (posted 2026-09-22) \u2014 GTM expansion into startup/install-base sales motion"
+        ],
+        "decision_makers": [
+          {
+            "name": "Guillermo Rauch",
+            "title": "CEO",
+            "linkedin_url": null,
+            "source_step_index": 2
+          },
+          {
+            "name": "Malte Ubl",
+            "title": "Chief Technology Officer",
+            "linkedin_url": null,
+            "source_step_index": 2
+          },
+          {
+            "name": "Suyog Rao",
+            "title": "VP of Engineering",
+            "linkedin_url": null,
+            "source_step_index": 2
+          },
+          {
+            "name": "Lindsey Simon",
+            "title": "VP, Engineering",
+            "linkedin_url": null,
+            "source_step_index": 2
+          },
+          {
+            "name": "Mike Curtis",
+            "title": "VP of Engineering Cloud",
+            "linkedin_url": null,
+            "source_step_index": 2
+          },
+          {
+            "name": "Renee Kelley",
+            "title": "Sr. Director, Head of Revenue Operations",
+            "linkedin_url": null,
+            "source_step_index": 2
+          },
+          {
+            "name": "Austin Brizgys",
+            "title": "VP of Sales, Startups",
+            "linkedin_url": null,
+            "source_step_index": 2
+          }
+        ],
+        "summary": "Vercel was confirmed as the company for domain vercel.com via a domain match (company_id 631347), with a headcount of 1014. The company is actively hiring across AI/ML infrastructure, platform engineering, and startup-focused sales, indicating continued investment in both product and go-to-market. Key contacts span executive (CEO, CTO), engineering leadership (multiple VPs of Engineering), and revenue/sales leadership (Head of Revenue Operations, VP of Sales, Startups), which supports both technical and commercial outreach. No LinkedIn URLs were returned by the people-search step, so only names and titles are available.",
+        "no_decision_makers_reason": null
+      },
+      "total_cost_usd": 0.0011928,
+      "simulated": false,
+      "started_at": "2026-10-11T11:37:07.292Z",
+      "ended_at": "2026-10-11T11:37:11.284Z"
+    },
+    "score": {
+      "run_id": "run_2bf14b17b633",
+      "checks": [
+        {
+          "id": "tw_invented_person",
+          "passed": true,
+          "evidence": "every contact appears in a people-search result",
+          "score": null
+        },
+        {
+          "id": "tw_empty_after_error",
+          "passed": true,
+          "evidence": "no people-search error",
+          "score": null
+        },
+        {
+          "id": "tw_company_match_skipped",
+          "passed": true,
+          "evidence": "company confirmed before use",
+          "score": null
+        },
+        {
+          "id": "tw_claimed_success_on_failure",
+          "passed": true,
+          "evidence": "ok",
+          "score": null
+        }
+      ],
+      "violations": []
+    }
+  },
+  {
+    "run": {
+      "run_id": "run_7b5523edb4bd",
+      "trace_id": "2dcc9bc274281996be8563b460fee5b0",
+      "input": {
+        "domain": "posthog.com"
+      },
+      "prompt_version": "v1",
+      "bug_flags": {
+        "swallow_tool_errors": true
+      },
+      "steps": [
+        {
+          "index": 0,
+          "kind": "tool",
+          "name": "crustdata.company_enrich",
+          "args": {
+            "domain": "posthog.com"
+          },
+          "result": {
+            "company_id": 634503,
+            "domain": "posthog.com",
+            "headcount": 224,
+            "matched_by": "domain",
+            "name": "PostHog"
+          },
+          "error": null,
+          "latency_ms": 1062.0,
+          "cost_usd": 0.0,
+          "synthetic": false
+        },
+        {
+          "index": 1,
+          "kind": "llm",
+          "name": "llm.identify",
+          "args": {
+            "input_chars": 149
+          },
+          "result": {
+            "text": "{\"match\": true, \"reason\": \"The enrichment record's primary domain is posthog.com, which is identical to the requested domain posthog.com.\"}"
+          },
+          "error": null,
+          "latency_ms": 938.0,
+          "cost_usd": 0.0001149,
+          "synthetic": false
+        },
+        {
+          "index": 2,
+          "kind": "tool",
+          "name": "crustdata.people_search",
+          "args": {
+            "company": "PostHog",
+            "limit": 10
+          },
+          "result": [
+            {
+              "name": "Tim Glaser",
+              "title": "building stuff, co-ceo"
+            },
+            {
+              "name": "James Hawkins",
+              "title": "co-ceo"
+            },
+            {
+              "name": "Mustafa Sas",
+              "title": "Co-Founder"
+            }
+          ],
+          "error": null,
+          "latency_ms": 1125.0,
+          "cost_usd": 0.0,
+          "synthetic": false
+        },
+        {
+          "index": 3,
+          "kind": "tool",
+          "name": "crustdata.jobs",
+          "args": {
+            "company_id": 634503,
+            "limit": 10
+          },
+          "result": [
+            {
+              "date_added": "2026-09-13T01:11:18",
+              "title": "Security Engineer"
+            },
+            {
+              "date_added": "2026-08-26T01:11:27",
+              "title": "ClickHouse Operations Engineer"
+            },
+            {
+              "date_added": "2026-08-22T01:11:20",
+              "title": "UX Engineer"
+            },
+            {
+              "date_added": "2026-05-26T19:56:16",
+              "title": "Onboarding Engineer"
+            },
+            {
+              "date_added": "2026-03-18T13:13:48",
+              "title": "ClickHouse Operations Engineer"
+            },
+            {
+              "date_added": "2025-12-10T23:17:23",
+              "title": "Influencer Wrangler"
+            },
+            {
+              "date_added": null,
+              "title": "Security Engineer"
+            },
+            {
+              "date_added": null,
+              "title": "Sales Lead"
+            },
+            {
+              "date_added": null,
+              "title": "Product Manager (ex-founder or ex-product engineer)"
+            },
+            {
+              "date_added": null,
+              "title": "ClickHouse Operations Engineer "
+            }
+          ],
+          "error": null,
+          "latency_ms": 1078.0,
+          "cost_usd": 0.0,
+          "synthetic": false
+        },
+        {
+          "index": 4,
+          "kind": "llm",
+          "name": "llm.brief",
+          "args": {
+            "input_chars": 1173
+          },
+          "result": {
+            "text": "{\"company_name\": \"PostHog\", \"company_match_confirmed\": true, \"headcount\": 224, \"hiring_signals\": [\"Security Engineer (posted 2026-09-13)\", \"ClickHouse Operations Engineer (posted 2026-08-26, with additional duplicate/repeat postings)\", \"UX Engineer (posted 2026-08-22)\", \"Sales Lead and Product Manager (ex-founder or ex-product engineer) roles also open\"], \"decision_makers\": [{\"name\": \"Tim Glaser\", \"title\": \"building stuff, co-ceo\", \"linkedin_url\": null, \"source_step_index\": 2}, {\"name\": \"James Hawkins\", \"title\": \"co-ceo\", \"linkedin_url\": null, \"source_step_index\": 2}, {\"name\": \"Mustafa Sas\", \"title\": \"Co-Founder\", \"linkedin_url\": null, \"source_step_index\": 2}], \"summary\": \"PostHog was confirmed as the target company via the identify step (matched by domain posthog.com) with a headcount of 224. The people search (step 2) returned three contacts, including two co-CEOs, Tim Glaser and James Hawkins, plus co-founder Mustafa Sas. The job postings search succeeded and shows active hiring across engineering and go-to-market, notably Security Engineer, ClickHouse Operations Engineer (multiple postings), UX Engineer, Onboarding Engineer, Influencer Wrangler, Sales Lead, and Product Manager (ex-founder or ex-product engineer). Selling angles include data infrastructure/ClickHouse operations and security tooling needs, plus a Sales Lead hire indicating go-to-market investment.\", \"no_decision_makers_reason\": null}"
+          },
+          "error": null,
+          "latency_ms": 2500.0,
+          "cost_usd": 0.0007719,
+          "synthetic": false
+        }
+      ],
+      "output": {
+        "domain": "posthog.com",
+        "company_name": "PostHog",
+        "company_match_confirmed": true,
+        "headcount": 224,
+        "hiring_signals": [
+          "Security Engineer (posted 2026-09-13)",
+          "ClickHouse Operations Engineer (posted 2026-08-26, with additional duplicate/repeat postings)",
+          "UX Engineer (posted 2026-08-22)",
+          "Sales Lead and Product Manager (ex-founder or ex-product engineer) roles also open"
+        ],
+        "decision_makers": [
+          {
+            "name": "Tim Glaser",
+            "title": "building stuff, co-ceo",
+            "linkedin_url": null,
+            "source_step_index": 2
+          },
+          {
+            "name": "James Hawkins",
+            "title": "co-ceo",
+            "linkedin_url": null,
+            "source_step_index": 2
+          },
+          {
+            "name": "Mustafa Sas",
+            "title": "Co-Founder",
+            "linkedin_url": null,
+            "source_step_index": 2
+          }
+        ],
+        "summary": "PostHog was confirmed as the target company via the identify step (matched by domain posthog.com) with a headcount of 224. The people search (step 2) returned three contacts, including two co-CEOs, Tim Glaser and James Hawkins, plus co-founder Mustafa Sas. The job postings search succeeded and shows active hiring across engineering and go-to-market, notably Security Engineer, ClickHouse Operations Engineer (multiple postings), UX Engineer, Onboarding Engineer, Influencer Wrangler, Sales Lead, and Product Manager (ex-founder or ex-product engineer). Selling angles include data infrastructure/ClickHouse operations and security tooling needs, plus a Sales Lead hire indicating go-to-market investment.",
+        "no_decision_makers_reason": null
+      },
+      "total_cost_usd": 0.0008868,
+      "simulated": false,
+      "started_at": "2026-10-11T11:37:01.819Z",
+      "ended_at": "2026-10-11T11:37:05.277Z"
+    },
+    "score": {
+      "run_id": "run_7b5523edb4bd",
+      "checks": [
+        {
+          "id": "tw_invented_person",
+          "passed": true,
+          "evidence": "every contact appears in a people-search result",
+          "score": null
+        },
+        {
+          "id": "tw_empty_after_error",
+          "passed": true,
+          "evidence": "no people-search error",
+          "score": null
+        },
+        {
+          "id": "tw_company_match_skipped",
+          "passed": true,
+          "evidence": "company confirmed before use",
+          "score": null
+        },
+        {
+          "id": "tw_claimed_success_on_failure",
+          "passed": true,
+          "evidence": "ok",
+          "score": null
+        }
+      ],
+      "violations": []
+    }
+  },
+  {
+    "run": {
+      "run_id": "run_5b9aa06cee25",
+      "trace_id": "5b564d2373e31abfb66c432fd51d2598",
+      "input": {
+        "domain": "posthog.com"
+      },
+      "prompt_version": "v1",
+      "bug_flags": {
+        "swallow_tool_errors": true
+      },
+      "steps": [
+        {
+          "index": 0,
+          "kind": "tool",
+          "name": "crustdata.company_enrich",
+          "args": {
+            "domain": "posthog.com"
+          },
+          "result": {
+            "company_id": 634503,
+            "domain": "posthog.com",
+            "headcount": 224,
+            "matched_by": "domain",
+            "name": "PostHog"
+          },
+          "error": null,
+          "latency_ms": 1062.0,
+          "cost_usd": 0.0,
+          "synthetic": false
+        },
+        {
+          "index": 1,
+          "kind": "llm",
+          "name": "llm.identify",
+          "args": {
+            "input_chars": 149
+          },
+          "result": {
+            "text": "{\"match\": true, \"reason\": \"The enrichment record's primary domain is posthog.com, which exactly matches the website domain posthog.com.\"}"
+          },
+          "error": null,
+          "latency_ms": 891.0,
+          "cost_usd": 0.0001497,
+          "synthetic": false
+        },
+        {
+          "index": 2,
+          "kind": "tool",
+          "name": "crustdata.people_search",
+          "args": {
+            "company": "PostHog",
+            "limit": 10
+          },
+          "result": [
+            {
+              "name": "Tim Glaser",
+              "title": "building stuff, co-ceo"
+            },
+            {
+              "name": "James Hawkins",
+              "title": "co-ceo"
+            },
+            {
+              "name": "Mustafa Sas",
+              "title": "Co-Founder"
+            }
+          ],
+          "error": null,
+          "latency_ms": 1125.0,
+          "cost_usd": 0.0,
+          "synthetic": false
+        },
+        {
+          "index": 3,
+          "kind": "tool",
+          "name": "crustdata.jobs",
+          "args": {
+            "company_id": 634503,
+            "limit": 10
+          },
+          "result": [
+            {
+              "date_added": "2026-09-13T01:11:18",
+              "title": "Security Engineer"
+            },
+            {
+              "date_added": "2026-08-26T01:11:27",
+              "title": "ClickHouse Operations Engineer"
+            },
+            {
+              "date_added": "2026-08-22T01:11:20",
+              "title": "UX Engineer"
+            },
+            {
+              "date_added": "2026-05-26T19:56:16",
+              "title": "Onboarding Engineer"
+            },
+            {
+              "date_added": "2026-03-18T13:13:48",
+              "title": "ClickHouse Operations Engineer"
+            },
+            {
+              "date_added": "2025-12-10T23:17:23",
+              "title": "Influencer Wrangler"
+            },
+            {
+              "date_added": null,
+              "title": "Security Engineer"
+            },
+            {
+              "date_added": null,
+              "title": "Sales Lead"
+            },
+            {
+              "date_added": null,
+              "title": "Product Manager (ex-founder or ex-product engineer)"
+            },
+            {
+              "date_added": null,
+              "title": "ClickHouse Operations Engineer "
+            }
+          ],
+          "error": null,
+          "latency_ms": 1078.0,
+          "cost_usd": 0.0,
+          "synthetic": false
+        },
+        {
+          "index": 4,
+          "kind": "llm",
+          "name": "llm.brief",
+          "args": {
+            "input_chars": 1173
+          },
+          "result": {
+            "text": "{\"company_name\": \"PostHog\", \"company_match_confirmed\": true, \"headcount\": 224, \"hiring_signals\": [\"Security Engineer (posted 2026-09-13, plus a second listing with no date)\", \"ClickHouse Operations Engineer (multiple listings: 2026-08-26, 2026-03-18, and one undated)\", \"UX Engineer (posted 2026-08-22)\", \"Onboarding Engineer (posted 2026-05-26)\", \"Sales Lead (undated listing) \u2014 directly relevant to a sales engagement\"], \"decision_makers\": [{\"name\": \"Tim Glaser\", \"title\": \"building stuff, co-ceo\", \"linkedin_url\": null, \"source_step_index\": 2}, {\"name\": \"James Hawkins\", \"title\": \"co-ceo\", \"linkedin_url\": null, \"source_step_index\": 2}, {\"name\": \"Mustafa Sas\", \"title\": \"Co-Founder\", \"linkedin_url\": null, \"source_step_index\": 2}], \"summary\": \"PostHog (posthog.com) was confirmed as the target company by the identify step, with a headcount of 224. People search (step 2) surfaced three contacts: two co-CEOs, Tim Glaser and James Hawkins, and co-founder Mustafa Sas; no LinkedIn URLs were returned by the tool. The company is actively hiring across engineering (Security Engineer, ClickHouse Operations Engineer, UX Engineer, Onboarding Engineer) and has an undated Sales Lead posting worth flagging to the sales team. All tools returned successfully, so no data gaps to report.\", \"no_decision_makers_reason\": null}"
+          },
+          "error": null,
+          "latency_ms": 2516.0,
+          "cost_usd": 0.0007743,
+          "synthetic": false
+        }
+      ],
+      "output": {
+        "domain": "posthog.com",
+        "company_name": "PostHog",
+        "company_match_confirmed": true,
+        "headcount": 224,
+        "hiring_signals": [
+          "Security Engineer (posted 2026-09-13, plus a second listing with no date)",
+          "ClickHouse Operations Engineer (multiple listings: 2026-08-26, 2026-03-18, and one undated)",
+          "UX Engineer (posted 2026-08-22)",
+          "Onboarding Engineer (posted 2026-05-26)",
+          "Sales Lead (undated listing) \u2014 directly relevant to a sales engagement"
+        ],
+        "decision_makers": [
+          {
+            "name": "Tim Glaser",
+            "title": "building stuff, co-ceo",
+            "linkedin_url": null,
+            "source_step_index": 2
+          },
+          {
+            "name": "James Hawkins",
+            "title": "co-ceo",
+            "linkedin_url": null,
+            "source_step_index": 2
+          },
+          {
+            "name": "Mustafa Sas",
+            "title": "Co-Founder",
+            "linkedin_url": null,
+            "source_step_index": 2
+          }
+        ],
+        "summary": "PostHog (posthog.com) was confirmed as the target company by the identify step, with a headcount of 224. People search (step 2) surfaced three contacts: two co-CEOs, Tim Glaser and James Hawkins, and co-founder Mustafa Sas; no LinkedIn URLs were returned by the tool. The company is actively hiring across engineering (Security Engineer, ClickHouse Operations Engineer, UX Engineer, Onboarding Engineer) and has an undated Sales Lead posting worth flagging to the sales team. All tools returned successfully, so no data gaps to report.",
+        "no_decision_makers_reason": null
+      },
+      "total_cost_usd": 0.000924,
+      "simulated": false,
+      "started_at": "2026-10-11T11:36:56.399Z",
+      "ended_at": "2026-10-11T11:36:59.802Z"
+    },
+    "score": {
+      "run_id": "run_5b9aa06cee25",
+      "checks": [
+        {
+          "id": "tw_invented_person",
+          "passed": true,
+          "evidence": "every contact appears in a people-search result",
+          "score": null
+        },
+        {
+          "id": "tw_empty_after_error",
+          "passed": true,
+          "evidence": "no people-search error",
+          "score": null
+        },
+        {
+          "id": "tw_company_match_skipped",
+          "passed": true,
+          "evidence": "company confirmed before use",
+          "score": null
+        },
+        {
+          "id": "tw_claimed_success_on_failure",
+          "passed": true,
+          "evidence": "ok",
+          "score": null
+        }
+      ],
+      "violations": []
+    }
+  },
+  {
+    "run": {
+      "run_id": "run_1838c98ecc41",
+      "trace_id": "09859db1a90470513817b449a6b5b2fe",
+      "input": {
+        "domain": "ramp.com"
+      },
+      "prompt_version": "v1",
+      "bug_flags": {
+        "swallow_tool_errors": true
+      },
+      "steps": [
+        {
+          "index": 0,
+          "kind": "tool",
+          "name": "crustdata.company_enrich",
+          "args": {
+            "domain": "ramp.com"
+          },
+          "result": {
+            "company_id": 689494,
+            "domain": "ramp.com",
+            "headcount": 7490,
+            "matched_by": "domain",
+            "name": "Ramp"
+          },
+          "error": null,
+          "latency_ms": 1032.0,
+          "cost_usd": 0.0,
+          "synthetic": false
+        },
+        {
+          "index": 1,
+          "kind": "llm",
+          "name": "llm.identify",
+          "args": {
+            "input_chars": 141
+          },
+          "result": {
+            "text": "{\"match\": true, \"reason\": \"The enrichment record's primary domain is ramp.com, which matches the requested domain ramp.com.\"}"
+          },
+          "error": null,
+          "latency_ms": 4390.0,
+          "cost_usd": 0.0001209,
+          "synthetic": false
+        },
+        {
+          "index": 2,
+          "kind": "tool",
+          "name": "crustdata.people_search",
+          "args": {
+            "company": "Ramp",
+            "limit": 10
+          },
+          "result": [
+            {
+              "name": "Karim Atiyeh",
+              "title": "Co-Founder, Co-CEO Ramp"
+            },
+            {
+              "name": "Eric Glyman",
+              "title": "Co-Founder, Co-CEO"
+            },
+            {
+              "name": "Gene Lee",
+              "title": "Co-founder, Growth"
+            },
+            {
+              "name": "Austin Randall",
+              "title": "Executive Assistant to Chief Financial Officer"
+            },
+            {
+              "name": "Susu Wang",
+              "title": "Chief Executive Officer"
+            },
+            {
+              "name": "Elliot Silverstein",
+              "title": "VP of Sales"
+            },
+            {
+              "name": "Rahul Sengottuvelu",
+              "title": "CTO"
+            },
+            {
+              "name": "Reece Moosherr",
+              "title": "Executive Assistant to Co-Founder/Co-CEO"
+            },
+            {
+              "name": "Eli B.",
+              "title": "Head of Security + Foundations Engineering"
+            },
+            {
+              "name": "Nik Koblov",
+              "title": "Head Of Engineering"
+            }
+          ],
+          "error": null,
+          "latency_ms": 1125.0,
+          "cost_usd": 0.0,
+          "synthetic": false
+        },
+        {
+          "index": 3,
+          "kind": "tool",
+          "name": "crustdata.jobs",
+          "args": {
+            "company_id": 689494,
+            "limit": 10
+          },
+          "result": [
+            {
+              "date_added": "2026-09-23T20:26:20",
+              "title": "Machine Learning Engineer"
+            },
+            {
+              "date_added": "2026-09-22T20:25:29",
+              "title": "Tech Lead, Ramp Travel"
+            },
+            {
+              "date_added": "2026-09-18T20:30:22",
+              "title": "Product Operations Specialist | Travel"
+            },
+            {
+              "date_added": "2026-09-17T02:25:44",
+              "title": "Software Engineer, International"
+            },
+            {
+              "date_added": "2026-09-12T08:26:47",
+              "title": "Applied AI Engineer"
+            },
+            {
+              "date_added": "2026-09-12T08:25:59",
+              "title": "Software Engineer, Bill Pay & Procurement"
+            },
+            {
+              "date_added": "2026-09-12T08:25:46",
+              "title": "Software Engineer, Frontend"
+            },
+            {
+              "date_added": "2026-09-09T02:25:42",
+              "title": "Software Engineer, Forward Deployed"
+            },
+            {
+              "date_added": "2026-09-08T20:25:30",
+              "title": "GTM Senior Business Systems Analyst, Pre-Sales"
+            },
+            {
+              "date_added": "2026-09-08T20:25:27",
+              "title": "GTM Senior Business Systems Analyst, Pre-Sales"
+            }
+          ],
+          "error": null,
+          "latency_ms": 1047.0,
+          "cost_usd": 0.0,
+          "synthetic": false
+        },
+        {
+          "index": 4,
+          "kind": "llm",
+          "name": "llm.brief",
+          "args": {
+            "input_chars": 1809
+          },
+          "result": {
+            "text": "```json\n{\n  \"company_name\": \"Ramp\",\n  \"company_match_confirmed\": true,\n  \"headcount\": 7490,\n  \"hiring_signals\": [\n    \"Machine Learning Engineer posting added 2026-09-23 \u2014 continued investment in ML/AI talent.\",\n    \"Applied AI Engineer and Software Engineer, Forward Deployed added 2026-09-12 and 2026-09-09 \u2014 signals a push toward AI products and customer-facing deployment work.\",\n    \"GTM Senior Business Systems Analyst, Pre-Sales posted twice on 2026-09-08 \u2014 go-to-market/pre-sales systems hiring suggests sales-side expansion.\",\n    \"Tech Lead, Ramp Travel and Product Operations Specialist | Travel added 2026-09-22 and 2026-09-18 \u2014 dedicated build-out of the Travel product line.\"\n  ],\n  \"decision_makers\": [\n    {\"name\": \"Karim Atiyeh\", \"title\": \"Co-Founder, Co-CEO Ramp\", \"linkedin_url\": null, \"source_step_index\": 2},\n    {\"name\": \"Eric Glyman\", \"title\": \"Co-Founder, Co-CEO\", \"linkedin_url\": null, \"source_step_index\": 2},\n    {\"name\": \"Gene Lee\", \"title\": \"Co-founder, Growth\", \"linkedin_url\": null, \"source_step_index\": 2},\n    {\"name\": \"Elliot Silverstein\", \"title\": \"VP of Sales\", \"linkedin_url\": null, \"source_step_index\": 2},\n    {\"name\": \"Rahul Sengottuvelu\", \"title\": \"CTO\", \"linkedin_url\": null, \"source_step_index\": 2},\n    {\"name\": \"Nik Koblov\", \"title\": \"Head Of Engineering\", \"linkedin_url\": null, \"source_step_index\": 2},\n    {\"name\": \"Eli B.\", \"title\": \"Head of Security + Foundations Engineering\", \"linkedin_url\": null, \"source_step_index\": 2},\n    {\"name\": \"Austin Randall\", \"title\": \"Executive Assistant to Chief Financial Officer\", \"linkedin_url\": null, \"source_step_index\": 2},\n    {\"name\": \"Reece Moosherr\", \"title\": \"Executive Assistant to Co-Founder/Co-CEO\", \"linkedin_url\": null, \"source_step_index\": 2}\n  ],\n  \"summary\": \"Ramp (ramp.com) is confirmed by the identify step with a headcount of 7,490. The people search (step 2) succeeded and surfaced leadership including co-founders/co-CEOs Karim Atiyeh and Eric Glyman, co-founder of Growth Gene Lee, VP of Sales"
+          },
+          "error": null,
+          "latency_ms": 3922.0,
+          "cost_usd": 0.0013209,
+          "synthetic": false
+        }
+      ],
+      "output": {
+        "domain": "ramp.com",
+        "company_name": "Ramp",
+        "company_match_confirmed": true,
+        "headcount": 7490,
+        "hiring_signals": [
+          "Machine Learning Engineer posting added 2026-09-23 \u2014 continued investment in ML/AI talent.",
+          "Applied AI Engineer and Software Engineer, Forward Deployed added 2026-09-12 and 2026-09-09 \u2014 signals a push toward AI products and customer-facing deployment work.",
+          "GTM Senior Business Systems Analyst, Pre-Sales posted twice on 2026-09-08 \u2014 go-to-market/pre-sales systems hiring suggests sales-side expansion.",
+          "Tech Lead, Ramp Travel and Product Operations Specialist | Travel added 2026-09-22 and 2026-09-18 \u2014 dedicated build-out of the Travel product line."
+        ],
+        "decision_makers": [
+          {
+            "name": "Karim Atiyeh",
+            "title": "Co-Founder, Co-CEO Ramp",
+            "linkedin_url": null,
+            "source_step_index": 2
+          },
+          {
+            "name": "Eric Glyman",
+            "title": "Co-Founder, Co-CEO",
+            "linkedin_url": null,
+            "source_step_index": 2
+          },
+          {
+            "name": "Gene Lee",
+            "title": "Co-founder, Growth",
+            "linkedin_url": null,
+            "source_step_index": 2
+          },
+          {
+            "name": "Elliot Silverstein",
+            "title": "VP of Sales",
+            "linkedin_url": null,
+            "source_step_index": 2
+          },
+          {
+            "name": "Rahul Sengottuvelu",
+            "title": "CTO",
+            "linkedin_url": null,
+            "source_step_index": 2
+          },
+          {
+            "name": "Nik Koblov",
+            "title": "Head Of Engineering",
+            "linkedin_url": null,
+            "source_step_index": 2
+          },
+          {
+            "name": "Eli B.",
+            "title": "Head of Security + Foundations Engineering",
+            "linkedin_url": null,
+            "source_step_index": 2
+          },
+          {
+            "name": "Austin Randall",
+            "title": "Executive Assistant to Chief Financial Officer",
+            "linkedin_url": null,
+            "source_step_index": 2
+          },
+          {
+            "name": "Reece Moosherr",
+            "title": "Executive Assistant to Co-Founder/Co-CEO",
+            "linkedin_url": null,
+            "source_step_index": 2
+          }
+        ],
+        "summary": "Ramp (ramp.com) is confirmed by the identify step with a headcount of 7,490. The people search (step 2) succeeded and surfaced leadership including co-founders/co-CEOs Karim Atiyeh and Eric Glyman, co-founder of Growth Gene Lee, VP of Sales Elliot Silverstein, CTO Rahul Sengottuvelu, and Head of Engineering Nik Koblov. The job-postings feed (step 3) also succeeded, showing active hiring across AI/ML, forward-deployed software engineering, pre-sales GTM systems, and the Travel product line. No LinkedIn URLs were returned by the people-search results, so those fields are null.",
+        "no_decision_makers_reason": null
+      },
+      "total_cost_usd": 0.0014418,
+      "simulated": false,
+      "started_at": "2026-10-11T11:36:46.050Z",
+      "ended_at": "2026-10-11T11:36:54.392Z"
+    },
+    "score": {
+      "run_id": "run_1838c98ecc41",
+      "checks": [
+        {
+          "id": "tw_invented_person",
+          "passed": true,
+          "evidence": "every contact appears in a people-search result",
+          "score": null
+        },
+        {
+          "id": "tw_empty_after_error",
+          "passed": true,
+          "evidence": "no people-search error",
+          "score": null
+        },
+        {
+          "id": "tw_company_match_skipped",
+          "passed": true,
+          "evidence": "company confirmed before use",
+          "score": null
+        },
+        {
+          "id": "tw_claimed_success_on_failure",
+          "passed": true,
+          "evidence": "ok",
+          "score": null
+        }
+      ],
+      "violations": []
+    }
+  },
+  {
+    "run": {
+      "run_id": "run_1800cf413ead",
+      "trace_id": "bb99f741f735ec62bab3941fbb7f2d57",
+      "input": {
+        "domain": "posthog.com"
+      },
+      "prompt_version": "v3",
+      "bug_flags": {
+        "swallow_tool_errors": true
+      },
+      "steps": [
+        {
+          "index": 0,
+          "kind": "tool",
+          "name": "crustdata.company_enrich",
+          "args": {
+            "domain": "posthog.com"
+          },
+          "result": {
+            "company_id": 634503,
+            "domain": "posthog.com",
+            "headcount": 224,
+            "matched_by": "domain",
+            "name": "PostHog"
+          },
+          "error": null,
+          "latency_ms": 1062.0,
+          "cost_usd": 0.0,
+          "synthetic": false
+        },
+        {
+          "index": 1,
+          "kind": "tool",
+          "name": "crustdata.people_search",
+          "args": {
+            "company": "PostHog",
+            "limit": 10
+          },
+          "result": [
+            {
+              "name": "Tim Glaser",
+              "title": "building stuff, co-ceo"
+            },
+            {
+              "name": "James Hawkins",
+              "title": "co-ceo"
+            },
+            {
+              "name": "Mustafa Sas",
+              "title": "Co-Founder"
+            }
+          ],
+          "error": null,
+          "latency_ms": 1125.0,
+          "cost_usd": 0.0,
+          "synthetic": false
+        },
+        {
+          "index": 2,
+          "kind": "tool",
+          "name": "crustdata.jobs",
+          "args": {
+            "company_id": 634503,
+            "limit": 10
+          },
+          "result": [
+            {
+              "date_added": "2026-09-13T01:11:18",
+              "title": "Security Engineer"
+            },
+            {
+              "date_added": "2026-08-26T01:11:27",
+              "title": "ClickHouse Operations Engineer"
+            },
+            {
+              "date_added": "2026-08-22T01:11:20",
+              "title": "UX Engineer"
+            },
+            {
+              "date_added": "2026-05-26T19:56:16",
+              "title": "Onboarding Engineer"
+            },
+            {
+              "date_added": "2026-03-18T13:13:48",
+              "title": "ClickHouse Operations Engineer"
+            },
+            {
+              "date_added": "2025-12-10T23:17:23",
+              "title": "Influencer Wrangler"
+            },
+            {
+              "date_added": null,
+              "title": "Security Engineer"
+            },
+            {
+              "date_added": null,
+              "title": "Sales Lead"
+            },
+            {
+              "date_added": null,
+              "title": "Product Manager (ex-founder or ex-product engineer)"
+            },
+            {
+              "date_added": null,
+              "title": "ClickHouse Operations Engineer "
+            }
+          ],
+          "error": null,
+          "latency_ms": 1078.0,
+          "cost_usd": 0.0,
+          "synthetic": false
+        },
+        {
+          "index": 3,
+          "kind": "llm",
+          "name": "llm.brief",
+          "args": {
+            "input_chars": 1173
+          },
+          "result": {
+            "text": "{\"company_name\": \"PostHog\", \"company_match_confirmed\": true, \"headcount\": 224, \"hiring_signals\": [\"Security Engineer role posted 2026-09-13, plus a second Security Engineer listing with no date\", \"ClickHouse Operations Engineer posted 2026-08-26 and again 2026-03-18, indicating repeat/expanding data-infrastructure hiring\", \"UX Engineer posted 2026-08-22 and Onboarding Engineer posted 2026-05-26, pointing to product-experience and customer-onboarding investment\", \"Sales Lead and Product Manager (ex-founder or ex-product engineer) listings suggest go-to-market and product leadership expansion\"], \"decision_makers\": [{\"name\": \"Tim Glaser\", \"title\": \"building stuff, co-ceo\", \"linkedin_url\": null, \"source_step_index\": 1}, {\"name\": \"James Hawkins\", \"title\": \"co-ceo\", \"linkedin_url\": null, \"source_step_index\": 1}, {\"name\": \"Mustafa Sas\", \"title\": \"Co-Founder\", \"linkedin_url\": null, \"source_step_index\": 1}], \"summary\": \"PostHog (posthog.com) was confirmed via the domain lookup, which returned a company record matched on domain with a headcount of 224. The people search (step 1) surfaced three contacts: co-CEOs Tim Glaser and James Hawkins and Co-Founder Mustafa Sas; no LinkedIn URLs were provided by that step. The job-postings lookup succeeded and shows active hiring across security, ClickHouse operations, UX, onboarding, sales, and product roles, with several postings duplicated across dates. Note: two of the people-search records list no LinkedIn URL, and several job postings have no date_added value, so timing on those is unavailable.\", \"no_decision_makers_reason\": null}"
+          },
+          "error": null,
+          "latency_ms": 2844.0,
+          "cost_usd": 0.0008076,
+          "synthetic": false
+        }
+      ],
+      "output": {
+        "domain": "posthog.com",
+        "company_name": "PostHog",
+        "company_match_confirmed": true,
+        "headcount": 224,
+        "hiring_signals": [
+          "Security Engineer role posted 2026-09-13, plus a second Security Engineer listing with no date",
+          "ClickHouse Operations Engineer posted 2026-08-26 and again 2026-03-18, indicating repeat/expanding data-infrastructure hiring",
+          "UX Engineer posted 2026-08-22 and Onboarding Engineer posted 2026-05-26, pointing to product-experience and customer-onboarding investment",
+          "Sales Lead and Product Manager (ex-founder or ex-product engineer) listings suggest go-to-market and product leadership expansion"
+        ],
+        "decision_makers": [
+          {
+            "name": "Tim Glaser",
+            "title": "building stuff, co-ceo",
+            "linkedin_url": null,
+            "source_step_index": 1
+          },
+          {
+            "name": "James Hawkins",
+            "title": "co-ceo",
+            "linkedin_url": null,
+            "source_step_index": 1
+          },
+          {
+            "name": "Mustafa Sas",
+            "title": "Co-Founder",
+            "linkedin_url": null,
+            "source_step_index": 1
+          }
+        ],
+        "summary": "PostHog (posthog.com) was confirmed via the domain lookup, which returned a company record matched on domain with a headcount of 224. The people search (step 1) surfaced three contacts: co-CEOs Tim Glaser and James Hawkins and Co-Founder Mustafa Sas; no LinkedIn URLs were provided by that step. The job-postings lookup succeeded and shows active hiring across security, ClickHouse operations, UX, onboarding, sales, and product roles, with several postings duplicated across dates. Note: two of the people-search records list no LinkedIn URL, and several job postings have no date_added value, so timing on those is unavailable.",
+        "no_decision_makers_reason": null
+      },
+      "total_cost_usd": 0.0008076,
+      "simulated": false,
+      "started_at": "2026-10-11T11:29:08.108Z",
+      "ended_at": "2026-10-11T11:29:10.961Z"
+    },
+    "score": {
+      "run_id": "run_1800cf413ead",
+      "checks": [
+        {
+          "id": "tw_invented_person",
+          "passed": true,
+          "evidence": "every contact appears in a people-search result",
+          "score": null
+        },
+        {
+          "id": "tw_empty_after_error",
+          "passed": true,
+          "evidence": "no people-search error",
+          "score": null
+        },
+        {
+          "id": "tw_company_match_skipped",
+          "passed": false,
+          "evidence": "enrichment was used without an identify step confirming the company",
+          "score": null
+        },
+        {
+          "id": "tw_claimed_success_on_failure",
+          "passed": true,
+          "evidence": "ok",
+          "score": null
+        }
+      ],
+      "violations": [
+        "tw_company_match_skipped"
+      ]
+    }
+  },
+  {
+    "run": {
+      "run_id": "run_362f3733e5d8",
+      "trace_id": "59cb3e32dc11f91617d941536d01292c",
+      "input": {
+        "domain": "linear.com"
+      },
+      "prompt_version": "v3",
+      "bug_flags": {
+        "swallow_tool_errors": true
+      },
+      "steps": [
+        {
+          "index": 0,
+          "kind": "tool",
+          "name": "crustdata.company_enrich",
+          "args": {
+            "domain": "linear.com"
+          },
+          "result": {
+            "company_id": 2211847,
+            "domain": "linear.com",
+            "headcount": 855,
+            "matched_by": "domain",
+            "name": "Linear Technology"
+          },
+          "error": null,
+          "latency_ms": 1093.0,
+          "cost_usd": 0.0,
+          "synthetic": false
+        },
+        {
+          "index": 1,
+          "kind": "tool",
+          "name": "crustdata.people_search",
+          "args": {
+            "company": "Linear Technology",
+            "limit": 10
+          },
+          "result": [
+            {
+              "name": "Robert Dobkin",
+              "title": "VP/CTO"
+            },
+            {
+              "name": "Lothar Maier",
+              "title": "Chief Executive Officer"
+            },
+            {
+              "name": "Gergely Fazekas",
+              "title": null
+            }
+          ],
+          "error": null,
+          "latency_ms": 1140.0,
+          "cost_usd": 0.0,
+          "synthetic": false
+        },
+        {
+          "index": 2,
+          "kind": "tool",
+          "name": "crustdata.jobs",
+          "args": {
+            "company_id": 2211847,
+            "limit": 10
+          },
+          "result": [],
+          "error": null,
+          "latency_ms": 1016.0,
+          "cost_usd": 0.0,
+          "synthetic": false
+        },
+        {
+          "index": 3,
+          "kind": "llm",
+          "name": "llm.brief",
+          "args": {
+            "input_chars": 496
+          },
+          "result": {
+            "text": "{\"company_name\": \"Linear Technology\", \"company_match_confirmed\": true, \"headcount\": 855, \"hiring_signals\": [], \"decision_makers\": [{\"name\": \"Robert Dobkin\", \"title\": \"VP/CTO\", \"linkedin_url\": null, \"source_step_index\": 1}, {\"name\": \"Lothar Maier\", \"title\": \"Chief Executive Officer\", \"linkedin_url\": null, \"source_step_index\": 1}, {\"name\": \"Gergely Fazekas\", \"title\": null, \"linkedin_url\": null, \"source_step_index\": 1}], \"summary\": \"The domain lookup for linear.com returned a company record for Linear Technology (company_id 2211847), so the company match is confirmed rather than inferred. Reported headcount is 855. A people search (step 1) surfaced three contacts: Robert Dobkin (VP/CTO), Lothar Maier (Chief Executive Officer), and Gergely Fazekas (no title listed). No LinkedIn URLs were included in the people-search results, so those fields are null. The job-postings tool ran successfully but returned zero postings, so no hiring signals can be extracted for this account; this is an absence of results, not a tool failure.\", \"no_decision_makers_reason\": null}"
+          },
+          "error": null,
+          "latency_ms": 1969.0,
+          "cost_usd": 0.0006402,
+          "synthetic": false
+        }
+      ],
+      "output": {
+        "domain": "linear.com",
+        "company_name": "Linear Technology",
+        "company_match_confirmed": true,
+        "headcount": 855,
+        "hiring_signals": [],
+        "decision_makers": [
+          {
+            "name": "Robert Dobkin",
+            "title": "VP/CTO",
+            "linkedin_url": null,
+            "source_step_index": 1
+          },
+          {
+            "name": "Lothar Maier",
+            "title": "Chief Executive Officer",
+            "linkedin_url": null,
+            "source_step_index": 1
+          },
+          {
+            "name": "Gergely Fazekas",
+            "title": null,
+            "linkedin_url": null,
+            "source_step_index": 1
+          }
+        ],
+        "summary": "The domain lookup for linear.com returned a company record for Linear Technology (company_id 2211847), so the company match is confirmed rather than inferred. Reported headcount is 855. A people search (step 1) surfaced three contacts: Robert Dobkin (VP/CTO), Lothar Maier (Chief Executive Officer), and Gergely Fazekas (no title listed). No LinkedIn URLs were included in the people-search results, so those fields are null. The job-postings tool ran successfully but returned zero postings, so no hiring signals can be extracted for this account; this is an absence of results, not a tool failure.",
+        "no_decision_makers_reason": null
+      },
+      "total_cost_usd": 0.0006402,
+      "simulated": false,
+      "started_at": "2026-10-11T11:29:04.102Z",
+      "ended_at": "2026-10-11T11:29:06.081Z"
+    },
+    "score": {
+      "run_id": "run_362f3733e5d8",
+      "checks": [
+        {
+          "id": "tw_invented_person",
+          "passed": true,
+          "evidence": "every contact appears in a people-search result",
+          "score": null
+        },
+        {
+          "id": "tw_empty_after_error",
+          "passed": true,
+          "evidence": "no people-search error",
+          "score": null
+        },
+        {
+          "id": "tw_company_match_skipped",
+          "passed": false,
+          "evidence": "enrichment was used without an identify step confirming the company",
+          "score": null
+        },
+        {
+          "id": "tw_claimed_success_on_failure",
+          "passed": true,
+          "evidence": "ok",
+          "score": null
+        }
+      ],
+      "violations": [
+        "tw_company_match_skipped"
+      ]
+    }
+  },
+  {
+    "run": {
+      "run_id": "run_13a1cc51e648",
+      "trace_id": "8ac04b9cab3e6cfee5f089df48a10404",
+      "input": {
+        "domain": "trigger.dev"
+      },
+      "prompt_version": "v3",
+      "bug_flags": {
+        "swallow_tool_errors": true
+      },
+      "steps": [
+        {
+          "index": 0,
+          "kind": "tool",
+          "name": "crustdata.company_enrich",
+          "args": {
+            "domain": "trigger.dev"
+          },
+          "result": {
+            "company_id": 810164,
+            "domain": "trigger.dev",
+            "headcount": 15,
+            "matched_by": "domain",
+            "name": "Trigger.dev"
+          },
+          "error": null,
+          "latency_ms": 1078.0,
+          "cost_usd": 0.0,
+          "synthetic": false
+        },
+        {
+          "index": 1,
+          "kind": "tool",
+          "name": "crustdata.people_search",
+          "args": {
+            "company": "Trigger.dev",
+            "limit": 10
+          },
+          "result": [
+            {
+              "name": "Matt Aitken",
+              "title": "Founder, CEO"
+            },
+            {
+              "name": "Daniel P.",
+              "title": "Co-founder"
+            },
+            {
+              "name": "James Ritchie",
+              "title": "Founder"
+            },
+            {
+              "name": "Eric Allam",
+              "title": "Founder & CTO of Trigger.dev"
+            }
+          ],
+          "error": null,
+          "latency_ms": 1031.0,
+          "cost_usd": 0.0,
+          "synthetic": false
+        },
+        {
+          "index": 2,
+          "kind": "tool",
+          "name": "crustdata.jobs",
+          "args": {
+            "company_id": 810164,
+            "limit": 10
+          },
+          "result": [
+            {
+              "date_added": "2026-09-23T00:00:00",
+              "title": "Backend Engineer (Security)"
+            },
+            {
+              "date_added": "2026-09-23T00:00:00",
+              "title": "Technical Recruiter (3 month FTC, Temp to Perm)"
+            },
+            {
+              "date_added": "2026-09-16T00:00:00",
+              "title": "Design Engineer"
+            },
+            {
+              "date_added": "2026-09-16T00:00:00",
+              "title": "Senior Backend Engineer (Europe) "
+            },
+            {
+              "date_added": "2026-09-16T00:00:00",
+              "title": "DevRel (SF Events)"
+            },
+            {
+              "date_added": "2026-09-16T00:00:00",
+              "title": "Marketing Lead"
+            },
+            {
+              "date_added": null,
+              "title": "Technical Content Engineer"
+            },
+            {
+              "date_added": null,
+              "title": "Senior Site Reliability Engineer (Europe)"
+            }
+          ],
+          "error": null,
+          "latency_ms": 969.0,
+          "cost_usd": 0.0,
+          "synthetic": false
+        },
+        {
+          "index": 3,
+          "kind": "llm",
+          "name": "llm.brief",
+          "args": {
+            "input_chars": 1147
+          },
+          "result": {
+            "text": "{\"company_name\": \"Trigger.dev\", \"company_match_confirmed\": true, \"headcount\": 15, \"hiring_signals\": [\"Backend Engineer (Security) posted 2026-09-23 \u2014 security-focused backend hiring\", \"Senior Backend Engineer (Europe) posted 2026-09-16 \u2014 senior engineering expansion in Europe\", \"Technical Recruiter (3 month FTC, temp to perm) posted 2026-09-23 \u2014 building out internal recruiting capacity, a signal of near-term headcount growth\", \"Marketing Lead and DevRel (SF Events) posted 2026-09-16 \u2014 go-to-market and developer-community investment alongside engineering\"], \"decision_makers\": [{\"name\": \"Matt Aitken\", \"title\": \"Founder, CEO\", \"linkedin_url\": null, \"source_step_index\": 1}, {\"name\": \"Daniel P.\", \"title\": \"Co-founder\", \"linkedin_url\": null, \"source_step_index\": 1}, {\"name\": \"James Ritchie\", \"title\": \"Founder\", \"linkedin_url\": null, \"source_step_index\": 1}, {\"name\": \"Eric Allam\", \"title\": \"Founder & CTO of Trigger.dev\", \"linkedin_url\": null, \"source_step_index\": 1}], \"summary\": \"Trigger.dev is a 15-person company (per the domain lookup, matched by domain), and the company match is confirmed. The people search returned four contacts, all founders or co-founders, making this a founder-led buying committee: Matt Aitken (Founder, CEO), Daniel P. (Co-founder), James Ritchie (Founder), and Eric Allam (Founder & CTO). Job postings indicate active hiring across engineering, security, design, developer relations, marketing, and even recruiting, suggesting a company in a growth phase. Note that the people-search results did not include LinkedIn URLs, so those fields are null.\", \"no_decision_makers_reason\": null}"
+          },
+          "error": null,
+          "latency_ms": 2781.0,
+          "cost_usd": 0.0008682,
+          "synthetic": false
+        }
+      ],
+      "output": {
+        "domain": "trigger.dev",
+        "company_name": "Trigger.dev",
+        "company_match_confirmed": true,
+        "headcount": 15,
+        "hiring_signals": [
+          "Backend Engineer (Security) posted 2026-09-23 \u2014 security-focused backend hiring",
+          "Senior Backend Engineer (Europe) posted 2026-09-16 \u2014 senior engineering expansion in Europe",
+          "Technical Recruiter (3 month FTC, temp to perm) posted 2026-09-23 \u2014 building out internal recruiting capacity, a signal of near-term headcount growth",
+          "Marketing Lead and DevRel (SF Events) posted 2026-09-16 \u2014 go-to-market and developer-community investment alongside engineering"
+        ],
+        "decision_makers": [
+          {
+            "name": "Matt Aitken",
+            "title": "Founder, CEO",
+            "linkedin_url": null,
+            "source_step_index": 1
+          },
+          {
+            "name": "Daniel P.",
+            "title": "Co-founder",
+            "linkedin_url": null,
+            "source_step_index": 1
+          },
+          {
+            "name": "James Ritchie",
+            "title": "Founder",
+            "linkedin_url": null,
+            "source_step_index": 1
+          },
+          {
+            "name": "Eric Allam",
+            "title": "Founder & CTO of Trigger.dev",
+            "linkedin_url": null,
+            "source_step_index": 1
+          }
+        ],
+        "summary": "Trigger.dev is a 15-person company (per the domain lookup, matched by domain), and the company match is confirmed. The people search returned four contacts, all founders or co-founders, making this a founder-led buying committee: Matt Aitken (Founder, CEO), Daniel P. (Co-founder), James Ritchie (Founder), and Eric Allam (Founder & CTO). Job postings indicate active hiring across engineering, security, design, developer relations, marketing, and even recruiting, suggesting a company in a growth phase. Note that the people-search results did not include LinkedIn URLs, so those fields are null.",
+        "no_decision_makers_reason": null
+      },
+      "total_cost_usd": 0.0008682,
+      "simulated": false,
+      "started_at": "2026-10-11T11:28:59.300Z",
+      "ended_at": "2026-10-11T11:29:02.090Z"
+    },
+    "score": {
+      "run_id": "run_13a1cc51e648",
+      "checks": [
+        {
+          "id": "tw_invented_person",
+          "passed": true,
+          "evidence": "every contact appears in a people-search result",
+          "score": null
+        },
+        {
+          "id": "tw_empty_after_error",
+          "passed": true,
+          "evidence": "no people-search error",
+          "score": null
+        },
+        {
+          "id": "tw_company_match_skipped",
+          "passed": false,
+          "evidence": "enrichment was used without an identify step confirming the company",
+          "score": null
+        },
+        {
+          "id": "tw_claimed_success_on_failure",
+          "passed": true,
+          "evidence": "ok",
+          "score": null
+        }
+      ],
+      "violations": [
+        "tw_company_match_skipped"
+      ]
+    }
+  },
+  {
+    "run": {
+      "run_id": "run_6184e1221af2",
+      "trace_id": "ebc97ed2259927b97a4e18c3f0af808b",
+      "input": {
+        "domain": "supabase.com"
+      },
+      "prompt_version": "v3",
+      "bug_flags": {
+        "swallow_tool_errors": true
+      },
+      "steps": [
+        {
+          "index": 0,
+          "kind": "tool",
+          "name": "crustdata.company_enrich",
+          "args": {
+            "domain": "supabase.com"
+          },
+          "result": {
+            "company_id": 623126,
+            "domain": "supabase.com",
+            "headcount": 439,
+            "matched_by": "domain",
+            "name": "Supabase"
+          },
+          "error": null,
+          "latency_ms": 1328.0,
+          "cost_usd": 0.0,
+          "synthetic": false
+        },
+        {
+          "index": 1,
+          "kind": "tool",
+          "name": "crustdata.people_search",
+          "args": {
+            "company": "Supabase",
+            "limit": 10
+          },
+          "result": [
+            {
+              "name": "Paul Copplestone",
+              "title": "CEO & Co-Founder"
+            },
+            {
+              "name": "Ant Wilson",
+              "title": "Co-Founder & CTO"
+            },
+            {
+              "name": "Kris Talajic",
+              "title": "Head of Sales, AMER"
+            },
+            {
+              "name": "Nate A.",
+              "title": "VP of Sales"
+            },
+            {
+              "name": "Oliver R.",
+              "title": "Head of Engineering"
+            },
+            {
+              "name": "Harold Gim\u00e9nez",
+              "title": "VP of Engineering, Product and Design"
+            },
+            {
+              "name": "Sean Thompson",
+              "title": "Head of EMEA Sales"
+            },
+            {
+              "name": "Aaron Brooks",
+              "title": "Head of Engineering Operations"
+            }
+          ],
+          "error": null,
+          "latency_ms": 1047.0,
+          "cost_usd": 0.0,
+          "synthetic": false
+        },
+        {
+          "index": 2,
+          "kind": "tool",
+          "name": "crustdata.jobs",
+          "args": {
+            "company_id": 623126,
+            "limit": 10
+          },
+          "result": [
+            {
+              "date_added": "2026-08-21T07:55:44",
+              "title": "Developer Relations Engineer"
+            },
+            {
+              "date_added": "2026-08-21T01:56:18",
+              "title": "Developer Relations Engineer (New York, NY)"
+            },
+            {
+              "date_added": "2026-08-21T01:56:12",
+              "title": "Developer Relations Engineer (London, UK)"
+            },
+            {
+              "date_added": "2026-08-18T20:01:03",
+              "title": "Partner Operations & Systems Lead"
+            },
+            {
+              "date_added": "2026-08-18T20:00:48",
+              "title": "Partnerships Lead (APAC)"
+            },
+            {
+              "date_added": "2026-08-17T19:56:36",
+              "title": "Field Marketing Manager, Startups"
+            },
+            {
+              "date_added": "2026-08-07T19:59:05",
+              "title": "Strategic Partner Manager"
+            },
+            {
+              "date_added": "2026-07-23T19:55:53",
+              "title": "Event Programs Manager, Developer Community & Ecosystem"
+            },
+            {
+              "date_added": "2026-06-26T02:03:02",
+              "title": "Field & Events Marketing Manager"
+            },
+            {
+              "date_added": "2026-06-26T02:02:52",
+              "title": "Field & Events Marketing Manager"
+            }
+          ],
+          "error": null,
+          "latency_ms": 1063.0,
+          "cost_usd": 0.0,
+          "synthetic": false
+        },
+        {
+          "index": 3,
+          "kind": "llm",
+          "name": "llm.brief",
+          "args": {
+            "input_chars": 1682
+          },
+          "result": {
+            "text": "{\"company_name\": \"Supabase\", \"company_match_confirmed\": true, \"headcount\": 439, \"hiring_signals\": [\"Hiring multiple Developer Relations Engineers across remote, New York, and London, indicating investment in developer community and ecosystem growth.\", \"Building out partnerships organization with roles including Partnerships Lead (APAC), Strategic Partner Manager, and Partner Operations & Systems Lead.\", \"Expanding field and event marketing with Field Marketing Manager, Startups and Field & Events Marketing Manager roles, plus an Event Programs Manager for developer community and ecosystem.\"], \"decision_makers\": [{\"name\": \"Paul Copplestone\", \"title\": \"CEO & Co-Founder\", \"linkedin_url\": null, \"source_step_index\": 1}, {\"name\": \"Ant Wilson\", \"title\": \"Co-Founder & CTO\", \"linkedin_url\": null, \"source_step_index\": 1}, {\"name\": \"Nate A.\", \"title\": \"VP of Sales\", \"linkedin_url\": null, \"source_step_index\": 1}, {\"name\": \"Kris Talajic\", \"title\": \"Head of Sales, AMER\", \"linkedin_url\": null, \"source_step_index\": 1}, {\"name\": \"Sean Thompson\", \"title\": \"Head of EMEA Sales\", \"linkedin_url\": null, \"source_step_index\": 1}, {\"name\": \"Harold Gim\u00e9nez\", \"title\": \"VP of Engineering, Product and Design\", \"linkedin_url\": null, \"source_step_index\": 1}, {\"name\": \"Oliver R.\", \"title\": \"Head of Engineering\", \"linkedin_url\": null, \"source_step_index\": 1}, {\"name\": \"Aaron Brooks\", \"title\": \"Head of Engineering Operations\", \"linkedin_url\": null, \"source_step_index\": 1}], \"summary\": \"The trusted domain lookup returned Supabase (supabase.com), confirmed by domain match, with 439 employees. People search surfaced senior leadership across sales, engineering, and founding roles. Recent job postings show hiring momentum in developer relations, partnerships, and field/event marketing. All tool calls returned successfully; no data is unavailable for the requested lookups.\", \"no_decision_makers_reason\": null}"
+          },
+          "error": null,
+          "latency_ms": 6031.0,
+          "cost_usd": 0.0017055,
+          "synthetic": false
+        }
+      ],
+      "output": {
+        "domain": "supabase.com",
+        "company_name": "Supabase",
+        "company_match_confirmed": true,
+        "headcount": 439,
+        "hiring_signals": [
+          "Hiring multiple Developer Relations Engineers across remote, New York, and London, indicating investment in developer community and ecosystem growth.",
+          "Building out partnerships organization with roles including Partnerships Lead (APAC), Strategic Partner Manager, and Partner Operations & Systems Lead.",
+          "Expanding field and event marketing with Field Marketing Manager, Startups and Field & Events Marketing Manager roles, plus an Event Programs Manager for developer community and ecosystem."
+        ],
+        "decision_makers": [
+          {
+            "name": "Paul Copplestone",
+            "title": "CEO & Co-Founder",
+            "linkedin_url": null,
+            "source_step_index": 1
+          },
+          {
+            "name": "Ant Wilson",
+            "title": "Co-Founder & CTO",
+            "linkedin_url": null,
+            "source_step_index": 1
+          },
+          {
+            "name": "Nate A.",
+            "title": "VP of Sales",
+            "linkedin_url": null,
+            "source_step_index": 1
+          },
+          {
+            "name": "Kris Talajic",
+            "title": "Head of Sales, AMER",
+            "linkedin_url": null,
+            "source_step_index": 1
+          },
+          {
+            "name": "Sean Thompson",
+            "title": "Head of EMEA Sales",
+            "linkedin_url": null,
+            "source_step_index": 1
+          },
+          {
+            "name": "Harold Gim\u00e9nez",
+            "title": "VP of Engineering, Product and Design",
+            "linkedin_url": null,
+            "source_step_index": 1
+          },
+          {
+            "name": "Oliver R.",
+            "title": "Head of Engineering",
+            "linkedin_url": null,
+            "source_step_index": 1
+          },
+          {
+            "name": "Aaron Brooks",
+            "title": "Head of Engineering Operations",
+            "linkedin_url": null,
+            "source_step_index": 1
+          }
+        ],
+        "summary": "The trusted domain lookup returned Supabase (supabase.com), confirmed by domain match, with 439 employees. People search surfaced senior leadership across sales, engineering, and founding roles. Recent job postings show hiring momentum in developer relations, partnerships, and field/event marketing. All tool calls returned successfully; no data is unavailable for the requested lookups.",
+        "no_decision_makers_reason": null
+      },
+      "total_cost_usd": 0.0017055,
+      "simulated": false,
+      "started_at": "2026-10-11T11:28:51.252Z",
+      "ended_at": "2026-10-11T11:28:57.294Z"
+    },
+    "score": {
+      "run_id": "run_6184e1221af2",
+      "checks": [
+        {
+          "id": "tw_invented_person",
+          "passed": true,
+          "evidence": "every contact appears in a people-search result",
+          "score": null
+        },
+        {
+          "id": "tw_empty_after_error",
+          "passed": true,
+          "evidence": "no people-search error",
+          "score": null
+        },
+        {
+          "id": "tw_company_match_skipped",
+          "passed": false,
+          "evidence": "enrichment was used without an identify step confirming the company",
+          "score": null
+        },
+        {
+          "id": "tw_claimed_success_on_failure",
+          "passed": true,
+          "evidence": "ok",
+          "score": null
+        }
+      ],
+      "violations": [
+        "tw_company_match_skipped"
+      ]
+    }
+  },
+  {
+    "run": {
+      "run_id": "run_60c5830986a3",
+      "trace_id": "256c541672aa0a645c8e120ebf1d2753",
+      "input": {
+        "domain": "trigger.dev"
+      },
+      "prompt_version": "v3",
+      "bug_flags": {
+        "swallow_tool_errors": true
+      },
+      "steps": [
+        {
+          "index": 0,
+          "kind": "tool",
+          "name": "crustdata.company_enrich",
+          "args": {
+            "domain": "trigger.dev"
+          },
+          "result": {
+            "company_id": 810164,
+            "domain": "trigger.dev",
+            "headcount": 15,
+            "matched_by": "domain",
+            "name": "Trigger.dev"
+          },
+          "error": null,
+          "latency_ms": 1078.0,
+          "cost_usd": 0.0,
+          "synthetic": false
+        },
+        {
+          "index": 1,
+          "kind": "tool",
+          "name": "crustdata.people_search",
+          "args": {
+            "company": "Trigger.dev",
+            "limit": 10
+          },
+          "result": [
+            {
+              "name": "Matt Aitken",
+              "title": "Founder, CEO"
+            },
+            {
+              "name": "Daniel P.",
+              "title": "Co-founder"
+            },
+            {
+              "name": "James Ritchie",
+              "title": "Founder"
+            },
+            {
+              "name": "Eric Allam",
+              "title": "Founder & CTO of Trigger.dev"
+            }
+          ],
+          "error": null,
+          "latency_ms": 1031.0,
+          "cost_usd": 0.0,
+          "synthetic": false
+        },
+        {
+          "index": 2,
+          "kind": "tool",
+          "name": "crustdata.jobs",
+          "args": {
+            "company_id": 810164,
+            "limit": 10
+          },
+          "result": [
+            {
+              "date_added": "2026-09-23T00:00:00",
+              "title": "Backend Engineer (Security)"
+            },
+            {
+              "date_added": "2026-09-23T00:00:00",
+              "title": "Technical Recruiter (3 month FTC, Temp to Perm)"
+            },
+            {
+              "date_added": "2026-09-16T00:00:00",
+              "title": "Design Engineer"
+            },
+            {
+              "date_added": "2026-09-16T00:00:00",
+              "title": "Senior Backend Engineer (Europe) "
+            },
+            {
+              "date_added": "2026-09-16T00:00:00",
+              "title": "DevRel (SF Events)"
+            },
+            {
+              "date_added": "2026-09-16T00:00:00",
+              "title": "Marketing Lead"
+            },
+            {
+              "date_added": null,
+              "title": "Technical Content Engineer"
+            },
+            {
+              "date_added": null,
+              "title": "Senior Site Reliability Engineer (Europe)"
+            }
+          ],
+          "error": null,
+          "latency_ms": 969.0,
+          "cost_usd": 0.0,
+          "synthetic": false
+        },
+        {
+          "index": 3,
+          "kind": "llm",
+          "name": "llm.brief",
+          "args": {
+            "input_chars": 1147
+          },
+          "result": {
+            "text": "{\"company_name\": \"Trigger.dev\", \"company_match_confirmed\": true, \"headcount\": 15, \"hiring_signals\": [\"Backend Engineer (Security) posted 2026-09-23, indicating investment in security-focused backend work\", \"Technical Recruiter (3 month FTC, temp to perm) posted 2026-09-23, suggesting the team is scaling hiring capacity\", \"Design Engineer and DevRel (SF Events) posted 2026-09-16, pointing to product/design and developer-community growth\", \"Senior Backend Engineer (Europe) and Senior Site Reliability Engineer (Europe) open, showing continued engineering and infrastructure expansion\"], \"decision_makers\": [{\"name\": \"Matt Aitken\", \"title\": \"Founder, CEO\", \"linkedin_url\": null, \"source_step_index\": 1}, {\"name\": \"Daniel P.\", \"title\": \"Co-founder\", \"linkedin_url\": null, \"source_step_index\": 1}, {\"name\": \"James Ritchie\", \"title\": \"Founder\", \"linkedin_url\": null, \"source_step_index\": 1}, {\"name\": \"Eric Allam\", \"title\": \"Founder & CTO of Trigger.dev\", \"linkedin_url\": null, \"source_step_index\": 1}], \"summary\": \"Trigger.dev is a 15-person company (matched by domain trigger.dev). The domain lookup returned a company record, so the match is confirmed. The people search returned four founder-level contacts: Matt Aitken (Founder, CEO), Daniel P. (Co-founder), James Ritchie (Founder), and Eric Allam (Founder & CTO). Open roles span backend engineering with a security focus, design engineering, DevRel, marketing, technical recruiting, and European senior backend/SRE positions, indicating broad growth across engineering, go-to-market, and hiring functions. No LinkedIn URLs were included in the people-search results.\"}"
+          },
+          "error": null,
+          "latency_ms": 2469.0,
+          "cost_usd": 0.0007746,
+          "synthetic": false
+        }
+      ],
+      "output": {
+        "domain": "trigger.dev",
+        "company_name": "Trigger.dev",
+        "company_match_confirmed": true,
+        "headcount": 15,
+        "hiring_signals": [
+          "Backend Engineer (Security) posted 2026-09-23, indicating investment in security-focused backend work",
+          "Technical Recruiter (3 month FTC, temp to perm) posted 2026-09-23, suggesting the team is scaling hiring capacity",
+          "Design Engineer and DevRel (SF Events) posted 2026-09-16, pointing to product/design and developer-community growth",
+          "Senior Backend Engineer (Europe) and Senior Site Reliability Engineer (Europe) open, showing continued engineering and infrastructure expansion"
+        ],
+        "decision_makers": [
+          {
+            "name": "Matt Aitken",
+            "title": "Founder, CEO",
+            "linkedin_url": null,
+            "source_step_index": 1
+          },
+          {
+            "name": "Daniel P.",
+            "title": "Co-founder",
+            "linkedin_url": null,
+            "source_step_index": 1
+          },
+          {
+            "name": "James Ritchie",
+            "title": "Founder",
+            "linkedin_url": null,
+            "source_step_index": 1
+          },
+          {
+            "name": "Eric Allam",
+            "title": "Founder & CTO of Trigger.dev",
+            "linkedin_url": null,
+            "source_step_index": 1
+          }
+        ],
+        "summary": "Trigger.dev is a 15-person company (matched by domain trigger.dev). The domain lookup returned a company record, so the match is confirmed. The people search returned four founder-level contacts: Matt Aitken (Founder, CEO), Daniel P. (Co-founder), James Ritchie (Founder), and Eric Allam (Founder & CTO). Open roles span backend engineering with a security focus, design engineering, DevRel, marketing, technical recruiting, and European senior backend/SRE positions, indicating broad growth across engineering, go-to-market, and hiring functions. No LinkedIn URLs were included in the people-search results.",
+        "no_decision_makers_reason": null
+      },
+      "total_cost_usd": 0.0007746,
+      "simulated": false,
+      "started_at": "2026-10-11T11:28:46.770Z",
+      "ended_at": "2026-10-11T11:28:49.247Z"
+    },
+    "score": {
+      "run_id": "run_60c5830986a3",
+      "checks": [
+        {
+          "id": "tw_invented_person",
+          "passed": true,
+          "evidence": "every contact appears in a people-search result",
+          "score": null
+        },
+        {
+          "id": "tw_empty_after_error",
+          "passed": true,
+          "evidence": "no people-search error",
+          "score": null
+        },
+        {
+          "id": "tw_company_match_skipped",
+          "passed": false,
+          "evidence": "enrichment was used without an identify step confirming the company",
+          "score": null
+        },
+        {
+          "id": "tw_claimed_success_on_failure",
+          "passed": true,
+          "evidence": "ok",
+          "score": null
+        }
+      ],
+      "violations": [
+        "tw_company_match_skipped"
+      ]
+    }
+  },
+  {
+    "run": {
+      "run_id": "run_a512bb588c90",
+      "trace_id": "9e17a6fc3327801b91103869c3011edc",
+      "input": {
+        "domain": "posthog.com"
+      },
+      "prompt_version": "v3",
+      "bug_flags": {
+        "swallow_tool_errors": true
+      },
+      "steps": [
+        {
+          "index": 0,
+          "kind": "tool",
+          "name": "crustdata.company_enrich",
+          "args": {
+            "domain": "posthog.com"
+          },
+          "result": {
+            "company_id": 634503,
+            "domain": "posthog.com",
+            "headcount": 224,
+            "matched_by": "domain",
+            "name": "PostHog"
+          },
+          "error": null,
+          "latency_ms": 1062.0,
+          "cost_usd": 0.0,
+          "synthetic": false
+        },
+        {
+          "index": 1,
+          "kind": "tool",
+          "name": "crustdata.people_search",
+          "args": {
+            "company": "PostHog",
+            "limit": 10
+          },
+          "result": [
+            {
+              "name": "Tim Glaser",
+              "title": "building stuff, co-ceo"
+            },
+            {
+              "name": "James Hawkins",
+              "title": "co-ceo"
+            },
+            {
+              "name": "Mustafa Sas",
+              "title": "Co-Founder"
+            }
+          ],
+          "error": null,
+          "latency_ms": 1125.0,
+          "cost_usd": 0.0,
+          "synthetic": false
+        },
+        {
+          "index": 2,
+          "kind": "tool",
+          "name": "crustdata.jobs",
+          "args": {
+            "company_id": 634503,
+            "limit": 10
+          },
+          "result": [
+            {
+              "date_added": "2026-09-13T01:11:18",
+              "title": "Security Engineer"
+            },
+            {
+              "date_added": "2026-08-26T01:11:27",
+              "title": "ClickHouse Operations Engineer"
+            },
+            {
+              "date_added": "2026-08-22T01:11:20",
+              "title": "UX Engineer"
+            },
+            {
+              "date_added": "2026-05-26T19:56:16",
+              "title": "Onboarding Engineer"
+            },
+            {
+              "date_added": "2026-03-18T13:13:48",
+              "title": "ClickHouse Operations Engineer"
+            },
+            {
+              "date_added": "2025-12-10T23:17:23",
+              "title": "Influencer Wrangler"
+            },
+            {
+              "date_added": null,
+              "title": "Security Engineer"
+            },
+            {
+              "date_added": null,
+              "title": "Sales Lead"
+            },
+            {
+              "date_added": null,
+              "title": "Product Manager (ex-founder or ex-product engineer)"
+            },
+            {
+              "date_added": null,
+              "title": "ClickHouse Operations Engineer "
+            }
+          ],
+          "error": null,
+          "latency_ms": 1078.0,
+          "cost_usd": 0.0,
+          "synthetic": false
+        },
+        {
+          "index": 3,
+          "kind": "llm",
+          "name": "llm.brief",
+          "args": {
+            "input_chars": 1173
+          },
+          "result": {
+            "text": "{\"company_name\": \"PostHog\", \"company_match_confirmed\": true, \"headcount\": 224, \"hiring_signals\": [\"Security Engineer (posted 2026-09-13)\", \"ClickHouse Operations Engineer (posted 2026-08-26, plus another posting dated 2026-03-18 and an undated listing)\", \"UX Engineer (posted 2026-08-22)\", \"Onboarding Engineer (posted 2026-05-26)\"], \"decision_makers\": [{\"name\": \"Tim Glaser\", \"title\": \"building stuff, co-ceo\", \"linkedin_url\": null, \"source_step_index\": 1}, {\"name\": \"James Hawkins\", \"title\": \"co-ceo\", \"linkedin_url\": null, \"source_step_index\": 1}, {\"name\": \"Mustafa Sas\", \"title\": \"Co-Founder\", \"linkedin_url\": null, \"source_step_index\": 1}], \"summary\": \"PostHog is a 224-person company (domain match confirmed via posthog.com). The people search returned three contacts, including two co-CEOs and a co-founder. Job postings indicate active hiring across security, ClickHouse operations, UX, and onboarding engineering roles, plus a Sales Lead listing.\", \"no_decision_makers_reason\": null}"
+          },
+          "error": null,
+          "latency_ms": 5563.0,
+          "cost_usd": 0.00078,
+          "synthetic": false
+        }
+      ],
+      "output": {
+        "domain": "posthog.com",
+        "company_name": "PostHog",
+        "company_match_confirmed": true,
+        "headcount": 224,
+        "hiring_signals": [
+          "Security Engineer (posted 2026-09-13)",
+          "ClickHouse Operations Engineer (posted 2026-08-26, plus another posting dated 2026-03-18 and an undated listing)",
+          "UX Engineer (posted 2026-08-22)",
+          "Onboarding Engineer (posted 2026-05-26)"
+        ],
+        "decision_makers": [
+          {
+            "name": "Tim Glaser",
+            "title": "building stuff, co-ceo",
+            "linkedin_url": null,
+            "source_step_index": 1
+          },
+          {
+            "name": "James Hawkins",
+            "title": "co-ceo",
+            "linkedin_url": null,
+            "source_step_index": 1
+          },
+          {
+            "name": "Mustafa Sas",
+            "title": "Co-Founder",
+            "linkedin_url": null,
+            "source_step_index": 1
+          }
+        ],
+        "summary": "PostHog is a 224-person company (domain match confirmed via posthog.com). The people search returned three contacts, including two co-CEOs and a co-founder. Job postings indicate active hiring across security, ClickHouse operations, UX, and onboarding engineering roles, plus a Sales Lead listing.",
+        "no_decision_makers_reason": null
+      },
+      "total_cost_usd": 0.00078,
+      "simulated": false,
+      "started_at": "2026-10-11T11:28:39.199Z",
+      "ended_at": "2026-10-11T11:28:44.764Z"
+    },
+    "score": {
+      "run_id": "run_a512bb588c90",
+      "checks": [
+        {
+          "id": "tw_invented_person",
+          "passed": true,
+          "evidence": "every contact appears in a people-search result",
+          "score": null
+        },
+        {
+          "id": "tw_empty_after_error",
+          "passed": true,
+          "evidence": "no people-search error",
+          "score": null
+        },
+        {
+          "id": "tw_company_match_skipped",
+          "passed": false,
+          "evidence": "enrichment was used without an identify step confirming the company",
+          "score": null
+        },
+        {
+          "id": "tw_claimed_success_on_failure",
+          "passed": true,
+          "evidence": "ok",
+          "score": null
+        }
+      ],
+      "violations": [
+        "tw_company_match_skipped"
+      ]
+    }
+  },
+  {
+    "run": {
+      "run_id": "run_aab4ec684362",
+      "trace_id": "4d94eac68eb0c3067df286daf65297ac",
+      "input": {
+        "domain": "posthog.com"
+      },
+      "prompt_version": "v1",
+      "bug_flags": {
+        "swallow_tool_errors": true
+      },
+      "steps": [
+        {
+          "index": 0,
+          "kind": "tool",
+          "name": "crustdata.company_enrich",
+          "args": {
+            "domain": "posthog.com"
+          },
+          "result": {
+            "company_id": 634503,
+            "domain": "posthog.com",
+            "headcount": 224,
+            "matched_by": "domain",
+            "name": "PostHog"
+          },
+          "error": null,
+          "latency_ms": 1062.0,
+          "cost_usd": 0.0,
+          "synthetic": false
+        },
+        {
+          "index": 1,
+          "kind": "llm",
+          "name": "llm.identify",
+          "args": {
+            "input_chars": 149
+          },
+          "result": {
+            "text": "{\"match\": true, \"reason\": \"The enrichment record's domain posthog.com exactly matches the queried domain posthog.com.\"}"
+          },
+          "error": null,
+          "latency_ms": 859.0,
+          "cost_usd": 0.0001065,
+          "synthetic": false
+        },
+        {
+          "index": 2,
+          "kind": "tool",
+          "name": "crustdata.people_search",
+          "args": {
+            "company": "PostHog",
+            "limit": 10
+          },
+          "result": null,
+          "error": {
+            "code": "HTTP_429",
+            "message": "injected"
+          },
+          "latency_ms": null,
+          "cost_usd": 0.0,
+          "synthetic": false
+        },
+        {
+          "index": 3,
+          "kind": "tool",
+          "name": "crustdata.jobs",
+          "args": {
+            "company_id": 634503,
+            "limit": 10
+          },
+          "result": [
+            {
+              "date_added": "2026-09-13T01:11:18",
+              "title": "Security Engineer"
+            },
+            {
+              "date_added": "2026-08-26T01:11:27",
+              "title": "ClickHouse Operations Engineer"
+            },
+            {
+              "date_added": "2026-08-22T01:11:20",
+              "title": "UX Engineer"
+            },
+            {
+              "date_added": "2026-05-26T19:56:16",
+              "title": "Onboarding Engineer"
+            },
+            {
+              "date_added": "2026-03-18T13:13:48",
+              "title": "ClickHouse Operations Engineer"
+            },
+            {
+              "date_added": "2025-12-10T23:17:23",
+              "title": "Influencer Wrangler"
+            },
+            {
+              "date_added": null,
+              "title": "Security Engineer"
+            },
+            {
+              "date_added": null,
+              "title": "Sales Lead"
+            },
+            {
+              "date_added": null,
+              "title": "Product Manager (ex-founder or ex-product engineer)"
+            },
+            {
+              "date_added": null,
+              "title": "ClickHouse Operations Engineer "
+            }
+          ],
+          "error": null,
+          "latency_ms": 1078.0,
+          "cost_usd": 0.0,
+          "synthetic": false
+        },
+        {
+          "index": 4,
+          "kind": "llm",
+          "name": "llm.brief",
+          "args": {
+            "input_chars": 1022
+          },
+          "result": {
+            "text": "{\"company_name\": \"PostHog\", \"company_match_confirmed\": true, \"headcount\": 224, \"hiring_signals\": [\"Security Engineer (posted 2026-09-13)\", \"ClickHouse Operations Engineer (posted 2026-08-26 and 2026-03-18)\", \"UX Engineer (posted 2026-08-22)\", \"Onboarding Engineer (posted 2026-05-26)\"], \"decision_makers\": [], \"summary\": \"PostHog is confirmed as the company for posthog.com via the identify step. The domain-matched company record shows a headcount of 224. Job postings indicate active hiring across engineering, security, UX, and onboarding roles, including Security Engineer, ClickHouse Operations Engineer, UX Engineer, and Onboarding Engineer. The people-search step (source_step_index 2) returned no contacts, so no decision makers can be listed from the available tool results.\", \"no_decision_makers_reason\": \"The people-search step completed successfully but returned zero results, so no contacts were available to include.\"}"
+          },
+          "error": null,
+          "latency_ms": 3188.0,
+          "cost_usd": 0.0009102,
+          "synthetic": false
+        }
+      ],
+      "output": {
+        "domain": "posthog.com",
+        "company_name": "PostHog",
+        "company_match_confirmed": true,
+        "headcount": 224,
+        "hiring_signals": [
+          "Security Engineer (posted 2026-09-13)",
+          "ClickHouse Operations Engineer (posted 2026-08-26 and 2026-03-18)",
+          "UX Engineer (posted 2026-08-22)",
+          "Onboarding Engineer (posted 2026-05-26)"
+        ],
+        "decision_makers": [],
+        "summary": "PostHog is confirmed as the company for posthog.com via the identify step. The domain-matched company record shows a headcount of 224. Job postings indicate active hiring across engineering, security, UX, and onboarding roles, including Security Engineer, ClickHouse Operations Engineer, UX Engineer, and Onboarding Engineer. The people-search step (source_step_index 2) returned no contacts, so no decision makers can be listed from the available tool results.",
+        "no_decision_makers_reason": "The people-search step completed successfully but returned zero results, so no contacts were available to include."
+      },
+      "total_cost_usd": 0.0010167,
+      "simulated": false,
+      "started_at": "2026-10-11T11:28:30.510Z",
+      "ended_at": "2026-10-11T11:28:34.555Z"
+    },
+    "score": {
+      "run_id": "run_aab4ec684362",
+      "checks": [
+        {
+          "id": "tw_invented_person",
+          "passed": true,
+          "evidence": "every contact appears in a people-search result",
+          "score": null
+        },
+        {
+          "id": "tw_empty_after_error",
+          "passed": false,
+          "evidence": "people search failed (HTTP_429) but the brief reports no decision makers instead of saying the data is unavailable",
+          "score": null
+        },
+        {
+          "id": "tw_company_match_skipped",
+          "passed": true,
+          "evidence": "company confirmed before use",
+          "score": null
+        },
+        {
+          "id": "tw_claimed_success_on_failure",
+          "passed": true,
+          "evidence": "ok",
+          "score": null
+        }
+      ],
+      "violations": [
+        "tw_empty_after_error"
+      ]
+    }
+  },
+  {
+    "run": {
+      "run_id": "run_6cfe3da1137f",
+      "trace_id": "8fa099d5c8128b9e500c1d1a2d49a410",
+      "input": {
+        "domain": "figma.com"
+      },
+      "prompt_version": "v1",
+      "bug_flags": {
+        "swallow_tool_errors": true
+      },
+      "steps": [
+        {
+          "index": 0,
+          "kind": "tool",
+          "name": "crustdata.company_enrich",
+          "args": {
+            "domain": "figma.com"
+          },
+          "result": {
+            "company_id": 631408,
+            "domain": "figma.com",
+            "headcount": 3135,
+            "matched_by": "domain",
+            "name": "Figma"
+          },
+          "error": null,
+          "latency_ms": 1109.0,
+          "cost_usd": 0.0,
+          "synthetic": false
+        },
+        {
+          "index": 1,
+          "kind": "llm",
+          "name": "llm.identify",
+          "args": {
+            "input_chars": 144
+          },
+          "result": {
+            "text": "{\"match\": true, \"reason\": \"The enrichment record's primary domain is figma.com, identical to the requested domain figma.com, so the record matches.\"}"
+          },
+          "error": null,
+          "latency_ms": 781.0,
+          "cost_usd": 0.0001197,
+          "synthetic": false
+        },
+        {
+          "index": 2,
+          "kind": "tool",
+          "name": "crustdata.people_search",
+          "args": {
+            "company": "Figma",
+            "limit": 10
+          },
+          "result": [
+            {
+              "name": "Jacquie D.",
+              "title": "Senior Executive Operations Partner to Chief Information Officer"
+            },
+            {
+              "name": "Stella Hendricks",
+              "title": "Founder"
+            },
+            {
+              "name": "Kris Rasmussen",
+              "title": "Chief Architect"
+            },
+            {
+              "name": "Dylan Field",
+              "title": "CEO & Co-founder"
+            },
+            {
+              "name": "Ezekiel Trujillo",
+              "title": "Founder"
+            },
+            {
+              "name": "Jan Zeman",
+              "title": "VP, Sales Operations and Strategy"
+            },
+            {
+              "name": "Marcel Weekes",
+              "title": "VP, Product Engineering"
+            },
+            {
+              "name": "Aaron Douglas",
+              "title": "Head of Desktop App Engineering"
+            },
+            {
+              "name": "ASPOASIA BaKer",
+              "title": "Chief Executive Officer"
+            },
+            {
+              "name": "Deepak Singh",
+              "title": "Founder"
+            }
+          ],
+          "error": null,
+          "latency_ms": 1141.0,
+          "cost_usd": 0.0,
+          "synthetic": false
+        },
+        {
+          "index": 3,
+          "kind": "tool",
+          "name": "crustdata.jobs",
+          "args": {
+            "company_id": 631408,
+            "limit": 10
+          },
+          "result": [
+            {
+              "date_added": "2026-10-05T19:32:11",
+              "title": "PhD Intern, AI Applied Scientist (2027)"
+            },
+            {
+              "date_added": "2026-09-29T13:32:15",
+              "title": "Content Strategist, Product"
+            },
+            {
+              "date_added": "2026-09-28T19:32:19",
+              "title": "Corporate Communications Manager"
+            },
+            {
+              "date_added": "2026-09-28T19:32:18",
+              "title": "Corporate Communications Manager"
+            },
+            {
+              "date_added": "2026-09-28T19:32:09",
+              "title": "Manager, Tech & Ecosystem Partnerships"
+            },
+            {
+              "date_added": "2026-09-24T19:32:46",
+              "title": "Video Strategist"
+            },
+            {
+              "date_added": "2026-09-24T19:32:44",
+              "title": "Video Strategist"
+            },
+            {
+              "date_added": "2026-09-24T19:32:43",
+              "title": "Video Strategist"
+            },
+            {
+              "date_added": "2026-09-23T19:32:20",
+              "title": "Data Engineer Intern (2027)"
+            },
+            {
+              "date_added": "2026-09-23T19:32:19",
+              "title": "Data Engineer Intern (2027)"
+            }
+          ],
+          "error": null,
+          "latency_ms": 1078.0,
+          "cost_usd": 0.0,
+          "synthetic": false
+        },
+        {
+          "index": 4,
+          "kind": "llm",
+          "name": "llm.brief",
+          "args": {
+            "input_chars": 1742
+          },
+          "result": {
+            "text": "{\"company_name\": \"Figma\", \"company_match_confirmed\": true, \"headcount\": 3135, \"hiring_signals\": [\"PhD Intern, AI Applied Scientist (2027) \u2014 investment in applied AI research talent\", \"Content Strategist, Product and Video Strategist (multiple openings) \u2014 expanding product content and video marketing function\", \"Corporate Communications Manager (two postings) \u2014 scaling corporate communications\", \"Manager, Tech & Ecosystem Partnerships \u2014 building technology/ecosystem partnership motion\"], \"decision_makers\": [{\"name\": \"Dylan Field\", \"title\": \"CEO & Co-founder\", \"linkedin_url\": null, \"source_step_index\": 2}, {\"name\": \"Jan Zeman\", \"title\": \"VP, Sales Operations and Strategy\", \"linkedin_url\": null, \"source_step_index\": 2}, {\"name\": \"Marcel Weekes\", \"title\": \"VP, Product Engineering\", \"linkedin_url\": null, \"source_step_index\": 2}, {\"name\": \"Kris Rasmussen\", \"title\": \"Chief Architect\", \"linkedin_url\": null, \"source_step_index\": 2}], \"summary\": \"Figma (figma.com) was confirmed as the target company via domain match in the identify step, with a reported headcount of 3,135. The people search completed successfully and surfaced a mix of Figma leadership (CEO/co-founder, VP Sales Operations and Strategy, VP Product Engineering, Chief Architect) alongside several results whose titles (Founder, CEO at unrelated entries) do not clearly map to Figma, so only the clearly Figma-aligned leaders are listed as contacts. Hiring activity is active across AI research internships, product content and video strategy, corporate communications, and technology/ecosystem partnerships, suggesting investment in AI talent, content/marketing scale-up, and partner ecosystem growth. LinkedIn URLs were not returned by the people search tool, so those fields are null.\", \"no_decision_makers_reason\": null}"
+          },
+          "error": null,
+          "latency_ms": 3547.0,
+          "cost_usd": 0.0010047,
+          "synthetic": false
+        }
+      ],
+      "output": {
+        "domain": "figma.com",
+        "company_name": "Figma",
+        "company_match_confirmed": true,
+        "headcount": 3135,
+        "hiring_signals": [
+          "PhD Intern, AI Applied Scientist (2027) \u2014 investment in applied AI research talent",
+          "Content Strategist, Product and Video Strategist (multiple openings) \u2014 expanding product content and video marketing function",
+          "Corporate Communications Manager (two postings) \u2014 scaling corporate communications",
+          "Manager, Tech & Ecosystem Partnerships \u2014 building technology/ecosystem partnership motion"
+        ],
+        "decision_makers": [
+          {
+            "name": "Dylan Field",
+            "title": "CEO & Co-founder",
+            "linkedin_url": null,
+            "source_step_index": 2
+          },
+          {
+            "name": "Jan Zeman",
+            "title": "VP, Sales Operations and Strategy",
+            "linkedin_url": null,
+            "source_step_index": 2
+          },
+          {
+            "name": "Marcel Weekes",
+            "title": "VP, Product Engineering",
+            "linkedin_url": null,
+            "source_step_index": 2
+          },
+          {
+            "name": "Kris Rasmussen",
+            "title": "Chief Architect",
+            "linkedin_url": null,
+            "source_step_index": 2
+          }
+        ],
+        "summary": "Figma (figma.com) was confirmed as the target company via domain match in the identify step, with a reported headcount of 3,135. The people search completed successfully and surfaced a mix of Figma leadership (CEO/co-founder, VP Sales Operations and Strategy, VP Product Engineering, Chief Architect) alongside several results whose titles (Founder, CEO at unrelated entries) do not clearly map to Figma, so only the clearly Figma-aligned leaders are listed as contacts. Hiring activity is active across AI research internships, product content and video strategy, corporate communications, and technology/ecosystem partnerships, suggesting investment in AI talent, content/marketing scale-up, and partner ecosystem growth. LinkedIn URLs were not returned by the people search tool, so those fields are null.",
+        "no_decision_makers_reason": null
+      },
+      "total_cost_usd": 0.0011244,
+      "simulated": false,
+      "started_at": "2026-10-11T11:28:24.180Z",
+      "ended_at": "2026-10-11T11:28:28.506Z"
+    },
+    "score": {
+      "run_id": "run_6cfe3da1137f",
+      "checks": [
+        {
+          "id": "tw_invented_person",
+          "passed": true,
+          "evidence": "every contact appears in a people-search result",
+          "score": null
+        },
+        {
+          "id": "tw_empty_after_error",
+          "passed": true,
+          "evidence": "no people-search error",
+          "score": null
+        },
+        {
+          "id": "tw_company_match_skipped",
+          "passed": true,
+          "evidence": "company confirmed before use",
+          "score": null
+        },
+        {
+          "id": "tw_claimed_success_on_failure",
+          "passed": true,
+          "evidence": "ok",
+          "score": null
+        }
+      ],
+      "violations": []
+    }
+  },
+  {
+    "run": {
+      "run_id": "run_03e603181a92",
+      "trace_id": "6fb0cdde8ddb1b14010c694e64c0b972",
+      "input": {
+        "domain": "notion.so"
+      },
+      "prompt_version": "v1",
+      "bug_flags": {
+        "swallow_tool_errors": true
+      },
+      "steps": [
+        {
+          "index": 0,
+          "kind": "tool",
+          "name": "crustdata.company_enrich",
+          "args": {
+            "domain": "notion.so"
+          },
+          "result": {
+            "company_id": 2937401,
+            "domain": "notion.online",
+            "headcount": 39,
+            "matched_by": "name",
+            "name": "NOTION"
+          },
+          "error": null,
+          "latency_ms": 2531.0,
+          "cost_usd": 0.0,
+          "synthetic": false
+        },
+        {
+          "index": 1,
+          "kind": "llm",
+          "name": "llm.identify",
+          "args": {
+            "input_chars": 146
+          },
+          "result": {
+            "text": "{\"match\": false, \"reason\": \"The enrichment record has primary domain notion.online, which does not match the requested domain notion.so.\"}"
+          },
+          "error": null,
+          "latency_ms": 1218.0,
+          "cost_usd": 0.0001524,
+          "synthetic": false
+        },
+        {
+          "index": 2,
+          "kind": "llm",
+          "name": "llm.brief",
+          "args": {
+            "input_chars": 302
+          },
+          "result": {
+            "text": "{\"company_name\": null, \"company_match_confirmed\": false, \"headcount\": null, \"hiring_signals\": [], \"decision_makers\": [], \"summary\": \"The company could not be confirmed for domain notion.so. The identify step returned a record that does not match this domain, so no verified company profile is available and no description of the organization should be relied on. Because the company was never confirmed, downstream research was skipped: the people search and the job postings lookup were both left unsearched, meaning there is no contact data and no hiring-signal data to report. This is a gap in coverage, not evidence that the company has no decision makers or no open roles. To proceed, re-run identification against notion.so to resolve the mismatched record, then rerun the people search and job postings steps.\", \"no_decision_makers_reason\": \"The people search was never executed (status: not searched) because the company was not confirmed, so contact data is unavailable \u2014 this is not a finding that no decision makers exist.\"}"
+          },
+          "error": null,
+          "latency_ms": 2391.0,
+          "cost_usd": 0.0004911,
+          "synthetic": false
+        }
+      ],
+      "output": {
+        "domain": "notion.so",
+        "company_name": null,
+        "company_match_confirmed": false,
+        "headcount": null,
+        "hiring_signals": [],
+        "decision_makers": [],
+        "summary": "The company could not be confirmed for domain notion.so. The identify step returned a record that does not match this domain, so no verified company profile is available and no description of the organization should be relied on. Because the company was never confirmed, downstream research was skipped: the people search and the job postings lookup were both left unsearched, meaning there is no contact data and no hiring-signal data to report. This is a gap in coverage, not evidence that the company has no decision makers or no open roles. To proceed, re-run identification against notion.so to resolve the mismatched record, then rerun the people search and job postings steps.",
+        "no_decision_makers_reason": "The people search was never executed (status: not searched) because the company was not confirmed, so contact data is unavailable \u2014 this is not a finding that no decision makers exist."
+      },
+      "total_cost_usd": 0.0006435,
+      "simulated": false,
+      "started_at": "2026-10-11T11:28:18.553Z",
+      "ended_at": "2026-10-11T11:28:22.168Z"
+    },
+    "score": {
+      "run_id": "run_03e603181a92",
+      "checks": [
+        {
+          "id": "tw_invented_person",
+          "passed": true,
+          "evidence": "every contact appears in a people-search result",
+          "score": null
+        },
+        {
+          "id": "tw_empty_after_error",
+          "passed": true,
+          "evidence": "no people-search error",
+          "score": null
+        },
+        {
+          "id": "tw_company_match_skipped",
+          "passed": true,
+          "evidence": "company confirmed before use",
+          "score": null
+        },
+        {
+          "id": "tw_claimed_success_on_failure",
+          "passed": true,
+          "evidence": "ok",
+          "score": null
+        }
+      ],
+      "violations": []
+    }
+  },
+  {
+    "run": {
+      "run_id": "run_7b153157118e",
+      "trace_id": "a9bf26721989b692e38559fabc653fb8",
+      "input": {
+        "domain": "notion.com"
+      },
+      "prompt_version": "v1",
+      "bug_flags": {
+        "swallow_tool_errors": true
+      },
+      "steps": [
+        {
+          "index": 0,
+          "kind": "tool",
+          "name": "crustdata.company_enrich",
+          "args": {
+            "domain": "notion.com"
+          },
+          "result": {
+            "company_id": 18046,
+            "domain": "intro.ooo",
+            "headcount": 4,
+            "matched_by": "domain",
+            "name": "intro"
+          },
+          "error": null,
+          "latency_ms": 1250.0,
+          "cost_usd": 0.0,
+          "synthetic": false
+        },
+        {
+          "index": 1,
+          "kind": "llm",
+          "name": "llm.identify",
+          "args": {
+            "input_chars": 141
+          },
+          "result": {
+            "text": "{\"match\": false, \"reason\": \"The enrichment record's primary domain is intro.ooo, which does not match the requested domain notion.com.\"}"
+          },
+          "error": null,
+          "latency_ms": 813.0,
+          "cost_usd": 0.0001395,
+          "synthetic": false
+        },
+        {
+          "index": 2,
+          "kind": "llm",
+          "name": "llm.brief",
+          "args": {
+            "input_chars": 303
+          },
+          "result": {
+            "text": "{\"company_name\": null, \"company_match_confirmed\": false, \"headcount\": null, \"hiring_signals\": [], \"decision_makers\": [], \"summary\": \"No usable company profile was produced for notion.com. The company-identification step returned a record, but that record does not match the notion.com domain, so the company could not be confirmed (company_confirmed_by_identify_step: false). Per the sourcing rules, an unconfirmed company is not described here. Because the company was never confirmed, the people search and job-postings steps were not run (status: 'not searched'), so contact and hiring data are unavailable rather than absent \u2014 no hiring signals or decision makers can be reported from these tool results.\", \"no_decision_makers_reason\": \"People search was never executed (status: 'not searched') because the company-identification step failed to confirm a record matching the notion.com domain. With no people-search results to cite, no contacts can be listed; this is missing data, not evidence that no decision makers exist.\"}"
+          },
+          "error": null,
+          "latency_ms": 2109.0,
+          "cost_usd": 0.0005427,
+          "synthetic": false
+        }
+      ],
+      "output": {
+        "domain": "notion.com",
+        "company_name": null,
+        "company_match_confirmed": false,
+        "headcount": null,
+        "hiring_signals": [],
+        "decision_makers": [],
+        "summary": "No usable company profile was produced for notion.com. The company-identification step returned a record, but that record does not match the notion.com domain, so the company could not be confirmed (company_confirmed_by_identify_step: false). Per the sourcing rules, an unconfirmed company is not described here. Because the company was never confirmed, the people search and job-postings steps were not run (status: 'not searched'), so contact and hiring data are unavailable rather than absent \u2014 no hiring signals or decision makers can be reported from these tool results.",
+        "no_decision_makers_reason": "People search was never executed (status: 'not searched') because the company-identification step failed to confirm a record matching the notion.com domain. With no people-search results to cite, no contacts can be listed; this is missing data, not evidence that no decision makers exist."
+      },
+      "total_cost_usd": 0.0006822,
+      "simulated": false,
+      "started_at": "2026-10-11T11:28:13.621Z",
+      "ended_at": "2026-10-11T11:28:16.544Z"
+    },
+    "score": {
+      "run_id": "run_7b153157118e",
+      "checks": [
+        {
+          "id": "tw_invented_person",
+          "passed": true,
+          "evidence": "every contact appears in a people-search result",
+          "score": null
+        },
+        {
+          "id": "tw_empty_after_error",
+          "passed": true,
+          "evidence": "no people-search error",
+          "score": null
+        },
+        {
+          "id": "tw_company_match_skipped",
+          "passed": true,
+          "evidence": "company confirmed before use",
+          "score": null
+        },
+        {
+          "id": "tw_claimed_success_on_failure",
+          "passed": true,
+          "evidence": "ok",
+          "score": null
+        }
+      ],
+      "violations": []
+    }
+  },
+  {
+    "run": {
+      "run_id": "run_70cb7e6013c8",
+      "trace_id": "1f9ec06ec0d5762e2d56c234f906c9d6",
+      "input": {
+        "domain": "notion.so"
+      },
+      "prompt_version": "v1",
+      "bug_flags": {
+        "swallow_tool_errors": true
+      },
+      "steps": [
+        {
+          "index": 0,
+          "kind": "tool",
+          "name": "crustdata.company_enrich",
+          "args": {
+            "domain": "notion.so"
+          },
+          "result": {
+            "company_id": 2937401,
+            "domain": "notion.online",
+            "headcount": 39,
+            "matched_by": "name",
+            "name": "NOTION"
+          },
+          "error": null,
+          "latency_ms": 2531.0,
+          "cost_usd": 0.0,
+          "synthetic": false
+        },
+        {
+          "index": 1,
+          "kind": "llm",
+          "name": "llm.identify",
+          "args": {
+            "input_chars": 146
+          },
+          "result": {
+            "text": "{\"match\": false, \"reason\": \"The enrichment record's primary domain is notion.online, which does not match the requested domain notion.so.\"}"
+          },
+          "error": null,
+          "latency_ms": 1094.0,
+          "cost_usd": 0.0001572,
+          "synthetic": false
+        },
+        {
+          "index": 2,
+          "kind": "llm",
+          "name": "llm.brief",
+          "args": {
+            "input_chars": 302
+          },
+          "result": {
+            "text": "{\"company_name\": null, \"company_match_confirmed\": false, \"headcount\": null, \"hiring_signals\": [], \"decision_makers\": [], \"summary\": \"We could not confirm this company. A company record was returned for the notion.so lookup, but it does not match the domain we searched, so the identity of the account is unverified and we are not describing it here. Because the company was never confirmed, the downstream steps were not run: no people search was performed and no job postings were pulled, so headcount, contacts, and hiring signals are all unavailable rather than empty.\", \"no_decision_makers_reason\": \"No decision makers can be listed. The people-search step was never run (status: not searched) because the company could not be confirmed against notion.so, so there are no people results to cite. This is a data-availability gap, not evidence that the company has no decision makers.\"}"
+          },
+          "error": null,
+          "latency_ms": 1765.0,
+          "cost_usd": 0.0004167,
+          "synthetic": false
+        }
+      ],
+      "output": {
+        "domain": "notion.so",
+        "company_name": null,
+        "company_match_confirmed": false,
+        "headcount": null,
+        "hiring_signals": [],
+        "decision_makers": [],
+        "summary": "We could not confirm this company. A company record was returned for the notion.so lookup, but it does not match the domain we searched, so the identity of the account is unverified and we are not describing it here. Because the company was never confirmed, the downstream steps were not run: no people search was performed and no job postings were pulled, so headcount, contacts, and hiring signals are all unavailable rather than empty.",
+        "no_decision_makers_reason": "No decision makers can be listed. The people-search step was never run (status: not searched) because the company could not be confirmed against notion.so, so there are no people results to cite. This is a data-availability gap, not evidence that the company has no decision makers."
+      },
+      "total_cost_usd": 0.0005739,
+      "simulated": false,
+      "started_at": "2026-10-11T11:28:08.746Z",
+      "ended_at": "2026-10-11T11:28:11.606Z"
+    },
+    "score": {
+      "run_id": "run_70cb7e6013c8",
+      "checks": [
+        {
+          "id": "tw_invented_person",
+          "passed": true,
+          "evidence": "every contact appears in a people-search result",
+          "score": null
+        },
+        {
+          "id": "tw_empty_after_error",
+          "passed": true,
+          "evidence": "no people-search error",
+          "score": null
+        },
+        {
+          "id": "tw_company_match_skipped",
+          "passed": true,
+          "evidence": "company confirmed before use",
+          "score": null
+        },
+        {
+          "id": "tw_claimed_success_on_failure",
+          "passed": true,
+          "evidence": "ok",
+          "score": null
+        }
+      ],
+      "violations": []
+    }
+  }
+]

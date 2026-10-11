@@ -1,0 +1,41 @@
+[
+  {
+    "id": "inc_20261011_1137_tw_company_match_skipped",
+    "detection": "tw_company_match_skipped",
+    "trace_ids": [
+      "58cb4e296317b28f900fb64859463bfb",
+      "6ca2d4279ae0845a7ec7e85fa18a00c8",
+      "ac53db26fbe90ea2e2c54c63af62aea0",
+      "e0bcc8d34502dd1c5bffc16e3e3e471d",
+      "332e14b4eaf523b9cab56a49954bd0c6",
+      "bb99f741f735ec62bab3941fbb7f2d57",
+      "59cb3e32dc11f91617d941536d01292c",
+      "8ac04b9cab3e6cfee5f089df48a10404",
+      "ebc97ed2259927b97a4e18c3f0af808b",
+      "256c541672aa0a645c8e120ebf1d2753"
+    ],
+    "workflow": "company-research",
+    "first_seen": "2026-10-11T11:37:58Z",
+    "status": "awaiting_approval"
+  },
+  {
+    "id": "inc_20261011_1102_tw_empty_after_error",
+    "detection": "tw_empty_after_error",
+    "trace_ids": [
+      "331680adc56fa6045156e04e3dc14c84",
+      "8e1734ce545e8208923ded9bde00756c",
+      "5cf6ab4fce9b1533a03b3ea7c5419553",
+      "f5764e28d9004a3316df89456edc46b2",
+      "0b30744c7ef9402da89bd811ac39ca09",
+      "6ca49714eef53abb9e4f804af0084909",
+      "3329eaac0b5c725bd58b9503e51da475",
+      "f954c55dda2d02159848e10146b6e778",
+      "5ef6be2ef3414cc9704afec97f44139a",
+      "feba07cdf11baf29eed287346de2351a",
+      "9c8d824636ea1452bda71830c10d95fa"
+    ],
+    "workflow": "company-research",
+    "first_seen": "2026-10-11T11:02:37Z",
+    "status": "awaiting_approval"
+  }
+]

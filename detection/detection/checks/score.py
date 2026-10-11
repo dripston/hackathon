@@ -6,6 +6,7 @@ import threading
 
 from ..config import get_settings
 from ..models import AgentRun, RunScore
+from .jev import jev_grounded
 from .tripwires import ALL
 
 _lock = threading.Lock()
@@ -13,7 +14,10 @@ _lock = threading.Lock()
 
 def score_run(run: AgentRun) -> RunScore:
     checks = [check(run) for check in ALL]
-    return RunScore(run_id=run.run_id, checks=checks, violations=[c.id for c in checks if not c.passed])
+    jev = jev_grounded(run)
+    # Violations are the deterministic tripwires only; the Jev score is advisory (see checks/jev.py).
+    violations = [c.id for c in checks if not c.passed]
+    return RunScore(run_id=run.run_id, checks=checks + ([jev] if jev else []), violations=violations)
 
 
 def attributes(run: AgentRun, score: RunScore) -> dict:
