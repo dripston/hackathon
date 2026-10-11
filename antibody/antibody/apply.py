@@ -70,10 +70,14 @@ def checkout(ref: str, name: str) -> Path:
 
 
 def remove(path: Path, branch: str | None) -> None:
-    if path.exists():
+    for i in range(5):  # a just-killed patient can hold files open for a moment on Windows
+        if not path.exists():
+            break
         git_tools.git("worktree", "remove", "--force", str(path), check=False)
         if path.exists():
-            shutil.rmtree(path, onexc=_force_remove)
+            shutil.rmtree(path, onexc=_force_remove if i == 4 else _ignore)
+        if path.exists():
+            time.sleep(1 + i)
     git_tools.git("worktree", "prune", check=False)
     if branch:
         git_tools.git("branch", "-D", branch, check=False)
@@ -84,6 +88,15 @@ def _launch(module: str, argv: list[str]) -> str:
     Windows Application Control can block."""
     return (f"import sys; sys.argv = {[module.split('.')[0], *argv]!r}; "
             f"from {module} import main; r = main(); sys.exit(r if isinstance(r, int) else 0)")
+
+
+def _ignore(func, path, _exc) -> None:
+    """rmtree helper for early attempts: clear read-only, try once, stay quiet (the caller retries)."""
+    try:
+        os.chmod(path, stat.S_IWRITE)
+        func(path)
+    except OSError:
+        pass
 
 
 def _force_remove(func, path, _exc) -> None:

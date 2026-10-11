@@ -3,7 +3,8 @@
 
     cd antibody
     uv run python scripts/e2e.py            # fast: about 10-15 minutes
-    uv run python scripts/e2e.py --full     # also unit tests, the pre-deploy gate and post-merge aftercare
+    uv run python scripts/e2e.py --full     # also unit tests, the pre-deploy gate and the post-merge gate
+    uv run python scripts/e2e.py --full --backtest   # and wait for the post-merge backtest (+~10 min)
     uv run python scripts/e2e.py --telegram # the bot calls you on Telegram; you approve the fix yourself
 
 It never touches main or GitHub. It makes a throwaway checkout (.e2e/<stamp>, branch e2e/<stamp>, never
@@ -472,19 +473,34 @@ def production_after_fix(url: str) -> None:
     check(f"{DETECTION} no longer fires", not bad, f"{len(rows) - len(bad)}/{len(rows)} runs honest" + (f"; failing {bad}" if bad else ""))
 
 
-def aftercare_wait(api_url: str, timeout: int = 1800) -> None:
-    step("10. Aftercare: gate the deploy branch with every family, refresh the backtest")
-    end = time.monotonic() + timeout
-    st = {}
+def aftercare_wait(api_url: str, backtest: bool, timeout: int = 1800) -> None:
+    step("10. Aftercare: gate the merged branch with every family" + (", then the backtest" if backtest else ""))
+    say(f"   {DIM}the gate replays every saved family on the merged branch (~3-5 min)"
+        + ("; the backtest then replays each causing commit and its parent (~10 more min)" if backtest
+           else "; the backtest keeps running in Antibody, not waited for (add --backtest){X}"))
+    t0 = time.monotonic()
+    end = t0 + timeout
+    st, last = {}, None
     while time.monotonic() < end:
         st = httpx.get(f"{api_url}/aftercare", timeout=30).json()
-        if st.get("state") in ("done", "failed"):
+        wts = sorted(p.name for p in (LAB_ROOT / "ab" / "worktrees").glob("gate-*")) if (LAB_ROOT / "ab" / "worktrees").exists() else []
+        now = (st.get("state"), st.get("gate_verdict"), wts[-1] if wts else None)
+        if now != last:  # print only when something moves
+            last = now
+            what = f"checking {wts[-1].split('-', 1)[1][:70]}" if wts else ""
+            verdict = f" (gate: {st['gate_verdict'].upper()})" if st.get("gate_verdict") else ""
+            say(f"   {(time.monotonic() - t0) / 60:4.1f} min  {st.get('state')}{verdict}  {DIM}{what}{X}")
+        if st.get("state") in ("done", "failed") or (not backtest and st.get("state") == "backtesting"):
             break
-        time.sleep(15)
-    check("aftercare finished", st.get("state") == "done", json.dumps(st)[:300])
+        time.sleep(10)
+    if st.get("state") == "failed":
+        check("aftercare finished", False, json.dumps(st)[:300])
     gate = httpx.get(f"{api_url}/gate/latest", timeout=30).json()
-    check("gate on the fixed branch is SAFE", gate.get("verdict") == "safe",
-          "; ".join(f["message"] for f in gate.get("families", [])))
+    check("gate on the merged branch is SAFE", gate.get("verdict") == "safe",
+          "; ".join(f.get("message", "") for f in gate.get("families", [])) or gate.get("note") or "")
+    if not backtest:
+        return
+    check("aftercare finished", st.get("state") == "done", json.dumps(st)[:300])
     trust = httpx.get(f"{api_url}/trust", timeout=30).json()
     check("backtest has numbers", trust.get("status") == "measured",
           f"blocked {trust.get('would_have_blocked')}/{len(trust.get('seeded_bugs') or [])} seeded bugs; "
@@ -527,6 +543,7 @@ def main() -> int:
     ap.add_argument("--keep", action="store_true", help="keep the throwaway checkout and branches")
     ap.add_argument("--telegram", action="store_true", help="the bot calls you on Telegram and you approve (stop your running bot first)")
     ap.add_argument("--approve-timeout", type=int, default=900, help="seconds to wait for your Telegram decision")
+    ap.add_argument("--backtest", action="store_true", help="with --full: also wait for the post-merge backtest (+~10 min)")
     a = ap.parse_args()
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -590,7 +607,7 @@ def main() -> int:
         det, det_url = start_patient(det_port, "fixed")
         production_after_fix(det_url)
         if a.full:
-            aftercare_wait(api_url)
+            aftercare_wait(api_url, a.backtest)
         ok = True
     except Abort as e:
         say(f"\n   {R}stopped: {e}{X}")

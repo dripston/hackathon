@@ -38,7 +38,7 @@ class StateStore:
         path = self.root / "incidents" / incident_id / f"{stage}.json"
         if not path.exists():
             return None
-        data = json.loads(path.read_text(encoding="utf-8"))
+        data = json.loads(_retry(lambda: path.read_text(encoding="utf-8")))
         return model.model_validate(data) if model else data
 
     def delete(self, incident_id: str, stage: str) -> None:
@@ -92,4 +92,18 @@ def _write_json(path: Path, data) -> None:
         text = json.dumps(data, indent=2, default=str)
     tmp = path.with_suffix(".tmp")
     tmp.write_text(text, encoding="utf-8")
-    tmp.replace(path)
+    _retry(lambda: tmp.replace(path))
+
+
+def _retry(fn, attempts: int = 20, delay: float = 0.05):
+    """Windows locks a file while another thread or process has it open, so a read that lands while a
+    write replaces the file (or the reverse) fails with PermissionError for a few milliseconds. Retry it."""
+    import time
+
+    for i in range(attempts):
+        try:
+            return fn()
+        except PermissionError:
+            if i == attempts - 1:
+                raise
+            time.sleep(delay)
