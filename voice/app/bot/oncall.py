@@ -77,14 +77,16 @@ async def handle_command(client: AntibodyClient, state: OnCallState, chat_id: in
         if incident_id not in {i["id"] for i in waiting}:
             if not waiting:
                 return "There's no fix waiting for approval right now."
-            incident_id = waiting[0]["id"]
+            incident_id = waiting[-1]["id"]  # oldest first, the order calls are made in
+        more = len(waiting) - 1
+        next_up = f" {more} more fix{'es are' if more > 1 else ' is'} waiting; I'll call you about it next." if more else ""
         if verb == "approve":
             res = await client.approve(incident_id, n, f"approve fix {n}", channel)
             merged = "and merged" if res.get("merged") else "but it is not merged yet"
             pr = " The pull request is on GitHub." if res.get("pr_url") else ""
-            return f"Approved fix {n} {merged}. The incident is resolved.{pr}"
+            return f"Approved fix {n} {merged}. The incident is resolved.{pr}{next_up}"
         await client.reject(incident_id, n, reason or f"rejected by {channel}")
-        return f"Rejected fix {n}. The incident is escalated, and nothing was merged."
+        return f"Rejected fix {n}. The incident is escalated, and nothing was merged.{next_up}"
     except AntibodyError as exc:
         return f"Antibody said: {exc}"
 
@@ -106,17 +108,20 @@ async def check_once(bot, services) -> list[str]:
     if state.chat_id is None:
         return []
     items, _ = await services.antibody.incidents()
-    called = []
-    for inc in items:
+    # One decision at a time: while an announced fix still waits, don't call about the next one, so
+    # "approve fix 1" can only mean the incident the engineer just heard about.
+    if any(i["id"] in state.announced and i.get("status") == "awaiting_approval" for i in items):
+        return []
+    for inc in reversed(items):  # oldest first
         if inc.get("status") not in ("awaiting_approval", "escalated") or inc["id"] in state.announced:
             continue
         text = await call_script(services.antibody, inc)
         await _send_call(bot, state.chat_id, text, services)
         state.announced.add(inc["id"])
         state.set_current(state.chat_id, inc["id"])
-        called.append(inc["id"])
         logger.info("On-call: called chat {} about {}", state.chat_id, inc["id"])
-    return called
+        return [inc["id"]]
+    return []
 
 
 async def watch(bot, services) -> None:

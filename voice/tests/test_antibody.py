@@ -152,3 +152,14 @@ async def test_no_call_without_an_on_call_chat(settings, state):
     services, bot = Services(settings, FakeAntibody().client(settings), state), Bot()
     assert await oncall.check_once(bot, services) == []
     assert bot.messages == []
+
+
+async def test_one_call_at_a_time_oldest_first(settings, state):
+    older = dict(INC, id="inc_0_old", first_seen="2026-10-11T09:00:00Z")
+    fake = FakeAntibody(incidents=[dict(INC), older])  # API order: newest first
+    state.chat_id = 7
+    services, bot = Services(settings, fake.client(settings), state), Bot()
+    assert await oncall.check_once(bot, services) == ["inc_0_old"]
+    assert await oncall.check_once(bot, services) == []  # still deciding on the first
+    reply = await oncall.handle_command(fake.client(settings), state, 7, "approve fix 1", "voice")
+    assert fake.approvals and "1 more fix is waiting" in reply
