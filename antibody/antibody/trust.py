@@ -16,16 +16,24 @@ def report(store: StateStore | None = None) -> dict:
     seeded = json.loads(BUGS.read_text(encoding="utf-8")) if BUGS.exists() else {"bugs": [], "label": ""}
     rows = {r["commit"]: r for r in (bt or {}).get("rows", [])}
 
+    from .models import Incident
+
+    incidents = [store.read(i, "incident", Incident) for i in store.incident_ids()]
     bugs = []
     for b in seeded.get("bugs", []):
         row = rows.get(b["commit"])
+        opened = [i for i in incidents if i and i.detection == b["check"]]
         if row:
             caught, note = row["caught"], row["bad"]
+        elif opened:
+            caught = False
+            note = (f"caught in production ({opened[0].id}, {opened[0].status}); the gate is measured once its "
+                    "fix merges and the family reaches main")
         else:
-            caught, note = False, ("no immunity family: it never fired on real traffic, so there was no incident "
-                                   "to learn from" if bt else "not measured yet")
+            caught, note = False, "never fired on real traffic, so there is no incident or family to learn from"
         bugs.append({"bug": b["bug"], "commit": b["commit"], "check": b["check"],
-                     "incident_id": row["incident_id"] if row else None, "would_have_blocked": caught, "note": note})
+                     "incident_id": row["incident_id"] if row else (opened[0].id if opened else None),
+                     "caught_in_production": bool(opened) or bool(row), "would_have_blocked": caught, "note": note})
 
     blocked = sum(b["would_have_blocked"] for b in bugs)
     return {

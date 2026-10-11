@@ -117,6 +117,11 @@ def patient_service(worktree: Path, stub: bool):
         src_env = REPO_ROOT / "detection" / ".env"
         if src_env.exists() and not (cwd / ".env").exists():
             shutil.copy(src_env, cwd / ".env")
+        # Recordings are test data, not the code under test: an older commit (e.g. a backtest of the commit
+        # that caused an incident) predates today's recordings, so give it the current ones.
+        src_cassettes = REPO_ROOT / "detection" / "fixtures" / "cassettes"
+        if src_cassettes.exists():
+            shutil.copytree(src_cassettes, cwd / "fixtures" / "cassettes", dirs_exist_ok=True)
     env.pop("VIRTUAL_ENV", None)
     log.info("starting patient from worktree: %s (port %d)", cwd, port)
     proc = subprocess.Popen(cmd, cwd=cwd, env=env, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE,
