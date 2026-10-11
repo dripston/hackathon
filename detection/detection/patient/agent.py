@@ -99,7 +99,8 @@ def run_research(
     if usable:
         people, people_step = run.tool(provider, "crustdata.people_search", {"company": company.get("name"), "limit": 10})
         if people_step.error and flags["swallow_tool_errors"]:
-            people, people_status = [], "ok"
+            # still resilient: no crash, empty list, but never claim the search succeeded
+            people, people_status = [], f"unavailable ({people_step.error.code})"
         elif people_step.error:
             people, people_status = [], f"unavailable ({people_step.error.code})"
         else:

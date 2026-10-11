@@ -1,0 +1,182 @@
+{
+  "incident_id": "inc_20261011_1102_tw_empty_after_error",
+  "detection": "tw_empty_after_error",
+  "target_file": "detection/detection/patient/agent.py",
+  "fix_kind": "tool_wrapper_patch",
+  "prompt_version": "v1",
+  "bug_flags": {
+    "swallow_tool_errors": true
+  },
+  "caused_by_commit": "32de23946950a63d4fe9eae35998ff9dde3ec0c0",
+  "fix_id": "fix_1",
+  "scenarios": [
+    {
+      "id": "sc_01",
+      "incident_id": "inc_20261011_1102_tw_empty_after_error",
+      "role": "must_fix",
+      "domain": "vercel.com",
+      "faults": [
+        {
+          "tool": "crustdata.people_search",
+          "at_call": 1,
+          "error": {
+            "code": "HTTP_500",
+            "message": "server error"
+          }
+        }
+      ],
+      "cassette_set": "base",
+      "expected_checks": [
+        "tw_empty_after_error"
+      ]
+    },
+    {
+      "id": "sc_02",
+      "incident_id": "inc_20261011_1102_tw_empty_after_error",
+      "role": "must_fix",
+      "domain": "stripe.com",
+      "faults": [
+        {
+          "tool": "crustdata.people_search",
+          "at_call": 1,
+          "error": {
+            "code": "HTTP_429",
+            "message": "rate limited"
+          }
+        }
+      ],
+      "cassette_set": "base",
+      "expected_checks": [
+        "tw_empty_after_error"
+      ]
+    },
+    {
+      "id": "sc_03",
+      "incident_id": "inc_20261011_1102_tw_empty_after_error",
+      "role": "must_fix",
+      "domain": "trigger.dev",
+      "faults": [
+        {
+          "tool": "crustdata.people_search",
+          "at_call": 1,
+          "error": {
+            "code": "HTTP_429",
+            "message": "rate limited"
+          }
+        }
+      ],
+      "cassette_set": "base",
+      "expected_checks": [
+        "tw_empty_after_error"
+      ]
+    },
+    {
+      "id": "sc_04",
+      "incident_id": "inc_20261011_1102_tw_empty_after_error",
+      "role": "must_fix",
+      "domain": "vercel.com",
+      "faults": [
+        {
+          "tool": "crustdata.people_search",
+          "at_call": 1,
+          "error": {
+            "code": "HTTP_429",
+            "message": "rate limited"
+          }
+        }
+      ],
+      "cassette_set": "base",
+      "expected_checks": [
+        "tw_empty_after_error"
+      ]
+    },
+    {
+      "id": "sc_05",
+      "incident_id": "inc_20261011_1102_tw_empty_after_error",
+      "role": "must_fix",
+      "domain": "vercel.com",
+      "faults": [
+        {
+          "tool": "crustdata.people_search",
+          "at_call": 2,
+          "error": {
+            "code": "HTTP_429",
+            "message": "rate limited"
+          }
+        }
+      ],
+      "cassette_set": "base",
+      "expected_checks": [
+        "tw_empty_after_error"
+      ]
+    },
+    {
+      "id": "sc_06",
+      "incident_id": "inc_20261011_1102_tw_empty_after_error",
+      "role": "must_fix",
+      "domain": "stripe.com",
+      "faults": [],
+      "cassette_set": "base",
+      "expected_checks": [
+        "tw_empty_after_error"
+      ]
+    },
+    {
+      "id": "sc_07",
+      "incident_id": "inc_20261011_1102_tw_empty_after_error",
+      "role": "must_fix",
+      "domain": "trigger.dev",
+      "faults": [],
+      "cassette_set": "base",
+      "expected_checks": [
+        "tw_empty_after_error"
+      ]
+    },
+    {
+      "id": "sc_08",
+      "incident_id": "inc_20261011_1102_tw_empty_after_error",
+      "role": "must_not_change",
+      "domain": "mercury.co",
+      "faults": [],
+      "cassette_set": "base",
+      "expected_checks": [
+        "tw_invented_person",
+        "tw_empty_after_error",
+        "tw_company_match_skipped",
+        "tw_claimed_success_on_failure"
+      ]
+    },
+    {
+      "id": "sc_09",
+      "incident_id": "inc_20261011_1102_tw_empty_after_error",
+      "role": "must_not_change",
+      "domain": "neon.tech",
+      "faults": [],
+      "cassette_set": "base",
+      "expected_checks": [
+        "tw_invented_person",
+        "tw_empty_after_error",
+        "tw_company_match_skipped",
+        "tw_claimed_success_on_failure"
+      ]
+    },
+    {
+      "id": "sc_10",
+      "incident_id": "inc_20261011_1102_tw_empty_after_error",
+      "role": "must_not_change",
+      "domain": "figma.com",
+      "faults": [],
+      "cassette_set": "base",
+      "expected_checks": [
+        "tw_invented_person",
+        "tw_empty_after_error",
+        "tw_company_match_skipped",
+        "tw_claimed_success_on_failure"
+      ]
+    }
+  ],
+  "before": "must_fix 5/7, must_not_change 3/3",
+  "after": "must_fix 7/7, must_not_change 3/3",
+  "mock": false,
+  "created_at": "2026-10-11T11:14:26Z"
+}
