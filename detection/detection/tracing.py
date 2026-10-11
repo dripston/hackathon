@@ -73,6 +73,9 @@ def run_span(name: str = "company-research"):
 
 
 def set_attributes(span, attrs: dict) -> None:
+    """The SDK exports only `neatlogs.*` keys; custom tags travel as one JSON string in
+    `neatlogs.metadata`, which neatlogs search and conditional detections match on (compact JSON:
+    a detection can test `"antibody.tw.tw_empty_after_error":1`)."""
     if span is None:
         return
     for k, v in attrs.items():
@@ -80,6 +83,21 @@ def set_attributes(span, attrs: dict) -> None:
             span.set_attribute(k, v if isinstance(v, (str, int, float, bool)) else json.dumps(v))
         except Exception:
             pass
+    blob = json.dumps(attrs, separators=(",", ":"), sort_keys=True)
+    try:
+        span.set_attribute("neatlogs.metadata", blob)
+    except Exception:
+        pass
+    # Attributes set after a span starts don't reliably reach neatlogs, so the scores also go on a
+    # short child span created with them: name `antibody.score`, input/output = the compact JSON.
+    # The neatlogs detections match `span_name = antibody.score` and `output contains ...`.
+    if _nl is not None:
+        try:
+            with _nl.trace("antibody.score", kind="CHAIN", **{"neatlogs.metadata": blob, "input.value": blob,
+                                                             "output.value": blob}) as child:
+                child.set_attribute("output.value", blob)
+        except Exception as e:
+            log.debug("score span failed: %s", e)
 
 
 def flush() -> None:

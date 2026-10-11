@@ -49,11 +49,15 @@ def neatlogs_traces(trace_ids: list[str], limit: int = 5) -> list[dict]:
         return []
     out = []
     try:
-        ctxs = neatlogs_mcp.call_many([("get_trace_context", {"trace_id": t}) for t in trace_ids[:limit]])
+        ctxs = neatlogs_mcp.call_many([("get_trace_context", {"trace_id": t}) for t in trace_ids[:limit]],
+                                      tolerant=True)
     except neatlogs_mcp.NeatlogsUnavailable as e:
         log.warning("diagnosis: could not fetch neatlogs traces (%s)", e)
         return []
     for tid, ctx in zip(trace_ids, ctxs):
+        if ctx is None:
+            log.info("diagnosis: trace %s not in neatlogs (yet); skipped", tid)
+            continue
         attrs = neatlogs_mcp.trace_attributes(ctx or {})
         out.append({
             "trace_id": tid, "status": (ctx or {}).get("status"),

@@ -1,4 +1,4 @@
-"""antibody watch | handle | demo | gate | backtest | costs | evidence | serve | stub-serve | approve"""
+"""antibody watch | handle | demo | gate | backtest | costs | evidence | serve | stub-serve | approve | neatlogs-setup"""
 
 import argparse
 import json
@@ -65,6 +65,16 @@ def cmd_backtest(a) -> int:
 
     s = backtest(clean_refs=a.clean)
     print(f"caught {s['caught']}/{s['families']} causing commits; false alarms {s['false_alarms']}/{s['clean_checks']} clean parents")
+    return 0
+
+
+def cmd_neatlogs_setup(a) -> int:
+    """Create the tw_* detections in neatlogs (idempotent), so intake reads neatlogs alerts."""
+    from . import neatlogs_mcp
+
+    names = [d for d in get_settings().detection_list if d.startswith("tw_")]
+    print(f"neatlogs: ensuring detections {', '.join(names)}")
+    neatlogs_mcp.ensure_detections(names)
     return 0
 
 
@@ -147,6 +157,8 @@ def main(argv: list[str] | None = None) -> int:
     b.add_argument("--clean", nargs="*", default=[], help="known-good commits to count false alarms on")
     b.set_defaults(fn=cmd_backtest)
 
+    ns = sub.add_parser("neatlogs-setup", help="create the tw_* detections in neatlogs (idempotent)")
+    ns.set_defaults(fn=cmd_neatlogs_setup)
     c = sub.add_parser("costs", help="cost per incident (ledger and neatlogs), for the business plan")
     c.set_defaults(fn=cmd_costs)
 

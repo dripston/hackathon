@@ -77,7 +77,13 @@ def test_api_endpoints(no_git):
     r = c.get("/incidents")
     assert r.status_code == 200 and r.json()[0]["id"] == inc.id and r.headers["x-antibody-mock"] == "1"
     d = c.get(f"/incidents/{inc.id}").json()
-    assert set(d) == {"incident", "diagnosis", "families", "resolution"}
+    assert {"incident", "diagnosis", "families", "resolution"} <= set(d)  # contract keys, plus extras:
+    assert len(d["scenarios"]) >= 8 and {s["role"] for s in d["scenarios"]} == {"must_fix", "must_not_change"}
+    assert d["attempts"][-1]["verdict"] == "accepted" and d["attempts"][-1]["fix"]["diff"]
+    ov = c.get("/overview").json()
+    assert ov["awaiting_approval"] == 1 and ov["open_incidents"] == 1
+    tr = c.get("/trust").json()
+    assert tr["status"] == "not_measured_yet" and tr["catch_rate"] is None
     text = c.get(f"/incidents/{inc.id}/brief").json()["text"]
     assert "approve fix 1" in text
     bad = c.post(f"/incidents/{inc.id}/approve", json={"fix_id": "fix_1", "phrase": "yes", "channel": "voice"})

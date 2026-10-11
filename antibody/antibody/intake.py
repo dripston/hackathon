@@ -51,24 +51,16 @@ def _from_neatlogs(detections: list[str], now: datetime) -> dict[str, list[str]]
         d = known.get(name)
         if d is None or d.get("enabled") is False:
             continue
-        count = neatlogs_mcp.detection_count(name, start, end)
-        log.info("neatlogs: %s fired %d times in the last %d min", name, count, WINDOW_MIN)
+        # The neatlogs detection says whether it fired (its rule already excludes simulated runs);
+        # detection's run log gives the exact failing traces inside the window.
+        count = neatlogs_mcp.detection_occurrences(name, start, end)
+        log.info("neatlogs: %s fired %d times this hour", name, count)
         if count <= THRESHOLD:
             continue
-        traces = neatlogs_mcp.search_traces(name, limit=20, date_range=f"{start}/{end}")
-        ids = []
-        for t in traces:
-            tid = t.get("trace_id")
-            if not tid:
-                continue
-            try:
-                if neatlogs_mcp.is_simulated(neatlogs_mcp.trace_context(tid)):
-                    continue
-            except neatlogs_mcp.NeatlogsUnavailable:
-                pass
-            ids.append(tid)
-            if len(ids) >= 10:
-                break
+        ids = _from_detection_runs([name], now).get(name, [])
+        if len(ids) <= THRESHOLD:
+            continue
+        ids = ids[:10]
         hits[name] = ids
     return hits
 

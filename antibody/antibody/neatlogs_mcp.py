@@ -39,7 +39,7 @@ def _payload(result) -> Any:
     return {"text": "\n".join(texts)}
 
 
-async def _call_many(calls: list[tuple[str, dict]]) -> list[Any]:
+async def _call_many(calls: list[tuple[str, dict]], tolerant: bool = False) -> list[Any]:
     from mcp import ClientSession
     from mcp.client.streamable_http import create_mcp_http_client, streamable_http_client
 
@@ -54,7 +54,12 @@ async def _call_many(calls: list[tuple[str, dict]]) -> list[Any]:
                 await session.initialize()
                 out = []
                 for name, args in calls:
-                    out.append(_payload(await session.call_tool(name, args)))
+                    try:
+                        out.append(_payload(await session.call_tool(name, args)))
+                    except RuntimeError:  # a tool-level error, e.g. one trace not ingested yet
+                        if not tolerant:
+                            raise
+                        out.append(None)
                 return out
 
 
@@ -62,14 +67,22 @@ def call(name: str, args: dict | None = None) -> Any:
     return call_many([(name, args or {})])[0]
 
 
-def call_many(calls: list[tuple[str, dict]]) -> list[Any]:
-    """Run several tool calls over one MCP session (sync wrapper)."""
-    try:
-        return asyncio.run(_call_many(calls))
-    except NeatlogsUnavailable:
-        raise
-    except Exception as e:
-        raise NeatlogsUnavailable(f"neatlogs MCP failed: {_leaf(e)}") from e
+def call_many(calls: list[tuple[str, dict]], tolerant: bool = False) -> list[Any]:
+    """Run several tool calls over one MCP session (sync wrapper). `tolerant`: a call that fails
+    with a tool error gives None instead of failing the batch."""
+    import time
+
+    for attempt in range(2):  # one retry: the MCP server sometimes answers 503 mid-session
+        try:
+            return asyncio.run(_call_many(calls, tolerant))
+        except NeatlogsUnavailable:
+            raise
+        except Exception as e:
+            leaf = _leaf(e)
+            if attempt == 0 and "tool error" not in leaf:
+                time.sleep(2)
+                continue
+            raise NeatlogsUnavailable(f"neatlogs MCP failed: {leaf}") from e
 
 
 def _leaf(e: BaseException) -> str:
@@ -93,23 +106,79 @@ def list_detections() -> list[dict]:
     return out
 
 
-def detection_count(name: str, start_iso: str, end_iso: str) -> int:
-    r = call("get_detection_trend", {"detection_name": name, "granularity": "hour",
-                                     "date_range": f"{start_iso}/{end_iso}"}) or {}
-    if "total_count" in r:
-        return int(r["total_count"])
-    return sum(int(p.get("count", 0)) for p in r.get("trend", []))
-
-
-def search_traces(query: str, limit: int = 20, date_range: str | None = None) -> list[dict]:
-    """Verified live: {"total", "totalRelation", "mode", "results": [...]}; an empty query is rejected."""
+def search_traces(query: str, limit: int = 20, date_from: str | None = None, date_to: str | None = None,
+                  detection_name: str | None = None, workflow_name: str | None = None) -> list[dict]:
+    """Verified live: {"total", "totalRelation", "mode", "results": [...]}; an empty query is rejected.
+    Filters are top-level arguments (date_from/date_to ISO, detection_name, workflow_name)."""
     if not query:
         return []
     args: dict = {"query": query, "limit": limit}
-    if date_range:
-        args["filters"] = {"date_range": date_range}
+    for k, v in (("date_from", date_from), ("date_to", date_to), ("detection_name", detection_name),
+                 ("workflow_name", workflow_name)):
+        if v:
+            args[k] = v
     r = call("search_traces", args) or {}
     return r.get("results", r.get("traces", []))
+
+
+def detection_occurrences(name: str, start_iso: str, end_iso: str) -> int:
+    """How often a detection fired in the hourly buckets overlapping [start, end) (verified live:
+    get_detection_trend -> {total_occurrences, data_points: [{date, count}]}). Hour granularity is the
+    finest neatlogs offers, so a 10-minute window counts its whole hour."""
+    r = call("get_detection_trend", {"detection_name": name, "period": "24h", "granularity": "hour"}) or {}
+    start_hour = start_iso[:13]  # "YYYY-MM-DDTHH"
+    return sum(int(p.get("count", 0)) for p in r.get("data_points", [])
+               if start_hour <= str(p.get("date", ""))[:13] <= end_iso[:13])
+
+
+# ---- our detections ----
+
+SCORE_SPAN = "antibody.score"
+
+
+def detection_config(check_id: str) -> dict:
+    """Conditional rule: the run's score span says this tripwire failed, and the run was real. The span's
+    input is compact JSON written by detection/tracing.py, e.g. ..."antibody.simulated":false,...
+    "antibody.tw.tw_empty_after_error":1..."""
+    rules = [
+        {"type": "rule", "field": "span_name", "operator": "=", "value": SCORE_SPAN},
+        {"type": "rule", "field": "input", "operator": "contains", "value": f'"antibody.tw.{check_id}":1'},
+        {"type": "rule", "field": "input", "operator": "contains", "value": '"antibody.simulated":false'},
+    ]
+    return {"root": {"type": "group", "logic": "AND", "children": rules}}
+
+
+DESCRIPTIONS = {
+    "tw_invented_person": "The brief names a decision maker who appears in no people-search result.",
+    "tw_empty_after_error": "People search failed, but the brief says no decision makers were found.",
+    "tw_company_match_skipped": "The brief used a company record without confirming it matches the domain.",
+    "tw_claimed_success_on_failure": "A tool failed, but the summary claims the research completed.",
+}
+
+
+def ensure_detections(check_ids: list[str], echo=print) -> dict[str, str]:
+    """Create our tripwire detections in neatlogs if missing. Returns {check_id: status}."""
+    existing = {d.get("name") for d in list_detections()} | {d.get("slug") for d in list_detections()}
+    groups = (call("list_detection_groups") or {}).get("groups", [])
+    group = next((g["id"] for g in groups if g.get("name") == "Negative"), groups[0]["id"] if groups else None)
+    out = {}
+    for cid in check_ids:
+        if cid in existing:
+            out[cid] = "exists"
+            echo(f"  {cid}: already exists")
+            continue
+        run_on = {"frequency": "span_name", "span_names": [SCORE_SPAN]}
+        preview = call("preview_detection", {"type": "conditional", "config": detection_config(cid),
+                                             "run_on": run_on, "timeframe_days": 14, "limit": 1}) or {}
+        n = preview.get("total_count", 0)
+        created = call("create_detection", {
+            "display_name": cid, "group_id": group, "type": "conditional", "config": detection_config(cid),
+            "description": DESCRIPTIONS.get(cid, cid) + " Real runs only (antibody.simulated = false).",
+            "run_on": run_on}) or {}
+        out[cid] = f"created ({n} matching spans in the last 14 days)"
+        echo(f"  {cid}: created, id {created.get('id') or created.get('detection', {}).get('id')}, "
+             f"{n} matching spans in the last 14 days")
+    return out
 
 
 def trace_context(trace_id: str) -> dict:
