@@ -6,8 +6,9 @@ Next.js console for Detection (:5050) and the Antibody Operator API (:4000).
 
 Live mode is the default. No client environment file is required for local use.
 The browser uses `/api/antibody` and `/api/detection`; Next.js proxies these to
-`http://127.0.0.1:4000` and `http://127.0.0.1:5050` respectively. Override the
-server-side `ANTIBODY_URL` and `DETECTION_URL` when hosting the console elsewhere.
+`http://127.0.0.1:8000/api/antibody` and `/api/detection` through the unified
+server. Override server-side `SERVER_URL` when hosting the console elsewhere.
+Starting `server/` launches the backend modules; see `../server/README.md`.
 The frontend host must be able to reach those addresses.
 
 Explicit `NEXT_PUBLIC_ANTIBODY_URL` / `NEXT_PUBLIC_DETECTION_URL` overrides are
