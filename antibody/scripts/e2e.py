@@ -590,10 +590,10 @@ def drill_main(a) -> int:
             "FAMILY_SIZE": str(a.family_size), "LLM_MAX_RETRIES": "12",
             "UV_CACHE_DIR": str(MAIN / "detection" / ".uv-cache"), "PYTHONIOENCODING": "utf-8",
         })
-        # Spread the rate limit: the agent's live traffic uses GROQ_API_KEY; Antibody and its replays use the
-        # voice bot's key when there is one (two separate per-minute budgets).
-        if root_env.get("LLM_PROVIDER", "").lower() == "groq" and root_env.get("VOICE_GROQ_API_KEY"):
-            os.environ["GROQ_API_KEY"] = root_env["VOICE_GROQ_API_KEY"]
+        # A drill may get its own Groq key (DRILL_GROQ_API_KEY) so it doesn't share a budget with production.
+        # Never borrow the voice bot's key: a drill can burn its daily quota and silence the on-call call.
+        if root_env.get("LLM_PROVIDER", "").lower() == "groq" and root_env.get("DRILL_GROQ_API_KEY"):
+            os.environ["GROQ_API_KEY"] = root_env["DRILL_GROQ_API_KEY"]
         from antibody import tracing
 
         tracing.init()
