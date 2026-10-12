@@ -170,3 +170,30 @@ export interface LiveEvent {
 }
 export const getEvents = (id: string, after = 0) =>
   USE_MOCK ? mock({ events: [] as LiveEvent[], next: after }) : request<{ events: LiveEvent[]; next: number }>(ab(), `/incidents/${encodeURIComponent(id)}/events?after=${after}`);
+
+export interface SystemInfo {
+  workspace: string;
+  agent: {
+    name: string;
+    workflow: string;
+    description: string;
+    llm: { provider: string; model: string };
+    prompt_version: string;
+    tools: string[];
+    checks: { id: string; label: string; kind: "tripwire" | "score" }[];
+    data_mode: string;
+  };
+  integrations: { id: string; name: string; role: string; connected: boolean; detail: string }[];
+  settings: {
+    approval_rule: string;
+    cost_cap_usd: number;
+    family_size: number;
+    max_attempts: number;
+    intake: string;
+    ship_target: string;
+    deploy_branch: string;
+    oncall_poll_seconds: number;
+  };
+}
+/** Always the production Antibody (what this workspace is connected to). */
+export const getSystemInfo = () => request<SystemInfo>(ANTIBODY_URL, "/system/info");

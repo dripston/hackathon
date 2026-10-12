@@ -58,7 +58,7 @@ export function Hero() {
               href="/live"
               className="border-border hover:bg-accent group inline-flex items-center gap-2 rounded-full border px-5 py-2.5 font-medium transition-colors"
             >
-              Open the live console <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+              Open the app <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
             </Link>
           </motion.div>
         </div>

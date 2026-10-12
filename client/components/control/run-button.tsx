@@ -35,21 +35,21 @@ export function RunButton({ className }: { className?: string }) {
   if (inFlight)
     return (
       <span className={cn("bg-brand/15 text-brand inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-sm font-medium", className)}>
-        <span className="bg-brand size-2 animate-pulse rounded-full" /> Run in progress
+        <span className="bg-brand size-2 animate-pulse rounded-full" /> Test incident running
       </span>
     );
   return (
     <button
       onClick={run}
       disabled={busy}
-      title={err ?? "Plant a real bug in a sandbox, send traffic, and watch Antibody catch, fix and prove it"}
+      title={err ?? "Like a fire drill: a real bug in an isolated copy of your agent, real traffic, and Antibody handles it end to end"}
       className={cn(
         "bg-brand text-background hover:bg-brand/90 glow-brand inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-semibold transition-all hover:scale-[1.03] disabled:opacity-60",
         className,
       )}
     >
       {busy ? <Loader2 className="size-3.5 animate-spin" /> : <Play className="size-3.5 fill-current" />}
-      Run new incident
+      Trigger test incident
     </button>
   );
 }

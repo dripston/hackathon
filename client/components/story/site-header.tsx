@@ -23,11 +23,14 @@ export function SiteHeader() {
           >
             GitHub
           </a>
+          <Link href="/connect" className="text-muted-foreground hover:text-foreground hidden text-sm transition-colors sm:block">
+            Get started
+          </Link>
           <Link
             href="/live"
             className="bg-foreground text-background hover:bg-foreground/90 rounded-full px-4 py-1.5 text-sm font-medium transition-colors"
           >
-            Live console
+            Open app
           </Link>
         </div>
       </nav>

@@ -274,6 +274,86 @@ def drill_start():
     return {"started": True, "pid": proc.pid}
 
 
+_gh_cache: dict = {}
+
+
+def _gh_ok() -> bool:
+    import shutil
+    import time as _time
+
+    if _gh_cache.get("at", 0) > _time.time() - 300:
+        return _gh_cache["ok"]
+    ok = bool(shutil.which("gh")) and subprocess.run(["gh", "auth", "status"], capture_output=True).returncode == 0
+    _gh_cache.update(ok=ok, at=_time.time())
+    return ok
+
+
+@app.get("/system/info")
+def system_info():
+    """Not in the contract (extra endpoint): what this Antibody is connected to, for the console's
+    Agents, Integrations and Settings pages. Presence flags only: no key values ever leave the server."""
+    import shutil
+
+    from . import git_tools
+    from .config import REPO_ROOT
+
+    s = get_settings()
+    env = os.environ.get
+    oncall = {}
+    try:
+        oncall = json.loads((REPO_ROOT / "voice" / ".state" / "oncall.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        pass
+    chat = str(oncall.get("chat_id") or env("ONCALL_CHAT_ID") or "")
+    provider = (env("LLM_PROVIDER") or s.llm_provider or "").lower()
+    return {
+        "workspace": "airo",
+        "agent": {
+            "name": "sales-research-agent",
+            "workflow": "company-research",
+            "description": "Researches a company from its domain: confirms it, finds decision makers and hiring signals, writes a sales brief.",
+            "llm": {"provider": provider, "model": env("MODEL_CHEAP") or s.model_cheap},
+            "prompt_version": env("PATIENT_PROMPT_VERSION", "v1"),
+            "tools": ["crustdata.company_enrich", "crustdata.people_search", "crustdata.jobs"],
+            "checks": [
+                {"id": "tw_invented_person", "label": "Invented person", "kind": "tripwire"},
+                {"id": "tw_empty_after_error", "label": "Empty after a tool error", "kind": "tripwire"},
+                {"id": "tw_company_match_skipped", "label": "Company check skipped", "kind": "tripwire"},
+                {"id": "tw_claimed_success_on_failure", "label": "Claimed success on failure", "kind": "tripwire"},
+                {"id": "jev_grounded", "label": "Grounded in tool results (Jev)", "kind": "score"},
+            ],
+            "data_mode": env("CRUSTDATA_MODE", "replay"),
+        },
+        "integrations": [
+            {"id": "neatlogs", "name": "neatlogs", "role": "Traces every run; detections open incidents",
+             "connected": bool(s.neatlogs_api_key), "detail": f"{len([d for d in s.detection_list if d.startswith('tw_')])} detections"},
+            {"id": "github", "name": "GitHub", "role": "Pull requests for every fix, merged on approval",
+             "connected": _gh_ok(), "detail": git_tools.github_repo() or "no repository"},
+            {"id": "entire", "name": "Entire", "role": "The reasoning behind the commit that broke it",
+             "connected": bool(shutil.which("entire")), "detail": "checkpoint lookup on every diagnosis"},
+            {"id": "telegram", "name": "Telegram on-call", "role": "Calls the engineer; approval by voice",
+             "connected": bool(env("TELEGRAM_BOT_TOKEN")) and bool(chat), "detail": f"on-call chat …{chat[-4:]}" if chat else "send /oncall to the bot"},
+            {"id": "crustdata", "name": "Crustdata", "role": "Company data the agent researches",
+             "connected": bool(env("CRUSTDATA_API_KEY")), "detail": "recorded responses" if env("CRUSTDATA_MODE", "replay") == "replay" else "live API"},
+            {"id": "typesafe", "name": "TypeSafe Jev", "role": "Grounding score on every brief",
+             "connected": bool(env("TYPESAFE_API_KEY")) and env("JEV_ENABLED", "1") != "0", "detail": env("JEV_MODEL", "jev-latest")},
+            {"id": "llm", "name": {"groq": "Groq", "deepseek": "DeepSeek"}.get(provider, provider or "LLM"), "role": "Diagnosis and fixes",
+             "connected": bool(env("GROQ_API_KEY") if provider == "groq" else env("DEEPSEEK_API_KEY") if provider == "deepseek" else s.model_strong),
+             "detail": env("MODEL_STRONG") or s.model_strong},
+        ],
+        "settings": {
+            "approval_rule": "Exact phrase only: “approve fix N” (typed or spoken). “yes”, “ok” never merge.",
+            "cost_cap_usd": s.antibody_cost_cap_usd,
+            "family_size": int(env("FAMILY_SIZE", "10") or 10),
+            "max_attempts": 3,
+            "intake": f"an incident opens when a detection fires more than {intake.THRESHOLD} times in {intake.WINDOW_MIN} minutes",
+            "ship_target": s.ship_target,
+            "deploy_branch": s.deploy_branch,
+            "oncall_poll_seconds": float(env("ONCALL_POLL_SECONDS", "15") or 15),
+        },
+    }
+
+
 @app.get("/aftercare")
 def aftercare_status():
     """Progress of the post-merge job (pull, gate main, backtest)."""

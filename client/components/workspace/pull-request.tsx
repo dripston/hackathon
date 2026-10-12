@@ -35,7 +35,7 @@ export function PullRequest({ events, detail, onChanged }: { events: LiveEvent[]
                 {opened.title} {number && !sandbox ? <span className="text-muted-foreground font-normal">#{number}</span> : null}
               </p>
               <p className="text-muted-foreground mt-0.5 font-mono text-xs">
-                <span className="text-foreground/80">{opened.branch}</span> → {sandbox ? "sandbox main" : "main"}
+                <span className="text-foreground/80">{opened.branch}</span> → main
               </p>
             </div>
             <motion.span
@@ -77,7 +77,7 @@ export function PullRequest({ events, detail, onChanged }: { events: LiveEvent[]
               Open on GitHub <ExternalLink className="size-3.5" />
             </a>
           )}
-          {sandbox && <p className="text-muted-foreground mt-auto pt-4 text-xs">Live drill: committed on a sandbox branch, never pushed to GitHub.</p>}
+          {sandbox && <p className="text-muted-foreground mt-auto pt-4 text-xs">Test incident: merged on the isolated copy only, never pushed to GitHub.</p>}
         </motion.div>
       )}
     </Window>

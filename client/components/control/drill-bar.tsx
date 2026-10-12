@@ -53,20 +53,20 @@ export function DrillBar() {
         <div className="bg-brand/15 pointer-events-none absolute -left-10 size-40 rounded-full blur-3xl" aria-hidden />
         <Sparkles className="text-brand relative size-7" />
         <div className="relative min-w-0 flex-1">
-          <p className="text-lg font-semibold">Run a live incident</p>
+          <p className="text-lg font-semibold">Trigger a test incident</p>
           <p className="text-muted-foreground text-sm">
-            A real bug in a sandbox copy of the agent, real traffic, real detection, a real fix proven on a family of variants.
-            You approve it. About 3–5 minutes, then it waits for you. The only simulated part is the API outage.
+            Like a fire drill for your agent: Antibody breaks an isolated copy on purpose, sends real traffic, then catches,
+            diagnoses and fixes it while you watch. You approve the fix. Takes about 3 minutes.
           </p>
           {err && <p className="text-infected mt-1 text-sm">{err}</p>}
-          {d?.ended && d.state !== "idle" && <p className="text-muted-foreground mt-1 text-sm">Last drill: {d.message}</p>}
+          {d?.ended && d.state !== "idle" && <p className="text-muted-foreground mt-1 text-sm">Last test incident: {d.message}</p>}
         </div>
         <button
           onClick={start}
           disabled={busy}
           className="bg-brand text-background hover:bg-brand/90 glow-brand relative inline-flex items-center gap-2 rounded-full px-5 py-2.5 font-medium transition-all hover:scale-[1.02] disabled:opacity-60"
         >
-          {busy ? <Loader2 className="size-4 animate-spin" /> : <Play className="size-4 fill-current" />} Start live drill
+          {busy ? <Loader2 className="size-4 animate-spin" /> : <Play className="size-4 fill-current" />} Trigger test incident
         </button>
       </div>
     );
@@ -90,7 +90,7 @@ export function DrillBar() {
     >
       <div className="flex flex-wrap items-center gap-4">
         <span className="text-brand flex items-center gap-2 text-sm font-medium">
-          <span className="bg-brand size-2 animate-pulse rounded-full" /> Live drill
+          <span className="bg-brand size-2 animate-pulse rounded-full" /> Test incident
         </span>
         <p className="font-medium">{d!.message}</p>
         <span className="text-muted-foreground ml-auto font-mono text-sm tabular-nums">
@@ -121,8 +121,8 @@ export function DrillBar() {
       </ol>
       <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs">
         <span className="text-muted-foreground">
-          <span className="text-foreground">Real:</span> the bug and its commit, LLM calls, detection, diagnosis, the fix and its proof.{" "}
-          <span className="text-foreground">Simulated:</span> the Crustdata outage.
+          Runs on an isolated copy of your agent; production and GitHub are never touched. Everything else is real: the bug&apos;s
+          commit, traffic, detection, diagnosis, the fix and its proof. Only the API outage is simulated.
         </span>
         {d!.incident_id && (
           <Link href={`/incidents/${encodeURIComponent(d!.incident_id)}`} className="text-foreground ml-auto inline-flex items-center gap-1.5 font-medium hover:underline">

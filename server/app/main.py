@@ -16,7 +16,7 @@ log = logging.getLogger("uvicorn.error")
 # Fixed paths prevent the proxy from becoming an arbitrary URL/path forwarder.
 ROUTES = {
     "antibody": {
-        "GET": r"(?:health|overview|incidents|incidents/[A-Za-z0-9_-]+(?:/brief|/events)?|gate/latest|trust|evidence|aftercare|risks|drill/status)",
+        "GET": r"(?:health|overview|incidents|incidents/[A-Za-z0-9_-]+(?:/brief|/events)?|gate/latest|trust|evidence|aftercare|risks|drill/status|system/info)",
         "POST": r"(?:incidents/[A-Za-z0-9_-]+/(?:approve|reject)|webhooks/neatlogs|drill/start|drill/stop)",
     },
     "detection": {"GET": r"(?:health|runs|risks)", "POST": r"(?:run|score)"},

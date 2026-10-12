@@ -39,7 +39,7 @@ export function Closing() {
             href="/live"
             className="bg-healthy text-background hover:bg-healthy/90 glow-healthy inline-flex items-center gap-2 rounded-full px-6 py-3 text-lg font-medium transition-colors"
           >
-            Open the live console <ArrowRight className="size-5" />
+            Open the app <ArrowRight className="size-5" />
           </Link>
         </div>
       </section>
