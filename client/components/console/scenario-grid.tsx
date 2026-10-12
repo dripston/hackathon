@@ -13,11 +13,11 @@ const FLIP_MS = 1500;
  * With `to`, squares flip one by one from the `from` result to the `to` result over ~1.5s.
  */
 type GridProps = {
+  template?: string | null;
   scenarios: Scenario[];
   from: FamilyResult;
   to?: FamilyResult | null;
   size?: "lg" | "sm";
-  template?: string | null;
 };
 
 export function ScenarioGrid(props: GridProps) {
@@ -69,6 +69,8 @@ function Grid({ scenarios, from, to, size = "lg", template, onReplay }: GridProp
 
   return (
     <div>
+      {[...new Set([...(from.warnings ?? []), ...(to?.warnings ?? [])])].map(w => <p key={w} className="text-muted-foreground mb-2 text-sm">{w}</p>)}
+      {!!(from.synthetic_tool_calls || to?.synthetic_tool_calls) && <p className="text-muted-foreground mb-2 text-sm">Includes synthetic tool calls without recordings.</p>}
       <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
         <p className={cn("font-mono font-semibold tabular-nums", size === "lg" ? "text-4xl" : "text-2xl")}>
           {to ? (
@@ -120,13 +122,13 @@ function Grid({ scenarios, from, to, size = "lg", template, onReplay }: GridProp
   );
 }
 
-function Square({ scenario, verdict, size, template }: { scenario: Scenario; verdict?: Verdict; size: "lg" | "sm"; template?: string | null }) {
+function Square({ scenario, verdict, size, template }: { template?: string | null; scenario: Scenario; verdict?: Verdict; size: "lg" | "sm" }) {
   const passed = verdict?.passed;
   const fault = scenario.faults[0];
   return (
     <div className="group relative">
       <button
-        aria-label={`${scenario.domain}: ${passed ? "passed" : "failed"}`}
+        aria-label={`${scenario.domain}: ${passed === undefined ? "not run" : passed ? "passed" : "failed"}`}
         className={cn(
           "rounded-md transition-all duration-300 [transform-style:preserve-3d]",
           size === "lg" ? "size-14" : "size-9",
@@ -136,23 +138,19 @@ function Square({ scenario, verdict, size, template }: { scenario: Scenario; ver
       />
       <div
         role="tooltip"
-        className="border-border bg-popover absolute top-full left-0 z-20 mt-2 hidden w-72 max-w-[calc(100vw-2rem)] rounded-lg border p-3 text-sm shadow-xl group-focus-within:block group-hover:block"
+        className="border-border bg-popover invisible absolute top-full left-0 z-20 mt-2 w-72 rounded-lg border p-3 text-sm opacity-0 shadow-xl transition-opacity group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100"
       >
         <p className="font-medium">{scenario.domain}</p>
         <p className="text-muted-foreground mt-1 font-mono text-xs">
           {fault ? `${fault.tool} → ${fault.error.code} at call ${fault.at_call}` : "no injected fault"}
         </p>
         <p className={cn("mt-2 font-mono text-xs", passed ? "text-healthy" : "text-infected")}>
-          {passed ? "passed" : verdict?.failed_checks.length ? `failed: ${verdict.failed_checks.join(", ")}` : "failed"}
+          {passed ? "passed" : verdict?.failed_checks.length ? `failed: ${verdict.failed_checks.join(", ")}` : passed === false ? "failed" : "not run"}
         </p>
-        {!passed && verdict?.evidence?.map((e) => (
-          <p key={e} className="text-muted-foreground mt-1 text-xs">
-            {e}
-          </p>
-        ))}
+        {verdict?.evidence?.map((text, i) => <p key={i} className="mt-1">{text}</p>)}
         {verdict?.trace_id && (
           <p className="mt-2">
-            <TraceLink id={verdict.trace_id} template={template} className="text-xs" />
+            <TraceLink template={template} id={verdict.trace_id} className="text-xs" />
           </p>
         )}
       </div>

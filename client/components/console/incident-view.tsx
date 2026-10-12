@@ -1,142 +1,75 @@
 "use client";
 
-import { use, useState, type ReactNode } from "react";
+import { use, useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
-import { ArrowLeft, ExternalLink, Mic } from "lucide-react";
-import { GITHUB_REPO, getAftercare, getBrief, getIncident } from "@/lib/api";
-import type { Aftercare, FamilyResult, IncidentDetail, Scenario } from "@/lib/types";
+import { ArrowLeft, ExternalLink } from "lucide-react";
+import { getBrief, getIncident } from "@/lib/api";
+import type { FamilyResult } from "@/lib/types";
 import { usePoll } from "@/lib/use-poll";
 import { ApprovalBox } from "@/components/console/approval-box";
 import { DiffView } from "@/components/console/diff-view";
 import { ScenarioGrid } from "@/components/console/scenario-grid";
-import { LabelBadge, MockBadge, PollNote, TraceLink, stamp } from "@/components/console/ui";
+import { ErrorNote, MockBadge, TraceLink, ago } from "@/components/console/ui";
 import { cn } from "@/lib/utils";
-
-const TERMINAL = ["resolved", "escalated"];
-const AFTERCARE_ACTIVE: Aftercare["state"][] = ["pulling", "gating", "backtesting"];
-
-/** GitHub repo slug: env var first, else read it from the Entire checkpoint URL (entire.io/gh/OWNER/REPO/commit/...). */
-function repoSlug(checkpointUrl: string | null | undefined) {
-  if (GITHUB_REPO) return GITHUB_REPO;
-  const m = checkpointUrl?.match(/entire\.io\/gh\/([^/]+\/[^/]+)\//);
-  return m ? m[1] : null;
-}
 
 export function IncidentView({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const incidentId = decodeURIComponent(id);
-
-  // Fast while the pipeline runs, slow once the incident is resolved or escalated.
-  const [detailMs, setDetailMs] = useState(2000);
-  const detail = usePoll(() => getIncident(incidentId), detailMs, incidentId);
-  const status = detail.data?.incident.status;
-  const wantMs = status && TERMINAL.includes(status) ? 10_000 : 2000;
-  if (wantMs !== detailMs) setDetailMs(wantMs);
-
-  // The brief is re-read when the status changes, since the text describes the current state.
-  // Tag each brief with the status it was written for, so a stale one is never shown for a new state.
-  const briefStatus = status ?? "";
-  const brief = usePoll(
-    async () => {
-      const r = await getBrief(incidentId);
-      return { ...r, data: { text: r.data.text, forStatus: briefStatus } };
-    },
-    0,
-    `${incidentId}:${briefStatus}`,
-  );
-
-  // After an approval Antibody pulls main, gates it and refreshes the backtest; poll that every 3s.
-  const [aftercareMs, setAftercareMs] = useState(0);
-  const aftercare = usePoll(getAftercare, aftercareMs);
-  const aftercareLive = aftercare.data?.incident_id === incidentId && !!aftercare.data && AFTERCARE_ACTIVE.includes(aftercare.data.state);
-  const [justDecided, setJustDecided] = useState(false);
-  const wantAftercareMs = aftercareLive || justDecided ? 3000 : 0;
-  if (wantAftercareMs !== aftercareMs) setAftercareMs(wantAftercareMs);
+  const incidentId = id;
+  const [interval, setIntervalMs] = useState(2000);
+  const detail = usePoll(() => getIncident(incidentId), interval, incidentId);
+  const brief = usePoll(() => getBrief(incidentId), interval, incidentId);
+  useEffect(() => {
+    const timer = setTimeout(() => setIntervalMs(detail.data?.incident.status === "resolved" || detail.data?.incident.status === "escalated" ? 10000 : 2000), 0);
+    return () => clearTimeout(timer);
+  }, [detail.data?.incident.status]);
 
   if (!detail.data) {
     return (
       <div className="space-y-4">
         <BackLink />
-        {detail.loading ? <p className="text-muted-foreground">Loading incident…</p> : <PollNote poll={detail} />}
+        {detail.loading ? <p className="text-muted-foreground">Loading incident…</p> : <ErrorNote error={detail.error} updatedAt={detail.updatedAt} />}
       </div>
     );
   }
 
-  return (
-    <Loaded
-      d={detail.data}
-      mock={detail.mock}
-      poll={detail}
-      brief={brief.data && brief.data.forStatus === briefStatus ? brief.data.text : undefined}
-      briefUpdating={!!brief.data && brief.data.forStatus !== briefStatus}
-      aftercare={aftercare.data}
-      onDecided={() => {
-        setJustDecided(true);
-        detail.refetch();
-        aftercare.refetch();
-      }}
-    />
-  );
-}
-
-function Loaded({
-  d,
-  mock,
-  poll,
-  brief,
-  briefUpdating,
-  aftercare,
-  onDecided,
-}: {
-  d: IncidentDetail;
-  mock: boolean;
-  poll: Parameters<typeof PollNote>[0]["poll"];
-  brief: string | undefined;
-  briefUpdating: boolean;
-  aftercare: Aftercare | undefined;
-  onDecided: () => void;
-}) {
-  const { incident, diagnosis, resolution, intake } = d;
-  const template = d.trace_url_template;
+  const d = detail.data;
+  const { incident, diagnosis, resolution } = d;
   const scenarios = d.scenarios ?? [];
+  const baseline = d.families.find((f) => f.candidate === "baseline") ?? resolution?.before ?? null;
   const attempts = d.attempts ?? [];
-  const baseline = d.families.find((f) => f.candidate === "baseline") ?? null;
   const resolved = incident.status === "resolved";
-  const escalated = incident.status === "escalated";
-  const acceptedId = resolution?.accepted_fix_id ?? null;
-  const awaiting = incident.status === "awaiting_approval" && !!acceptedId;
-  const repo = repoSlug(diagnosis?.checkpoint_url);
-  const accepted = attempts.find((a) => a.accepted);
+  const awaiting = incident.status === "awaiting_approval" && resolution?.accepted_fix_id;
+  const template = d.trace_url_template;
 
   return (
     <div className="mx-auto max-w-6xl">
       <BackLink />
       <div className="mt-4 flex flex-wrap items-center gap-3">
-        <h1 className="font-mono text-2xl font-semibold break-all">{incident.id}</h1>
-        <MockBadge show={mock} />
+        <h1 className="break-all font-mono text-xl font-semibold sm:text-2xl">{incident.id}</h1>
+        <MockBadge show={detail.mock} />
         <span
           className={cn(
             "ml-auto rounded-full px-3 py-1 font-mono text-sm",
             resolved ? "bg-healthy/15 text-healthy" : "bg-infected/15 text-infected",
           )}
         >
-          {incident.status.replace(/_/g, " ")}
+          {resolved ? "resolved" : incident.status.replace(/_/g, " ")}
         </span>
       </div>
-      <PollNote poll={poll} />
+      <ErrorNote error={detail.error} updatedAt={detail.updatedAt} />
+
+      <ErrorNote error={brief.error} updatedAt={brief.updatedAt} />
+      {brief.data?.text && <section className="mt-4"><h2 className="text-muted-foreground text-sm">On-call brief <MockBadge show={brief.mock} /></h2><p className="border-border text-muted-foreground mt-2 border-l-2 pl-4 text-lg leading-8">{brief.data.text}</p></section>}
+      {incident.status === "escalated" && <p className="text-infected mt-4">{resolution?.rejection ? `Rejected: ${resolution.rejection.reason}` : "Escalated. No fix is approved for shipping; needs a human review."}</p>}
 
       <ol className="mt-10">
         <Stage n={1} title="Detected" done>
           <p className="text-lg">
-            <span className="text-infected font-mono">{incident.detection}</span> fired on <strong>{incident.trace_ids.length}</strong>{" "}
-            traces in <span className="font-mono">{incident.workflow}</span>, first seen {stamp(incident.first_seen)}.
+            <span className="text-infected font-mono">{incident.detection}</span> fired on{" "}
+            <strong>{incident.trace_ids.length}</strong> traces in <span className="font-mono">{incident.workflow}</span>, first
+            seen {ago(incident.first_seen)}.
           </p>
-          {intake && (
-            <p className="text-muted-foreground mt-2">
-              {intake.source === "neatlogs" ? "Opened by neatlogs" : "Opened from detection's run log"}: {intake.occurrences} occurrences in{" "}
-              {intake.window_minutes} min (threshold {intake.threshold}).
-            </p>
-          )}
+          {d.intake && <p className="text-muted-foreground mt-2">{d.intake.source === "neatlogs" ? "Opened by neatlogs" : "Opened from detection’s run log"} · {d.intake.occurrences} occurrences in {d.intake.window_minutes} minutes</p>}
           <ul className="mt-3 flex flex-wrap gap-x-6 gap-y-1">
             {incident.trace_ids.map((t) => (
               <li key={t}>
@@ -150,58 +83,28 @@ function Loaded({
           {diagnosis ? (
             <>
               <p className="text-muted-foreground">
-                {diagnosis.commit_sha ? (
-                  <>
-                    Caused by commit{" "}
-                    {repo ? (
-                      <a
-                        href={`https://github.com/${repo}/commit/${diagnosis.commit_sha}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-foreground font-mono underline decoration-dotted underline-offset-4"
-                      >
-                        {diagnosis.commit_sha.slice(0, 8)}
-                      </a>
-                    ) : (
-                      <code className="text-foreground font-mono">{diagnosis.commit_sha.slice(0, 8)}</code>
-                    )}
-                  </>
-                ) : (
-                  "No causing commit identified"
-                )}{" "}
-                · {diagnosis.fix_kind.replace(/_/g, " ")}
-                {diagnosis.target_file && (
-                  <>
-                    {" "}
-                    · <code className="text-foreground font-mono break-all">{diagnosis.target_file}</code>
-                  </>
-                )}
+                Caused by commit <code className="text-foreground font-mono">{diagnosis.commit_sha?.slice(0, 10) ?? "unknown"}</code> ·{" "}
+                {diagnosis.fix_kind.replace(/_/g, " ")}
               </p>
-              {diagnosis.reasoning_excerpt && (
-                <figure className="border-infected/40 bg-infected/[0.06] mt-4 rounded-2xl border p-5 sm:p-8">
-                  <p className="text-muted-foreground font-mono text-sm tracking-wider uppercase">
-                    {diagnosis.reasoning_source === "entire_checkpoint"
-                      ? "From the Entire checkpoint · the reasoning behind the change"
-                      : "From the commit message"}
-                  </p>
-                  <blockquote className="mt-4 text-xl leading-8 font-medium break-words sm:text-2xl sm:leading-10 lg:text-3xl lg:leading-[1.4]">
-                    “{diagnosis.reasoning_excerpt}”
-                  </blockquote>
-                  {diagnosis.reasoning_source === "entire_checkpoint" && diagnosis.checkpoint_url && (
-                    <figcaption className="mt-6">
-                      <a
-                        href={diagnosis.checkpoint_url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-foreground inline-flex items-center gap-2 font-mono text-sm underline decoration-dotted underline-offset-4"
-                      >
-                        {diagnosis.checkpoint_id ?? "checkpoint"} on Entire <ExternalLink className="size-4" />
-                      </a>
-                    </figcaption>
-                  )}
-                </figure>
-              )}
-              <p className="mt-4 text-lg leading-8">{diagnosis.explanation}</p>
+              <figure className="border-infected/40 bg-infected/[0.06] mt-4 rounded-2xl border p-8">
+                <p className="text-muted-foreground font-mono text-sm tracking-wider uppercase">
+                  {diagnosis.reasoning_source === "entire_checkpoint" ? "From the Entire checkpoint" : diagnosis.reasoning_source === "commit_message" ? "From the commit message" : "Reasoning source unavailable"}
+                </p>
+                <blockquote className="mt-4 text-2xl leading-10 font-medium sm:text-3xl sm:leading-[1.4]">
+                  {diagnosis.reasoning_excerpt ? `“${diagnosis.reasoning_excerpt}”` : "No reasoning excerpt available."}
+                </blockquote>
+                {diagnosis.checkpoint_url && diagnosis.reasoning_source === "entire_checkpoint" && <figcaption className="mt-6">
+                  <a
+                    href={diagnosis.checkpoint_url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-foreground inline-flex items-center gap-2 font-mono text-sm underline decoration-dotted underline-offset-4"
+                  >
+                    {diagnosis.checkpoint_id} on Entire <ExternalLink className="size-4" />
+                  </a>
+                </figcaption>}
+              </figure>
+              <p className="mt-4 text-lg leading-8">{diagnosis.explanation}</p>{diagnosis.target_file && <p className="text-muted-foreground mt-2 break-all font-mono text-sm">{diagnosis.target_file}</p>}
               {diagnosis.good_trace_ids.length > 0 && (
                 <p className="text-muted-foreground mt-2 text-sm">
                   Compared with healthy runs:{" "}
@@ -220,45 +123,65 @@ function Loaded({
         </Stage>
 
         <Stage n={3} title="Family" done={scenarios.length > 0}>
-          {scenarios.length ? <FamilyList scenarios={scenarios} /> : <Waiting>Breeding variants of the failure…</Waiting>}
+          {scenarios.length ? (
+            <>
+              <p className="text-lg">
+                <strong>{scenarios.filter((s) => s.role === "must_fix").length}</strong> must_fix and{" "}
+                <strong>{scenarios.filter((s) => s.role === "must_not_change").length}</strong> must_not_change scenarios, replayed
+                on recorded tool responses.
+              </p>
+              <ul className="mt-3 grid gap-x-8 gap-y-1 font-mono text-sm sm:grid-cols-2">
+                {scenarios.map((s) => (
+                  <li key={s.id} className="flex gap-3">
+                    <span className={s.role === "must_fix" ? "text-infected" : "text-muted-foreground"}>
+                      {s.role === "must_fix" ? "fix " : "keep"}
+                    </span>
+                    <span>{s.domain}</span>
+                    <span className="text-muted-foreground ml-auto">
+                      {s.faults[0] ? `${s.faults[0].error.code} @${s.faults[0].at_call}` : "no fault"}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </>
+          ) : (
+            <Waiting>Breeding variants of the failure…</Waiting>
+          )}
         </Stage>
 
         <Stage n={4} title="Baseline" done={!!baseline}>
           {baseline && scenarios.length ? (
-            <ScenarioGrid scenarios={scenarios} from={baseline} template={template} />
+            <ScenarioGrid template={template} scenarios={scenarios} from={baseline} />
           ) : baseline ? (
             <FamilyLine family={baseline} />
           ) : (
             <Waiting>Running the family against the current agent…</Waiting>
           )}
-          {baseline && <FamilyWarnings family={baseline} />}
         </Stage>
 
-        <Stage n={5} title="Attempts" done={attempts.length > 0 && attempts.every((a) => a.verdict !== "not run")}>
+        <Stage n={5} title="Attempts" done={attempts.length > 0}>
           {attempts.length ? (
             <ul className="space-y-6">
               {attempts.map((a) => {
                 const fam = a.result;
                 return (
                   <li key={a.fix.id} className="border-border rounded-xl border p-5">
-                    <div className="flex flex-wrap items-center gap-3">
+                    <div className="flex items-center gap-3">
                       <span className="font-mono text-lg font-semibold">{a.fix.id}</span>
                       <span
                         className={cn(
                           "rounded-full px-2.5 py-0.5 font-mono text-sm",
-                          a.accepted ? "bg-healthy/15 text-healthy" : "bg-infected/15 text-infected",
+                          a.accepted && "bg-healthy/15 text-healthy",
+                          !a.accepted && "bg-infected/15 text-infected",
+                          !a.result && !a.error && "bg-muted text-foreground",
                         )}
                       >
                         {a.verdict}
                       </span>
                     </div>
-                    <p className="mt-2 leading-7">{a.fix.description}</p>
-                    {a.verdict.startsWith("rejected: broke") && a.broke.length > 0 && (
-                      <p className="text-infected mt-2 text-sm">
-                        Broke healthy cases: {a.broke.map((b) => b.domain ?? b.scenario_id).join(", ")}
-                      </p>
-                    )}
-                    {a.verdict.startsWith("error:") && a.error && <p className="text-infected mt-2 font-mono text-sm">{a.error}</p>}
+                    <p className="mt-2">{a.fix.description}</p>
+                    {a.error && <p className="text-infected mt-2">{a.error}</p>}
+                    {a.broke.length > 0 && <p className="text-infected mt-2">Broke healthy cases: {a.broke.map(b => b.domain ?? b.scenario_id).join(", ")}</p>}
                     {a.fix.diff && (
                       <details className="mt-3" open={a.accepted}>
                         <summary className="text-muted-foreground hover:text-foreground cursor-pointer text-sm">Diff</summary>
@@ -269,11 +192,16 @@ function Loaded({
                     )}
                     {fam && baseline && scenarios.length > 0 && (
                       <div className="mt-4">
-                        <ScenarioGrid scenarios={scenarios} from={baseline} to={fam} size={a.accepted ? "lg" : "sm"} template={template} />
+                        <ScenarioGrid
+                          template={template}
+                          scenarios={scenarios}
+                          from={baseline}
+                          to={fam}
+                          size={!a.accepted ? "sm" : "lg"}
+                        />
                       </div>
                     )}
                     {fam && !scenarios.length && <FamilyLine family={fam} />}
-                    {fam && <FamilyWarnings family={fam} />}
                   </li>
                 );
               })}
@@ -283,145 +211,24 @@ function Loaded({
           )}
         </Stage>
 
-        <Stage n={6} title="Shipped" done={!!(resolution?.pr_url || resolution?.merged)}>
-          {resolution && (resolution.pr_url || resolution.merged) ? (
-            <dl className="grid gap-4 sm:grid-cols-4">
-              <Fact label="Pull request">
-                {resolution.pr_url ? (
-                  <a href={resolution.pr_url} target="_blank" rel="noreferrer" className="underline decoration-dotted underline-offset-4">
-                    #{resolution.pr_url.split("/").pop()} ↗
-                  </a>
-                ) : (
-                  <span className="text-base">no PR (merged locally)</span>
-                )}
-                {resolution.merged && <span className="text-healthy ml-2 text-sm">Merged</span>}
-              </Fact>
-              <Fact label="Cost">${resolution.cost_usd.toFixed(2)}</Fact>
+        <Stage n={6} title="Resolution" done={resolved}>
+          {resolution ? <>
+            <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <Fact label="Pull request">{resolution.pr_url ? <a href={resolution.pr_url} target="_blank" rel="noreferrer" className="underline">#{resolution.pr_url.split("/").pop()} ↗</a> : "No pull request"}</Fact>
+              <Fact label="Cost">${resolution.cost_usd.toFixed(4)}</Fact>
               <Fact label="Time">{Math.round(resolution.duration_ms / 1000)} s</Fact>
-              <Fact label="Family">
-                {resolution.after ? (
-                  <span className="text-base">
-                    must_fix {resolution.before.must_fix_passed}/{resolution.before.must_fix_total} → {resolution.after.must_fix_passed}/
-                    {resolution.after.must_fix_total} · must_not_change {resolution.after.must_not_change_passed}/
-                    {resolution.after.must_not_change_total} kept
-                  </span>
-                ) : (
-                  "—"
-                )}
-              </Fact>
+              <Fact label="Merge">{resolution.merged ? "Merged" : "Not merged"}</Fact>
             </dl>
-          ) : escalated ? (
-            <p className="text-muted-foreground">Nothing was shipped.</p>
-          ) : (
-            <Waiting>Ships as a pull request once approved.</Waiting>
-          )}
+            {resolution.approval && <p className="text-healthy mt-4">Approved via {resolution.approval.channel}: “{resolution.approval.phrase}” · {new Date(resolution.approval.at).toLocaleString()}</p>}
+            {resolution.rejection && <p className="text-infected mt-4">Rejected: {resolution.rejection.reason}</p>}
+          </> : <Waiting>No resolution recorded yet.</Waiting>}
         </Stage>
+        {awaiting && <Stage n={7} title="Decision" done={false} last>
+          <ApprovalBox key={`${incident.id}:${awaiting}`} incidentId={incident.id} fixId={awaiting} onChanged={() => { detail.refresh(); brief.refresh(); }} />
+        </Stage>}
 
-        <Stage n={7} title="Decision" done={resolved || escalated} last>
-          {resolution?.approval ? (
-            <p className="text-healthy flex items-center gap-2 text-lg">
-              {resolution.approval.channel === "voice" && <Mic className="size-5" aria-label="approved by voice" />}
-              Approved: “{resolution.approval.phrase}” via {resolution.approval.channel} at {stamp(resolution.approval.at)}
-            </p>
-          ) : resolution?.rejection ? (
-            <p className="text-infected text-lg">
-              Rejected {resolution.rejection.fix_id} at {stamp(resolution.rejection.at)}: {resolution.rejection.reason}
-            </p>
-          ) : escalated && !acceptedId ? (
-            <p className="text-infected text-lg">No fix passed the whole family. Needs a human.</p>
-          ) : awaiting ? null : (
-            <Waiting>Waiting for a fix that passes the whole family.</Waiting>
-          )}
-          {escalated && !acceptedId && attempts.length > 0 && (
-            <ul className="text-muted-foreground mt-3 font-mono text-sm">
-              {attempts.map((a) => (
-                <li key={a.fix.id}>
-                  {a.fix.id}: {a.verdict}
-                </li>
-              ))}
-            </ul>
-          )}
-          {awaiting && acceptedId && (
-            <div className="mt-2">
-              {accepted && <p className="text-muted-foreground mb-4">{accepted.fix.id} passed the whole family. It ships only when a human approves it.</p>}
-              <ApprovalBox incidentId={incident.id} fixId={acceptedId} onDone={onDecided} />
-            </div>
-          )}
-          <AftercareBanner aftercare={aftercare} incidentId={incident.id} />
-        </Stage>
       </ol>
-
-      {(brief || briefUpdating) && (
-        <section className="border-border mt-4 rounded-xl border p-6">
-          <h2 className="text-muted-foreground font-mono text-sm tracking-wider uppercase">What the on-call engineer heard</h2>
-          {brief ? (
-            <p className="mt-3 text-lg leading-8">{brief}</p>
-          ) : (
-            <p className="text-muted-foreground mt-3 animate-pulse text-lg">Updating the brief for the new status…</p>
-          )}
-        </section>
-      )}
     </div>
-  );
-}
-
-function AftercareBanner({ aftercare, incidentId }: { aftercare: Aftercare | undefined; incidentId: string }) {
-  if (!aftercare || aftercare.incident_id !== incidentId || aftercare.state === "idle") return null;
-  const steps: Aftercare["state"][] = ["pulling", "gating", "backtesting", "done"];
-  const failed = aftercare.state === "failed";
-  return (
-    <div className="border-border mt-6 rounded-lg border p-4" role="status">
-      <p className="text-muted-foreground font-mono text-sm tracking-wider uppercase">Aftercare after merge</p>
-      <p className="mt-2 flex flex-wrap items-center gap-2 font-mono text-sm">
-        {steps.map((s, i) => (
-          <span key={s} className="flex items-center gap-2">
-            {i > 0 && <span className="text-muted-foreground">→</span>}
-            <span className={cn(aftercare.state === s ? "text-foreground font-semibold" : "text-muted-foreground")}>{s}</span>
-          </span>
-        ))}
-      </p>
-      {failed && <p className="text-infected mt-2 font-mono text-sm">failed{aftercare.error ? `: ${aftercare.error}` : ""}</p>}
-      {aftercare.state === "done" && (
-        <p className="text-healthy mt-2 font-mono text-sm">
-          Gate on main: {aftercare.gate_verdict ?? "—"} · backtest caught {aftercare.backtest_caught ?? 0}/{aftercare.backtest_families ?? 0}{" "}
-          <Link href="/gate" className="underline">
-            gate
-          </Link>{" "}
-          <Link href="/trust" className="underline">
-            trust
-          </Link>
-        </p>
-      )}
-    </div>
-  );
-}
-
-function FamilyList({ scenarios }: { scenarios: Scenario[] }) {
-  return (
-    <>
-      <p className="text-lg">
-        <strong>{scenarios.filter((s) => s.role === "must_fix").length}</strong> must_fix and{" "}
-        <strong>{scenarios.filter((s) => s.role === "must_not_change").length}</strong> must_not_change scenarios, replayed on recorded
-        tool responses.
-      </p>
-      {(["must_fix", "must_not_change"] as const).map((role) => (
-        <div key={role} className="mt-4">
-          <p className="text-muted-foreground mb-1 font-mono text-sm">{role}</p>
-          <ul className="grid gap-x-8 gap-y-1 font-mono text-sm sm:grid-cols-2">
-            {scenarios
-              .filter((s) => s.role === role)
-              .map((s) => (
-                <li key={s.id} className="flex flex-wrap gap-x-3">
-                  <span>{s.domain}</span>
-                  <span className="text-muted-foreground ml-auto text-right break-words">
-                    {s.faults[0] ? `${s.faults[0].error.code} on ${s.faults[0].tool}` : "no fault"}
-                  </span>
-                </li>
-              ))}
-          </ul>
-        </div>
-      ))}
-    </>
   );
 }
 
@@ -435,7 +242,7 @@ function BackLink() {
 
 function Stage({ n, title, done, last, children }: { n: number; title: string; done: boolean; last?: boolean; children: ReactNode }) {
   return (
-    <li className="relative flex gap-4 pb-12 sm:gap-6">
+    <li className="relative flex gap-6 pb-12">
       {!last && <span className="bg-border absolute top-10 bottom-0 left-[19px] w-px" aria-hidden />}
       <span
         className={cn(
@@ -471,20 +278,6 @@ function FamilyLine({ family }: { family: FamilyResult }) {
     <p className="font-mono text-2xl">
       {family.must_fix_passed}/{family.must_fix_total} must_fix · {family.must_not_change_passed}/{family.must_not_change_total}{" "}
       must_not_change
-    </p>
-  );
-}
-
-/** Some tool calls had no recording during replay: say so rather than hide it. */
-function FamilyWarnings({ family }: { family: FamilyResult }) {
-  const synthetic = family.synthetic_tool_calls ?? 0;
-  if (!synthetic && !family.warnings?.length) return null;
-  return (
-    <p className="mt-3 flex flex-wrap items-center gap-2 text-sm text-amber-300">
-      {synthetic > 0 && (
-        <LabelBadge label={`${synthetic} of ${family.total_tool_calls ?? "?"} tool calls had no recording`} />
-      )}
-      {family.warnings?.join(" · ")}
     </p>
   );
 }

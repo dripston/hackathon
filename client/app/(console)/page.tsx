@@ -2,32 +2,30 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { getIncident, getIncidents, getOverview, getRisks, getRuns } from "@/lib/api";
+import { getOverview, getIncidents, getRisks, getRuns } from "@/lib/api";
 import type { RiskForecast, ScoredRun } from "@/lib/types";
 import { useNow, usePoll } from "@/lib/use-poll";
 import { BriefPanel } from "@/components/console/brief-panel";
-import { Dot, PageHeader, Panel, PollNote, Stat, ago } from "@/components/console/ui";
+import { Dot, ErrorNote, PageHeader, Panel, Stat, MockBadge, ago } from "@/components/console/ui";
 import { cn } from "@/lib/utils";
 
 export default function LiveWard() {
-  const overview = usePoll(getOverview);
   const runs = usePoll(() => getRuns(20));
   const risks = usePoll(getRisks);
   const incidents = usePoll(getIncidents);
+  const overview = usePoll(getOverview);
   const [selected, setSelected] = useState<ScoredRun | null>(null);
-
-  // The trace-link template lives on incident details; read it from the newest incident, if any.
-  const firstIncident = incidents.data?.[0]?.id ?? "";
-  const template = usePoll(
-    async () => (firstIncident ? getIncident(firstIncident) : { data: undefined, mock: false }),
-    0,
-    firstIncident,
-  ).data?.trace_url_template;
 
   const list = runs.data ?? [];
   const now = useNow();
-  const o = overview.data;
-  const anyMock = overview.mock || runs.mock || risks.mock || incidents.mock;
+  const stats = overview.data;
+  const rate = stats?.silent_failure_rate;
+  const open = stats?.open_incidents;
+  const anyMock = runs.mock || risks.mock || incidents.mock || overview.mock;
+  const groups = new Map<string, RiskForecast[]>();
+  for (const risk of [...(risks.data ?? [])].sort((a, b) => b.created_at.localeCompare(a.created_at))) {
+    groups.set(risk.subject, [...(groups.get(risk.subject) ?? []), risk]);
+  }
 
   return (
     <>
@@ -36,41 +34,35 @@ export default function LiveWard() {
           <span className="bg-healthy size-2 animate-pulse rounded-full" /> polling every 2s
         </span>
       </PageHeader>
-      <PollNote poll={overview} />
 
+      <ErrorNote error={overview.error} updatedAt={overview.updatedAt} />
+      <MockBadge show={overview.mock} />
       <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
-        <Stat label="Runs in last 10 min" value={o ? o.runs_last_10_min : "—"} />
-        <Stat
-          label="Silent-failure rate"
-          value={o && o.silent_failure_rate != null ? `${Math.round(o.silent_failure_rate * 100)}%` : "—"}
-          tone={o?.silent_failure_rate == null ? undefined : o.silent_failure_rate > 0 ? "infected" : "healthy"}
-        />
-        <Stat label="Open incidents" value={o ? o.open_incidents : "—"} tone={o ? (o.open_incidents ? "infected" : "healthy") : undefined} />
+        <Stat label="Runs in last 10 min" value={stats?.runs_last_10_min ?? "—"} />
+        <Stat label="Silent-failure rate" value={rate != null ? `${Math.round(rate * 100)}%` : "—"} tone={rate != null && rate > 0 ? "infected" : "healthy"} />
+        <Stat label="Open incidents" value={open ?? "—"} tone={open ? "infected" : "healthy"} />
         <Stat
           label="Gate"
-          value={o ? (o.gate_verdict === "safe" ? "SAFE" : o.gate_verdict === "blocked" ? "BLOCKED" : "no gate run yet") : "—"}
-          tone={o?.gate_verdict ? (o.gate_verdict === "safe" ? "healthy" : "infected") : undefined}
+          value={stats ? (stats.gate_verdict?.toUpperCase() ?? "NOT RUN") : "—"}
+          tone={stats?.gate_verdict ? (stats.gate_verdict === "safe" ? "healthy" : "infected") : undefined}
         />
       </div>
 
       <div className="mt-6 grid gap-6 xl:grid-cols-[1fr_440px]">
-        <Panel title="Live feed · last 20 runs" action={<PollNote poll={runs} />}>
-          <div className="-mx-2 overflow-x-auto px-2">
-          <table className="w-full min-w-[560px] text-left whitespace-nowrap">
+        <Panel title="Live feed · last 20 runs" action={<><MockBadge show={runs.mock} /><ErrorNote error={runs.error} updatedAt={runs.updatedAt} /></>}>
+          <div className="overflow-x-auto"><table className="w-full text-left">
             <thead className="text-muted-foreground text-sm">
               <tr>
-                <th className="pb-3 pr-4 font-normal">When</th>
-                <th className="pb-3 pr-4 font-normal">Domain</th>
-                <th className="pb-3 pr-4 font-normal">Prompt</th>
-                <th className="pb-3 pr-4 font-normal">Status</th>
-                <th className="pb-3 pr-4 font-normal">Tripwires</th>
-                <th className="pb-3 font-normal">Jev</th>
+                <th className="pb-3 font-normal">When</th>
+                <th className="pb-3 font-normal">Domain</th>
+                <th className="pb-3 font-normal">Prompt</th>
+                <th className="pb-3 font-normal">Output</th>
+                <th className="pb-3 font-normal">Checks</th>
               </tr>
             </thead>
             <tbody>
               {list.map((item) => {
                 const bad = item.score.violations.length > 0;
-                const jev = item.score.checks.find((c) => c.id === "jev_grounded");
                 return (
                   <tr
                     key={item.run.run_id}
@@ -82,47 +74,39 @@ export default function LiveWard() {
                       bad && "bg-infected/[0.04]",
                     )}
                   >
-                    <td className="text-muted-foreground py-2.5 pr-4 font-mono text-sm">
-                      {item.run.started_at ? ago(item.run.started_at, now) : "—"}
-                    </td>
-                    <td className="py-2.5 pr-4 font-medium">{item.run.input.domain}</td>
-                    <td className="py-2.5 pr-4 font-mono text-sm">{item.run.prompt_version}</td>
-                    <td className="text-muted-foreground py-2.5 pr-4 font-mono text-sm">200 OK</td>
-                    <td className="py-2.5 pr-4">
+                    <td className="text-muted-foreground py-2.5 font-mono text-sm">{ago(item.run.started_at, now)}</td>
+                    <td className="py-2.5 font-medium">{item.run.input.domain}</td>
+                    <td className="py-2.5 font-mono text-sm">{item.run.prompt_version}</td>
+                    <td className="text-muted-foreground py-2.5 font-mono text-sm">{item.run.output ? "Brief returned" : "No brief"}</td>
+                    <td className="py-2.5">
                       <span className="flex gap-2">
-                        {item.score.checks
-                          .filter((c) => c.id.startsWith("tw_"))
-                          .map((c) => (
-                            <Dot key={c.id} passed={c.passed} title={`${c.id}: ${c.passed ? "passed" : "failed"}`} />
-                          ))}
+                        {item.score.checks.filter(c => c.id.startsWith("tw_")).map((c) => (
+                          <Dot key={c.id} passed={c.passed} title={`${c.id}: ${c.passed ? "passed" : "failed"}`} />
+                        ))}
                       </span>
-                    </td>
-                    <td className="py-2.5 pr-4">
-                      {jev?.score != null && (
-                        <span
-                          title="jev_grounded: advisory score, not an alarm"
-                          className="text-muted-foreground border-border rounded border px-1.5 py-0.5 font-mono text-xs"
-                        >
-                          {jev.score.toFixed(2)}
-                        </span>
-                      )}
+                      {item.score.checks.filter(c => c.id === "jev_grounded").map(c => <span key={c.id} className="text-muted-foreground text-xs" title="Advisory; not an alarm">Jev {c.score?.toFixed(2) ?? "—"} · advisory</span>)}
                     </td>
                   </tr>
                 );
               })}
             </tbody>
-          </table>
-          </div>
+          </table></div>
           {runs.loading && <p className="text-muted-foreground">Loading runs…</p>}
           {!runs.loading && !list.length && !runs.error && <p className="text-muted-foreground">No runs yet.</p>}
         </Panel>
 
         <div className="space-y-6">
-          <Panel title="At risk" action={<PollNote poll={risks} />}>
-            <RiskList risks={risks.data ?? []} loaded={!!risks.data} />
+          <Panel title="At risk" action={<><MockBadge show={risks.mock} /><ErrorNote error={risks.error} updatedAt={risks.updatedAt} /></>}>
+            <ul className="space-y-4">
+              {[...groups.entries()].map(([subject, history]) => <li key={subject}>
+                <ul><RiskRow risk={history[0]} /></ul>
+                {history.length > 1 && <details className="mt-2"><summary className="text-muted-foreground cursor-pointer text-sm">Older forecasts ({history.length - 1})</summary><ul className="mt-2 space-y-2">{history.slice(1).map(r => <RiskRow key={r.id} risk={r} />)}</ul></details>}
+              </li>)}
+              {risks.data?.length === 0 && <li className="text-muted-foreground">Nothing trending toward breaking.</li>}
+            </ul>
           </Panel>
 
-          <Panel title="Incidents" action={<PollNote poll={incidents} />}>
+          <Panel title="Incidents" action={<><MockBadge show={incidents.mock} /><ErrorNote error={incidents.error} updatedAt={incidents.updatedAt} /></>}>
             <ul className="space-y-2">
               {(incidents.data ?? []).map((i) => (
                 <li key={i.id}>
@@ -141,46 +125,15 @@ export default function LiveWard() {
         </div>
       </div>
 
-      {selected && <BriefPanel item={selected} template={template} onClose={() => setSelected(null)} />}
+      {selected && <BriefPanel mock={runs.mock} item={selected} onClose={() => setSelected(null)} />}
     </>
   );
 }
 
-/** The list holds history: newest forecast per subject up front, older ones collapsed. */
-function RiskList({ risks, loaded }: { risks: RiskForecast[]; loaded: boolean }) {
-  const bySubject = new Map<string, RiskForecast[]>();
-  for (const r of [...risks].sort((a, b) => b.created_at.localeCompare(a.created_at))) {
-    bySubject.set(r.subject, [...(bySubject.get(r.subject) ?? []), r]);
-  }
-  if (loaded && !risks.length) return <p className="text-muted-foreground">Nothing trending toward breaking.</p>;
-  return (
-    <ul className="space-y-4">
-      {[...bySubject.values()].map(([newest, ...older]) => (
-        <li key={newest.subject}>
-          <RiskRow risk={newest} />
-          {older.length > 0 && (
-            <details className="mt-2">
-              <summary className="text-muted-foreground hover:text-foreground cursor-pointer text-sm">
-                {older.length} earlier forecast{older.length === 1 ? "" : "s"}
-              </summary>
-              <div className="mt-2 space-y-2">
-                {older.map((r) => (
-                  <RiskRow key={r.id} risk={r} />
-                ))}
-              </div>
-            </details>
-          )}
-        </li>
-      ))}
-    </ul>
-  );
-}
-
 function RiskRow({ risk }: { risk: RiskForecast }) {
-  const isRate = risk.signal.endsWith("rate");
-  const fmt = (n: number) => (isRate ? `${Math.round(n * 100)}%` : String(n));
+  const pct = (n: number) => (risk.signal.endsWith("rate") ? `${Math.round(n * 100)}%` : String(n));
   return (
-    <div className="border-border rounded-lg border p-4">
+    <li className="border-border rounded-lg border p-4">
       <div className="flex items-center gap-2">
         <span className="font-mono text-sm">{risk.subject}</span>
         <span className="ml-auto">
@@ -190,19 +143,17 @@ function RiskRow({ risk }: { risk: RiskForecast }) {
             <span className="text-muted-foreground font-mono text-sm">didn&apos;t happen</span>
           ) : (
             <span className={cn("font-mono text-sm", risk.likelihood === "likely" ? "text-infected" : "text-muted-foreground")}>
-              watching · {risk.likelihood}
+              {risk.likelihood} · watching
             </span>
           )}
         </span>
       </div>
       <p className="mt-2 leading-6">{risk.evidence}</p>
       <p className="text-muted-foreground mt-1 font-mono text-sm">
-        {fmt(risk.current)} now · breaks at {fmt(risk.threshold)}
-        {risk.outcome === "pending" && risk.eta_minutes != null && (
-          <> · {risk.eta_minutes === 0 ? "threshold already crossed" : `~${risk.eta_minutes} min`}</>
-        )}
-        {risk.related_check && <> · {risk.related_check}</>}
+        {pct(risk.current)} now · breaks at {pct(risk.threshold)}
+        {risk.outcome === "pending" && risk.eta_minutes != null && <> · {risk.eta_minutes === 0 ? "threshold already crossed" : `~${risk.eta_minutes} min`}</>}
       </p>
-    </div>
+      {risk.related_check && <p className="text-muted-foreground mt-1 break-all font-mono text-xs">{risk.related_check}</p>}
+    </li>
   );
 }

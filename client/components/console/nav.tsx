@@ -23,19 +23,19 @@ export function NavBar({ path = "" }: { path?: string }) {
 
   return (
     <header className="border-border bg-background/80 sticky top-0 z-30 border-b backdrop-blur">
-      <nav className="mx-auto flex max-w-[1800px] items-center gap-3 px-4 py-3 sm:gap-8 sm:px-6" aria-label="Console">
-        <Link href="/" className="flex shrink-0 items-center gap-2 text-lg font-semibold tracking-tight">
+      <nav className="mx-auto flex max-w-[1800px] flex-wrap items-center gap-3 px-6 sm:gap-8 py-3" aria-label="Console">
+        <Link href="/" className="flex items-center gap-2 text-lg font-semibold tracking-tight">
           <ShieldCheck className="text-healthy size-5" aria-hidden />
-          <span className="hidden sm:inline">Antibody</span>
+          Antibody
         </Link>
-        <ul className="flex min-w-0 gap-0.5 sm:gap-1">
+        <ul className="flex gap-1">
           {LINKS.map(({ href, label }) => (
             <li key={href}>
               <Link
                 href={href}
                 aria-current={active(href) ? "page" : undefined}
                 className={cn(
-                  "rounded-md px-2.5 py-1.5 text-sm whitespace-nowrap transition-colors sm:px-3 sm:text-base",
+                  "rounded-md px-3 py-1.5 text-base whitespace-nowrap transition-colors",
                   active(href) ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground",
                 )}
               >
@@ -44,7 +44,7 @@ export function NavBar({ path = "" }: { path?: string }) {
             </li>
           ))}
         </ul>
-        <div className="text-muted-foreground ml-auto hidden items-center gap-4 text-sm sm:flex">
+        <div className="text-muted-foreground ml-auto flex items-center gap-4 text-sm">
           {USE_MOCK && <span className="font-mono text-amber-300">mock mode</span>}
           <Link href="/welcome" className="hover:text-foreground">
             About

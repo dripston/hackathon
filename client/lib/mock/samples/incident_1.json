@@ -23,7 +23,7 @@
     "incident_id": "inc_20261011_1102_tw_empty_after_error",
     "commit_sha": "32de23946950a63d4fe9eae35998ff9dde3ec0c0",
     "checkpoint_id": "01M4N4NJ51RE2BDH5D2WGX8B2J",
-    "checkpoint_url": "https://entire.io/gh/shresthjindal28/hackathon/commit/32de23946950a63d4fe9eae35998ff9dde3ec0c0",
+    "checkpoint_url": "https://entire.io/gh/dripston/hackathon/commit/32de23946950a63d4fe9eae35998ff9dde3ec0c0",
     "reasoning_excerpt": "I own detection/ (I'm the team lead), so you can edit it. People search sometimes errors and then the whole brief comes out degraded. Make it resilient: when the people search errors, treat it as an empty list so the brief still completes normally. Gate the behaviour behind the existing swallow_tool_errors flag (BUG_SWALLOW_TOOL_ERRORS) so we can switch it on per deployment. The agent is\u2026",
     "good_trace_ids": [
       "f5b6d3800ad9c83c1c3ba369b7582a30",
@@ -481,7 +481,7 @@
     "attempts": [
       "fix_1"
     ],
-    "pr_url": "https://github.com/shresthjindal28/hackathon/pull/3",
+    "pr_url": "https://github.com/dripston/hackathon/pull/3",
     "cost_usd": 0.030426,
     "duration_ms": 185539,
     "approval": {

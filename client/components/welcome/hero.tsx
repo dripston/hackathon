@@ -37,7 +37,7 @@ export function Hero() {
 
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
           <a href="#incident" className={cn(buttonVariants({ size: "lg" }), "h-11 px-5 text-sm")}>
-            Watch a real incident
+            Inspect an incident
           </a>
           <a href="#how" className={cn(buttonVariants({ variant: "outline", size: "lg" }), "h-11 px-5 text-sm")}>
             How it works

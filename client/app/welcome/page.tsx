@@ -1,3 +1,4 @@
+import { MockModeBanner } from "@/components/console/mock-mode-banner";
 import Link from "next/link";
 import { Evidence } from "@/components/welcome/evidence";
 import { Hero } from "@/components/welcome/hero";
@@ -21,6 +22,7 @@ export default function Home() {
       </header>
 
       <main>
+        <MockModeBanner />
         <Hero />
         <SilentFailures />
         <Pipeline />

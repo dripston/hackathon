@@ -1,85 +1,77 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ApiError, type ApiResult } from "@/lib/api";
+import type { ApiResult } from "@/lib/api";
 
 export interface PollState<T> {
   data: T | undefined;
   mock: boolean;
   error: string | null;
-  /** True when the last request never reached the server. */
-  unreachable: boolean;
-  /** Epoch ms of the first failed poll since the last good one; null while healthy. */
-  staleSince: number | null;
   loading: boolean;
-  /** Fetch again now (e.g. after an approval). */
-  refetch: () => void;
+  updatedAt: number | null;
+  refresh: () => void;
 }
 
-/** Current time, refreshed every `intervalMs`, so render stays pure. */
 export function useNow(intervalMs = 2000) {
-  // 0 during prerender (Cache Components forbids reading the clock there); real time after mount.
   const [now, setNow] = useState(0);
   useEffect(() => {
     const update = () => setNow(Date.now());
     const first = setTimeout(update, 0);
-    const t = setInterval(update, intervalMs);
-    return () => {
-      clearTimeout(first);
-      clearInterval(t);
-    };
+    const timer = setInterval(update, intervalMs);
+    return () => { clearTimeout(first); clearInterval(timer); };
   }, [intervalMs]);
   return now;
 }
 
-/**
- * Calls `fetcher` now and every `intervalMs` (0 = once). Keeps the last good data on error and
- * skips ticks while the tab is hidden.
- */
+/** Serial polling, paused in hidden tabs; retains the last successful response on errors. */
 export function usePoll<T>(fetcher: () => Promise<ApiResult<T>>, intervalMs = 2000, key = ""): PollState<T> {
-  type Core = Omit<PollState<T>, "refetch">;
-  const [state, setState] = useState<Core>({
-    data: undefined,
-    mock: false,
-    error: null,
-    unreachable: false,
-    staleSince: null,
-    loading: true,
+  const [state, setState] = useState<Omit<PollState<T>, "refresh"> & { key: string }>({
+    key, data: undefined, mock: false, error: null, loading: true, updatedAt: null,
   });
   const fetcherRef = useRef(fetcher);
-  fetcherRef.current = fetcher;
-  const tickRef = useRef<() => Promise<void>>(async () => {});
+  const refreshRef = useRef(() => {});
+  useEffect(() => { fetcherRef.current = fetcher; });
+  const refresh = useCallback(() => refreshRef.current(), []);
 
   useEffect(() => {
     let alive = true;
+    let pending = false;
+    let rerun = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    // The first load always fetches, even in a background tab; only repeat polling pauses while hidden.
+    let first = true;
+    const isVisible = () => document.visibilityState !== "hidden";
     const tick = async () => {
+      clearTimeout(timer);
+      if (!alive || (!isVisible() && !first)) return;
+      first = false;
+      if (pending) { rerun = true; return; }
+      pending = true;
       try {
         const { data, mock } = await fetcherRef.current();
-        if (alive) setState({ data, mock, error: null, unreachable: false, staleSince: null, loading: false });
-      } catch (err) {
-        if (!alive) return;
-        setState((s) => ({
-          ...s,
-          error: err instanceof Error ? err.message : String(err),
-          unreachable: err instanceof ApiError && err.unreachable,
-          staleSince: s.staleSince ?? Date.now(),
-          loading: false,
+        if (alive) setState({ key, data, mock, error: null, loading: false, updatedAt: Date.now() });
+      } catch (error) {
+        if (alive) setState(s => ({
+          ...(s.key === key ? s : { key, data: undefined, mock: false, updatedAt: null }),
+          error: error instanceof Error ? error.message : String(error), loading: false,
         }));
+      } finally {
+        pending = false;
+        if (alive && isVisible() && (rerun || intervalMs > 0)) {
+          timer = setTimeout(tick, rerun ? 0 : intervalMs);
+          rerun = false;
+        }
       }
     };
-    tickRef.current = tick;
-    tick();
-    const timer =
-      intervalMs > 0 ? setInterval(() => document.visibilityState === "visible" && tick(), intervalMs) : undefined;
-    const onVisible = () => document.visibilityState === "visible" && intervalMs > 0 && tick();
-    document.addEventListener("visibilitychange", onVisible);
-    return () => {
-      alive = false;
-      clearInterval(timer);
-      document.removeEventListener("visibilitychange", onVisible);
+    refreshRef.current = tick;
+    const visibility = () => {
+      clearTimeout(timer);
+      if (document.visibilityState !== "hidden") void tick();
     };
+    document.addEventListener("visibilitychange", visibility);
+    void tick();
+    return () => { alive = false; clearTimeout(timer); document.removeEventListener("visibilitychange", visibility); };
   }, [intervalMs, key]);
 
-  const refetch = useCallback(() => void tickRef.current(), []);
-  return { ...state, refetch };
+  return state.key === key ? { ...state, refresh } : { data: undefined, mock: false, error: null, loading: true, updatedAt: null, refresh };
 }
