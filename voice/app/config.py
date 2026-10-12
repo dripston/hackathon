@@ -11,7 +11,7 @@ from __future__ import annotations
 from functools import lru_cache
 from pathlib import Path
 
-from pydantic import Field
+from pydantic import AliasChoices, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -22,6 +22,7 @@ class Settings(BaseSettings):
         env_file_encoding="utf-8",
         extra="ignore",
         case_sensitive=False,
+        populate_by_name=True,
     )
 
     # --- Telegram ---
@@ -31,7 +32,9 @@ class Settings(BaseSettings):
     telegram_webhook_secret: str = ""
 
     # --- Groq LLM ---
-    groq_api_key: str = ""
+    # The repo shares one .env: the bot's own Groq key is VOICE_GROQ_API_KEY, so it doesn't share a rate
+    # limit with the patient agent and Antibody (GROQ_API_KEY). Falls back to GROQ_API_KEY.
+    groq_api_key: str = Field(default="", validation_alias=AliasChoices("VOICE_GROQ_API_KEY", "GROQ_API_KEY"))
     groq_model: str = "llama-3.3-70b-versatile"
 
     # --- Sarvam AI ---

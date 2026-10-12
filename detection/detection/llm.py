@@ -2,6 +2,7 @@
 Never sets temperature / top_p / top_k."""
 
 import json
+import os
 import re
 import time
 from dataclasses import dataclass
@@ -34,7 +35,9 @@ def _get_client():
 
         s = get_settings()
         key, url = s.llm_key_and_url
-        _client = tracing.wrap(openai.OpenAI(api_key=key, base_url=url, timeout=120.0))
+        _client = tracing.wrap(openai.OpenAI(api_key=key, base_url=url, timeout=120.0,
+                                                   # rate-limited providers (Groq's free tier: 8k tokens/min) need room to wait
+                                                   max_retries=int(os.environ.get("LLM_MAX_RETRIES", "2"))))
     return _client
 
 

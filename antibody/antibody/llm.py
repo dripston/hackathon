@@ -7,6 +7,7 @@ labelled as mock.
 """
 
 import logging
+import os
 import threading
 from dataclasses import dataclass
 
@@ -94,7 +95,9 @@ def _openai_compat_client():
         s = get_settings()
         key, url = ((s.deepseek_api_key, s.deepseek_base_url) if s.llm_provider == "deepseek"
                     else (s.groq_api_key, s.groq_base_url))
-        _groq = tracing.wrap(openai.OpenAI(api_key=key, base_url=url, timeout=180.0))
+        _groq = tracing.wrap(openai.OpenAI(api_key=key, base_url=url, timeout=180.0,
+                                         # LLM_MAX_RETRIES: room to wait out per-minute rate limits (Groq free tier)
+                                         max_retries=int(os.environ.get("LLM_MAX_RETRIES", "2"))))
     return _groq
 
 
