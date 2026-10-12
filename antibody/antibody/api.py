@@ -221,18 +221,54 @@ def drill_status():
     return st
 
 
+def _stop_drill(st: dict) -> None:
+    """Stop a drill and everything it started (its process group: the sandbox patient and Antibody)."""
+    import signal
+    import time as _time
+
+    pgid = st.get("pgid") or st.get("pid")
+    if not pgid:
+        return
+    if os.name == "nt":
+        subprocess.run(["taskkill", "/T", "/F", "/PID", str(pgid)], capture_output=True)
+        return
+    for sig in (signal.SIGTERM, signal.SIGKILL):
+        try:
+            os.killpg(pgid, sig)
+        except OSError:
+            return
+        _time.sleep(2)
+
+
+@app.post("/drill/stop")
+def drill_stop():
+    """Stop the current drill (for example one waiting for an approval nobody will give)."""
+    st = drill_status()
+    if not st.get("running"):
+        return {"stopped": False}
+    _stop_drill(st)
+    DRILL_STATUS.write_text(json.dumps({**st, "state": "failed", "message": "Stopped from the console", "ended": True,
+                                        "running": False}), encoding="utf-8")
+    return {"stopped": True}
+
+
 @app.post("/drill/start")
 def drill_start():
-    """Start one live incident drill (scripts/e2e.py --drill). One at a time."""
-    if drill_status().get("running"):
-        return JSONResponse({"error": "A drill is already running"}, status_code=409)
+    """Start one live incident drill (scripts/e2e.py --drill). One at a time; a finished drill that is
+    still on screen is replaced."""
+    st = drill_status()
+    if st.get("running"):
+        if st.get("state") in ("done", "expired", "failed"):
+            _stop_drill(st)
+        else:
+            return JSONResponse({"error": "A drill is already running"}, status_code=409)
     root = Path(__file__).resolve().parent.parent
     DRILL_STATUS.parent.mkdir(parents=True, exist_ok=True)
     env = {k: v for k, v in os.environ.items() if k not in ("VIRTUAL_ENV",)}
     log = open(DRILL_STATUS.parent / "drill.log", "wb")
     proc = subprocess.Popen(["uv", "run", "--quiet", "python", "scripts/e2e.py", "--drill"], cwd=root, env=env,
                             stdout=log, stderr=subprocess.STDOUT, start_new_session=os.name != "nt")
-    DRILL_STATUS.write_text(json.dumps({"state": "starting", "message": "Launching the drill", "pid": proc.pid,
+    DRILL_STATUS.write_text(json.dumps({"state": "starting", "message": "Launching the drill", "pid": proc.pid, "pgid": proc.pid,
                                         "started_at": __import__("datetime").datetime.now().astimezone().isoformat()}),
                             encoding="utf-8")
     return {"started": True, "pid": proc.pid}

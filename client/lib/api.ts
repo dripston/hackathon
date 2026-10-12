@@ -122,6 +122,9 @@ export interface DrillStatus {
 }
 /** The drill always lives on the production Antibody API, whatever the current source. */
 export const getDrill = () => (USE_MOCK ? mock({ state: "idle", running: false } as DrillStatus) : request<DrillStatus>(ANTIBODY_URL, "/drill/status"));
+export async function stopDrill() {
+  return request<{ stopped: boolean }>(ANTIBODY_URL, "/drill/stop", { method: "POST", body: "{}" });
+}
 export async function startDrill() {
   if (USE_MOCK) throw new ApiError("Drills need the live backend", 409);
   return request<{ started: boolean }>(ANTIBODY_URL, "/drill/start", { method: "POST", body: "{}" });

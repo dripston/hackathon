@@ -557,7 +557,22 @@ def drill_main(a) -> int:
     """One real incident, live, for mission control: a real bug in a sandbox, real traffic with an injected
     outage, real detection, diagnosis, family, fix and proof. Approval is left to a human."""
     DRILL_STATUS.parent.mkdir(parents=True, exist_ok=True)
-    DRILL_STATUS.write_text("{}", encoding="utf-8")
+    try:  # keep only the launcher's process group (the API stops the drill through it)
+        pgid = json.loads(DRILL_STATUS.read_text(encoding="utf-8")).get("pgid")
+    except (OSError, ValueError):
+        pgid = None
+    DRILL_STATUS.write_text(json.dumps({"pgid": pgid} if pgid else {}), encoding="utf-8")
+    # A replaced or stopped drill can't clean up after itself: remove earlier drill sandboxes first.
+    for line in git("worktree", "list", "--porcelain", check_=False).splitlines():
+        if line.startswith("worktree ") and "/.e2e/" in line.replace("\\", "/") and STAMP not in line:
+            git("worktree", "remove", "--force", line[len("worktree "):], check_=False)
+    git("worktree", "prune", check_=False)
+    for b in git("branch", "--list", "e2e/*", "antibody/inc_*", "--format=%(refname:short)", check_=False).splitlines():
+        if b.startswith("e2e/") or not (MAIN / "antibody" / "fixtures" / "immunity" / f"{b.split('/')[1]}.json").exists():
+            git("branch", "-D", b, check_=False)
+    for old in (MAIN / ".e2e").glob("*"):
+        if old.name != STAMP:
+            shutil.rmtree(old, onexc=_force_remove)
     det_port, api_port = a.drill_detection_port, a.drill_api_port
     det_url, api_url = f"http://127.0.0.1:{det_port}", f"http://127.0.0.1:{api_port}"
     iid = None

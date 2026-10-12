@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { motion } from "motion/react";
 import { ArrowRight, Loader2, Play, Sparkles } from "lucide-react";
-import { getDrill, startDrill, type DrillStatus } from "@/lib/api";
+import { getDrill, startDrill, stopDrill, type DrillStatus } from "@/lib/api";
 import { useNow, usePoll } from "@/lib/use-poll";
 import { cn } from "@/lib/utils";
 
@@ -72,6 +72,16 @@ export function DrillBar() {
     );
 
   const failed = d!.state === "failed" || d!.state === "expired";
+  const finished = failed || d!.state === "done";
+  const stop = async () => {
+    setBusy(true);
+    try {
+      await stopDrill();
+      drill.refresh();
+    } finally {
+      setBusy(false);
+    }
+  };
   return (
     <motion.div
       initial={{ opacity: 0, y: -8 }}
@@ -86,6 +96,15 @@ export function DrillBar() {
         <span className="text-muted-foreground ml-auto font-mono text-sm tabular-nums">
           {Math.floor(elapsed / 60)}:{String(elapsed % 60).padStart(2, "0")}
         </span>
+        {finished ? (
+          <button onClick={start} disabled={busy} className="bg-brand text-background hover:bg-brand/90 inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-medium disabled:opacity-60">
+            {busy ? <Loader2 className="size-3.5 animate-spin" /> : <Play className="size-3.5 fill-current" />} Run another
+          </button>
+        ) : (
+          <button onClick={stop} disabled={busy} className="border-border text-muted-foreground hover:text-foreground rounded-full border px-3 py-1 text-xs disabled:opacity-60">
+            Stop
+          </button>
+        )}
       </div>
       <ol className="mt-4 grid grid-cols-4 gap-2 md:grid-cols-8">
         {STEPS.map((s, i) => (

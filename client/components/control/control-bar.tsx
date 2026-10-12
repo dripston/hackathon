@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 import { getDrill, getSystem, setDrillMode } from "@/lib/api";
 import { drillServing } from "@/components/control/drill-bar";
+import { RunButton } from "@/components/control/run-button";
 import { useNow, usePoll } from "@/lib/use-poll";
 import { Mark } from "@/components/story/site-header";
 import { cn } from "@/lib/utils";
@@ -43,7 +44,8 @@ export function ControlBar() {
           ))}
           {inDrill && <span className="bg-brand/15 text-brand ml-2 rounded-full px-3 py-1.5 text-xs font-medium">Live drill</span>}
         </nav>
-        <div className="ml-auto hidden items-center gap-2 lg:flex">
+        <RunButton className="ml-auto" />
+        <div className="hidden items-center gap-2 xl:flex">
           {pills.map((p) => (
             <span key={p.label} className="border-border flex items-center gap-2 rounded-full border px-3 py-1 text-xs">
               <span className={cn("size-1.5 rounded-full", !p.known ? "bg-muted-foreground" : p.ok ? "bg-healthy animate-vital" : "bg-infected")} />
