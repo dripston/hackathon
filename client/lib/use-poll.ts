@@ -38,9 +38,10 @@ export function usePoll<T>(fetcher: () => Promise<ApiResult<T>>, intervalMs = 20
     let pending = false;
     let rerun = false;
     let timer: ReturnType<typeof setTimeout> | undefined;
+    const isVisible = () => document.visibilityState !== "hidden";
     const tick = async () => {
       clearTimeout(timer);
-      if (!alive || document.visibilityState === "hidden") return;
+      if (!alive || !isVisible()) return;
       if (pending) { rerun = true; return; }
       pending = true;
       try {
@@ -53,7 +54,7 @@ export function usePoll<T>(fetcher: () => Promise<ApiResult<T>>, intervalMs = 20
         }));
       } finally {
         pending = false;
-        if (alive && document.visibilityState !== "hidden" && (rerun || intervalMs > 0)) {
+        if (alive && isVisible() && (rerun || intervalMs > 0)) {
           timer = setTimeout(tick, rerun ? 0 : intervalMs);
           rerun = false;
         }

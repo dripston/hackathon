@@ -1,36 +1,55 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Antibody console
 
-## Getting Started
+Next.js console for Detection (:5050) and the Antibody Operator API (:4000).
 
-First, run the development server:
+## Configuration
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Live mode is the default. No client environment file is required for local use.
+The browser uses `/api/antibody` and `/api/detection`; Next.js proxies these to
+`http://127.0.0.1:4000` and `http://127.0.0.1:5050` respectively. Override the
+server-side `ANTIBODY_URL` and `DETECTION_URL` when hosting the console elsewhere.
+The frontend host must be able to reach those addresses.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Explicit `NEXT_PUBLIC_ANTIBODY_URL` / `NEXT_PUBLIC_DETECTION_URL` overrides are
+still supported. Remove old overrides pointing at browser-local localhost when
+using a tunnel. Restart Next.js after changing configuration.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+`NEXT_PUBLIC_USE_MOCK=1` enables read-only captured backend samples with visible
+MOCK labels. Unset it (or use 0) to connect to the backend. Existing local env
+files with the old value 1 still opt into mock mode. Live requests never silently
+fall back to samples.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Optional `NEXT_PUBLIC_NEATLOGS_TRACE_URL` is an HTTP(S) template containing
+`{trace_id}`. Incident responses can supply their own template. Without one,
+trace IDs have copy buttons rather than invented links.
 
-## Learn More
+## Data and actions
 
-To learn more about Next.js, take a look at the following resources:
+- Live ward: `/overview`, Detection `/runs`, `/incidents`, `/risks`.
+- Incidents: detail, brief, actual attempts/diffs, family verdicts, resolution.
+- Decisions: exact user-typed approval phrase or rejection with a reason. A
+  successful response refreshes detail; conflict responses refresh it too.
+- Gate: `/gate/latest`; 404 means no gate run yet.
+- Trust: `/trust`, including seeded bugs, misses and clean-check denominators.
+- Evidence: live `/evidence` plus the manually maintained judges' checklist.
+- Welcome: actual trust metrics and an incident brief, replacing example
+  percentages and the scripted live-call transcript.
+- Post-merge status: `/aftercare`. Existing page polls refresh report data.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Polls run serially, pause in hidden tabs, and preserve last-good data with stale
+indicators on failures. Jev groundedness remains advisory, separate from alarms.
+The run schema has no HTTP status, so run rows say `Brief returned` or `No brief`.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Commands
 
-## Deploy on Vercel
+- `npm run dev` — starts the console and copies the judges' checklist.
+- `npm run sync-samples` — refreshes checked-in mock samples from the backend.
+- `npm test` — isolated API-adapter tests; no running backend or paid calls.
+- `npm run lint` / `npm run build` — lint and production build.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Verification status for this change
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Five API-adapter tests passed before the user requested that testing stop.
+Page edits made afterward have not been tested, built, or browser-verified.
+No frontend or backend servers were launched. No approval, merge, replay,
+external notification, or paid model call was performed.

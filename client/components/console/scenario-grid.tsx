@@ -128,7 +128,7 @@ function Square({ scenario, verdict, size, template }: { template?: string | nul
   return (
     <div className="group relative">
       <button
-        aria-label={`${scenario.domain}: ${passed === undefined ? "not run" : passed ? "passed" : "not run"}`}
+        aria-label={`${scenario.domain}: ${passed === undefined ? "not run" : passed ? "passed" : "failed"}`}
         className={cn(
           "rounded-md transition-all duration-300 [transform-style:preserve-3d]",
           size === "lg" ? "size-14" : "size-9",
@@ -145,7 +145,7 @@ function Square({ scenario, verdict, size, template }: { template?: string | nul
           {fault ? `${fault.tool} → ${fault.error.code} at call ${fault.at_call}` : "no injected fault"}
         </p>
         <p className={cn("mt-2 font-mono text-xs", passed ? "text-healthy" : "text-infected")}>
-          {passed ? "passed" : verdict?.failed_checks.length ? `failed: ${verdict.failed_checks.join(", ")}` : "not run"}
+          {passed ? "passed" : verdict?.failed_checks.length ? `failed: ${verdict.failed_checks.join(", ")}` : passed === false ? "failed" : "not run"}
         </p>
         {verdict?.evidence?.map((text, i) => <p key={i} className="mt-1">{text}</p>)}
         {verdict?.trace_id && (

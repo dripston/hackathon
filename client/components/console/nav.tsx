@@ -23,7 +23,7 @@ export function NavBar({ path = "" }: { path?: string }) {
 
   return (
     <header className="border-border bg-background/80 sticky top-0 z-30 border-b backdrop-blur">
-      <nav className="mx-auto flex max-w-[1800px] items-center gap-8 px-6 py-3" aria-label="Console">
+      <nav className="mx-auto flex max-w-[1800px] flex-wrap items-center gap-3 px-6 sm:gap-8 py-3" aria-label="Console">
         <Link href="/" className="flex items-center gap-2 text-lg font-semibold tracking-tight">
           <ShieldCheck className="text-healthy size-5" aria-hidden />
           Antibody

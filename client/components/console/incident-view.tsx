@@ -19,7 +19,8 @@ export function IncidentView({ params }: { params: Promise<{ id: string }> }) {
   const detail = usePoll(() => getIncident(incidentId), interval, incidentId);
   const brief = usePoll(() => getBrief(incidentId), interval, incidentId);
   useEffect(() => {
-    setIntervalMs(detail.data?.incident.status === "resolved" || detail.data?.incident.status === "escalated" ? 10000 : 2000);
+    const timer = setTimeout(() => setIntervalMs(detail.data?.incident.status === "resolved" || detail.data?.incident.status === "escalated" ? 10000 : 2000), 0);
+    return () => clearTimeout(timer);
   }, [detail.data?.incident.status]);
 
   if (!detail.data) {
