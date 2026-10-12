@@ -234,7 +234,7 @@ export function IncidentView({ params }: { params: Promise<{ id: string }> }) {
 
 function BackLink() {
   return (
-    <Link href="/" className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm">
+    <Link href="/live" className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm">
       <ArrowLeft className="size-4" /> Live ward
     </Link>
   );

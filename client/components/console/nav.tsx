@@ -7,7 +7,7 @@ import { USE_MOCK } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 const LINKS = [
-  { href: "/", label: "Live ward" },
+  { href: "/live", label: "Live ward" },
   { href: "/gate", label: "Gate" },
   { href: "/trust", label: "Trust" },
   { href: "/evidence", label: "Evidence" },
@@ -19,7 +19,7 @@ export function ConsoleNav() {
 
 /** Same bar without an active link; the Suspense fallback while the pathname resolves. */
 export function NavBar({ path = "" }: { path?: string }) {
-  const active = (href: string) => (href === "/" ? path === "/" || path.startsWith("/incidents") : path.startsWith(href));
+  const active = (href: string) => (href === "/live" ? path === "/live" || path.startsWith("/incidents") : path.startsWith(href));
 
   return (
     <header className="border-border bg-background/80 sticky top-0 z-30 border-b backdrop-blur">
@@ -46,7 +46,7 @@ export function NavBar({ path = "" }: { path?: string }) {
         </ul>
         <div className="text-muted-foreground ml-auto flex items-center gap-4 text-sm">
           {USE_MOCK && <span className="font-mono text-amber-300">mock mode</span>}
-          <Link href="/welcome" className="hover:text-foreground">
+          <Link href="/" className="hover:text-foreground">
             About
           </Link>
         </div>
