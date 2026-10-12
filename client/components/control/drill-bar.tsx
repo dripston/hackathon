@@ -22,7 +22,7 @@ const ORDER = STEPS.map((s) => s.key);
 
 /** States in which the drill's own APIs are up and mission control should read them. */
 export const drillServing = (d?: DrillStatus | null) =>
-  !!d && !d.ended && ["traffic", "detecting", "fixing", "awaiting_approval", "verifying", "done", "expired"].includes(d.state);
+  !!d && !!d.running && ["traffic", "detecting", "fixing", "awaiting_approval", "verifying", "done", "expired"].includes(d.state);
 
 export function DrillBar() {
   const drill = usePoll(getDrill, 2000);
@@ -30,7 +30,8 @@ export function DrillBar() {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const d = drill.data;
-  const active = !!d && d.state !== "idle" && !d.ended;
+  // Only while its process is alive: a server restart ends a test incident even if its file says otherwise.
+  const active = !!d && d.state !== "idle" && !!d.running;
   const at = d ? ORDER.indexOf(d.state) : -1;
   const elapsed = d?.started_at && now ? Math.max(0, Math.round((now - Date.parse(d.started_at)) / 1000)) : 0;
 

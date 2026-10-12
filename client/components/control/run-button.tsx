@@ -16,7 +16,7 @@ export function RunButton({ className }: { className?: string }) {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const d = drill.data;
-  const inFlight = !!d && !d.ended && BUSY.has(d.state);
+  const inFlight = !!d && !!d.running && BUSY.has(d.state);
 
   const run = async () => {
     setBusy(true);
