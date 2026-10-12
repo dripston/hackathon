@@ -1,15 +1,13 @@
-import { BackendStatus } from "@/components/console/backend-status";
 import { Suspense } from "react";
-import { ConsoleNav, NavBar } from "@/components/console/nav";
+import { ControlBar } from "@/components/control/control-bar";
 
 export default function ConsoleLayout({ children }: LayoutProps<"/">) {
   return (
     <>
-      <Suspense fallback={<NavBar />}>
-        <ConsoleNav />
+      <Suspense fallback={<div className="border-border h-14 border-b" />}>
+        <ControlBar />
       </Suspense>
-      <BackendStatus />
-      <main className="mx-auto w-full max-w-[1800px] flex-1 px-6 py-8 text-base">{children}</main>
+      <main className="monitor-grid mx-auto w-full max-w-[1800px] flex-1 px-6 py-6 text-base">{children}</main>
     </>
   );
 }

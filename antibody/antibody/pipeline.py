@@ -5,6 +5,7 @@ Acceptance rule: all must_fix pass AND all must_not_change pass. Max 3 attempts,
 """
 
 import logging
+import os
 import re
 import time
 from pathlib import Path
@@ -105,7 +106,9 @@ class Pipeline:
         diag = self.store.read(inc.id, "diagnosis", Diagnosis)
         evidence = self.store.read(inc.id, "evidence") or {}
         stub = PatientClient().is_stub
-        scenarios = breed.breed(inc, diag, evidence, stub=stub)
+        # FAMILY_SIZE: smaller families for live drills on rate-limited LLMs (default 10).
+        size = int(os.environ.get("FAMILY_SIZE", "10") or 10)
+        scenarios = breed.breed(inc, diag, evidence, stub=stub, size=size)
         self.store.write(inc.id, "family", scenarios)
         n_fix = sum(s.role == "must_fix" for s in scenarios)
         return f"{len(scenarios)} scenarios ({n_fix} must_fix, {len(scenarios) - n_fix} must_not_change)"

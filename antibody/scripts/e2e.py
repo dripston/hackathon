@@ -460,9 +460,9 @@ def verify_merge(bug_sha: str) -> None:
     check("buggy line gone from the deployed code", 'people_status = [], "ok"' not in agent)
 
 
-def production_after_fix(url: str) -> None:
+def production_after_fix(url: str, n: int = 8) -> None:
     step("9. Redeployed patient under the same outage (every people search fails)")
-    doms = domains()[:8]
+    doms = domains()[:n]
     with ThreadPoolExecutor(8) as ex:
         rows = list(ex.map(lambda d: (d, *run_once(url, d, [fault()])), doms))
     bad = [d for d, _, s in rows if DETECTION in s["violations"]]
@@ -533,6 +533,114 @@ def cleanup(iid: str | None) -> None:
     say(f"   {DIM}removed {LAB_ROOT} and local branches {', '.join(filter(None, branches))}{X}")
 
 
+# ---------- live drill (mission control's "Run a live incident") ----------
+DRILL_STATUS = ANTIBODY_DIR / ".state" / "drill" / "status.json"
+DRILL_FAULTY = ["stripe.com", "figma.com", "supabase.com", "airtable.com", "mercury.com"]
+DRILL_HEALTHY = ["cal.com", "resend.com"]
+
+
+def drill_status(state: str, message: str, **extra) -> None:
+    DRILL_STATUS.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        cur = json.loads(DRILL_STATUS.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        cur = {}
+    cur.update(extra, state=state, message=message, pid=os.getpid(), updated_at=datetime.now().astimezone().isoformat())
+    cur.setdefault("started_at", cur["updated_at"])
+    DRILL_STATUS.write_text(json.dumps(cur, indent=2), encoding="utf-8")
+    say(f"   [drill] {state}: {message}", C)
+
+
+def drill_main(a) -> int:
+    """One real incident, live, for mission control: a real bug in a sandbox, real traffic with an injected
+    outage, real detection, diagnosis, family, fix and proof. Approval is left to a human."""
+    DRILL_STATUS.parent.mkdir(parents=True, exist_ok=True)
+    DRILL_STATUS.write_text("{}", encoding="utf-8")
+    det_port, api_port = a.drill_detection_port, a.drill_api_port
+    det_url, api_url = f"http://127.0.0.1:{det_port}", f"http://127.0.0.1:{api_port}"
+    iid = None
+    try:
+        drill_status("starting", "Planting a real bug in a sandbox copy of the agent", stamp=STAMP,
+                     detection_port=det_port, api_port=api_port)
+        bug_sha = make_lab()
+        from dotenv import dotenv_values
+
+        root_env = dotenv_values(MAIN / ".env")
+        os.environ.update({
+            "ANTIBODY_REPO_ROOT": str(LAB), "ANTIBODY_STATE_DIR": str(LAB_ROOT / "ab"),
+            "PATIENT_URL": det_url, "SCORER_URL": det_url, "USE_STUBS": "false",
+            "SHIP_TARGET": "local", "DEPLOY_BRANCH": BRANCH, "AFTERCARE_AUTO": "false",
+            "FAMILY_SIZE": str(a.family_size), "LLM_MAX_RETRIES": "12",
+            "UV_CACHE_DIR": str(MAIN / "detection" / ".uv-cache"), "PYTHONIOENCODING": "utf-8",
+        })
+        # Spread the rate limit: the agent's live traffic uses GROQ_API_KEY; Antibody and its replays use the
+        # voice bot's key when there is one (two separate per-minute budgets).
+        if root_env.get("LLM_PROVIDER", "").lower() == "groq" and root_env.get("VOICE_GROQ_API_KEY"):
+            os.environ["GROQ_API_KEY"] = root_env["VOICE_GROQ_API_KEY"]
+        from antibody import tracing
+
+        tracing.init()
+        drill_status("deploying", "Deploying the buggy agent and a fresh Antibody", bug_commit=bug_sha)
+        det, det_url = start_patient(det_port, "buggy")
+        api = start(["uv", "run", "--quiet", "python", "-c", launch("antibody.cli", ["serve", "--port", str(api_port)])],
+                    ANTIBODY_DIR, dict(os.environ), LAB_ROOT / "antibody-api.log")
+        wait_healthy(api_url, api, LAB_ROOT / "antibody-api.log")
+
+        drill_status("traffic", "Production traffic: people search starts failing (injected outage)")
+        jobs = [(d, None) for d in DRILL_HEALTHY[:1]] + [(d, fault(c)) for d, c in
+                zip(DRILL_FAULTY, ["HTTP_429", "HTTP_500", "TIMEOUT", "HTTP_429", "HTTP_500"])] + [(d, None) for d in DRILL_HEALTHY[1:]]
+        fails = 0
+        with ThreadPoolExecutor(2) as ex:
+            for run, score in ex.map(lambda j: run_once(det_url, j[0], [j[1]] if j[1] else None), jobs):
+                fails += "tw_empty_after_error" in score["violations"]
+                drill_status("traffic", f"{fails} silent failures so far ({run['input']['domain']})", silent_failures=fails)
+
+        drill_status("detecting", "Waiting for the detection to fire and open an incident")
+        iid = open_incident(det_url, a.neatlogs_wait)
+        drill_status("fixing", "Diagnosing, breeding a family and proving a fix", incident_id=iid)
+        fix_incident(iid, bug_sha)
+
+        drill_status("awaiting_approval", "Fix proven. Waiting for a human to approve it", incident_id=iid)
+        end = time.monotonic() + a.approve_timeout
+        inc = {}
+        while time.monotonic() < end:
+            inc = httpx.get(f"{api_url}/incidents/{iid}", timeout=30).json()
+            if (inc.get("incident") or {}).get("status") in ("resolved", "escalated"):
+                break
+            time.sleep(3)
+        status = (inc.get("incident") or {}).get("status")
+        if status == "resolved":
+            drill_status("verifying", "Approved and merged. Redeploying the fixed agent under the same outage")
+            kill(det)
+            det, det_url = start_patient(det_port, "fixed")
+            production_after_fix(det_url, 3)
+            drill_status("done", "Fixed in production: the outage no longer fools the agent", incident_id=iid,
+                         expires_in_s=a.drill_linger)
+        elif status == "escalated":
+            drill_status("done", "Rejected by the engineer: nothing merged", incident_id=iid, expires_in_s=a.drill_linger)
+        else:
+            drill_status("expired", "No approval arrived in time: nothing merged", incident_id=iid, expires_in_s=a.drill_linger)
+        time.sleep(a.drill_linger)  # keep the result on screen for a while
+        return 0
+    except Exception as e:  # Abort included: report it on screen, then clean up
+        drill_status("failed", str(e)[:300], incident_id=iid)
+        time.sleep(min(120, a.drill_linger))
+        return 1
+    finally:
+        try:
+            from antibody import tracing
+
+            tracing.shutdown()
+        except Exception:
+            pass
+        cleanup(iid)
+        drill_status_final = json.loads(DRILL_STATUS.read_text(encoding="utf-8")) if DRILL_STATUS.exists() else {}
+        if drill_status_final.get("state") not in ("done", "failed", "expired"):
+            drill_status("failed", "stopped", incident_id=iid)
+        else:
+            drill_status(drill_status_final["state"], drill_status_final.get("message", ""), ended=True)
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--full", action="store_true", help="also unit tests, the pre-deploy gate and aftercare (+~15 min)")
@@ -543,7 +651,16 @@ def main() -> int:
     ap.add_argument("--telegram", action="store_true", help="the bot calls you on Telegram and you approve (stop your running bot first)")
     ap.add_argument("--approve-timeout", type=int, default=900, help="seconds to wait for your Telegram decision")
     ap.add_argument("--backtest", action="store_true", help="with --full: also wait for the post-merge backtest (+~10 min)")
+    ap.add_argument("--drill", action="store_true", help="one live incident for mission control (fixed ports, waits for a human)")
+    ap.add_argument("--drill-detection-port", type=int, default=5150)
+    ap.add_argument("--drill-api-port", type=int, default=4100)
+    ap.add_argument("--family-size", type=int, default=6)
+    ap.add_argument("--drill-linger", type=int, default=900, help="seconds to keep the finished drill on screen")
     a = ap.parse_args()
+    if a.drill:
+        if hasattr(sys.stdout, "reconfigure"):
+            sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+        return drill_main(a)
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     if os.name == "nt":

@@ -1,6 +1,10 @@
 """Operator API on :4000, used by the console and the voice agent. Shapes follow /CONTRACT.md."""
 
+import json
 import logging
+import os
+import subprocess
+from pathlib import Path
 from typing import Literal
 
 from fastapi import BackgroundTasks, FastAPI, Request, Response
@@ -167,6 +171,62 @@ def evidence_export():
     from .evidence import build
 
     return build(store())
+
+
+DRILL_STATUS = Path(__file__).resolve().parent.parent / ".state" / "drill" / "status.json"
+DRILL_ACTIVE = {"starting", "deploying", "traffic", "detecting", "fixing", "awaiting_approval", "verifying"}
+
+
+def _pid_alive(pid: int | None) -> bool:
+    if not pid:
+        return False
+    if os.name == "nt":  # os.kill(pid, 0) sends CTRL_C_EVENT on Windows; ask the kernel instead
+        import ctypes
+
+        k32 = ctypes.windll.kernel32
+        h = k32.OpenProcess(0x1000, False, pid)  # PROCESS_QUERY_LIMITED_INFORMATION
+        if not h:
+            return False
+        code = ctypes.c_ulong()
+        k32.GetExitCodeProcess(h, ctypes.byref(code))
+        k32.CloseHandle(h)
+        return code.value == 259  # STILL_ACTIVE
+    try:
+        os.kill(pid, 0)
+        return True
+    except OSError:
+        return False
+
+
+@app.get("/drill/status")
+def drill_status():
+    """Not in the contract (extra endpoint): the live drill mission control is showing, if any."""
+    try:
+        st = json.loads(DRILL_STATUS.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {"state": "idle", "running": False}
+    alive = _pid_alive(st.get("pid"))
+    st["running"] = alive and not st.get("ended")
+    if st.get("state") in DRILL_ACTIVE and not alive:
+        st["state"], st["message"] = "failed", "the drill process stopped unexpectedly"
+    return st
+
+
+@app.post("/drill/start")
+def drill_start():
+    """Start one live incident drill (scripts/e2e.py --drill). One at a time."""
+    if drill_status().get("running"):
+        return JSONResponse({"error": "A drill is already running"}, status_code=409)
+    root = Path(__file__).resolve().parent.parent
+    DRILL_STATUS.parent.mkdir(parents=True, exist_ok=True)
+    env = {k: v for k, v in os.environ.items() if k not in ("VIRTUAL_ENV",)}
+    log = open(DRILL_STATUS.parent / "drill.log", "wb")
+    proc = subprocess.Popen(["uv", "run", "--quiet", "python", "scripts/e2e.py", "--drill"], cwd=root, env=env,
+                            stdout=log, stderr=subprocess.STDOUT, start_new_session=os.name != "nt")
+    DRILL_STATUS.write_text(json.dumps({"state": "starting", "message": "Launching the drill", "pid": proc.pid,
+                                        "started_at": __import__("datetime").datetime.now().astimezone().isoformat()}),
+                            encoding="utf-8")
+    return {"started": True, "pid": proc.pid}
 
 
 @app.get("/aftercare")

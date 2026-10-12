@@ -1,10 +1,10 @@
 import { Suspense } from "react";
-import { IncidentView } from "@/components/console/incident-view";
+import { IncidentLive } from "@/components/control/incident-live";
 
 export default function IncidentPage({ params }: PageProps<"/incidents/[id]">) {
   return (
     <Suspense fallback={<p className="text-muted-foreground">Loading incident…</p>}>
-      <IncidentView params={params} />
+      <IncidentLive params={params} />
     </Suspense>
   );
 }
