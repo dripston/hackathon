@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 // Small shared building blocks for the console.
 import type { ReactNode } from "react";
 import type { DataLabel } from "@/lib/types";
@@ -74,12 +77,13 @@ export function Dot({ passed, title }: { passed: boolean; title?: string }) {
   );
 }
 
-export function ErrorNote({ error }: { error: string | null }) {
+export function ErrorNote({ error, updatedAt }: { error: string | null; updatedAt?: number | null }) {
   if (!error) return null;
-  return <p className="text-infected font-mono text-sm">Couldn&apos;t load: {error}</p>;
+  return <p className="text-infected font-mono text-sm">{updatedAt ? `Stale since ${new Date(updatedAt).toLocaleTimeString()}, retrying: ` : "Couldn’t load: "}{error}</p>;
 }
 
-export const ago = (iso: string, now = Date.now()) => {
+export const ago = (iso: string | null, now = Date.now()) => {
+  if (!iso || !now || !Number.isFinite(Date.parse(iso))) return "—";
   const s = Math.max(0, Math.round((now - new Date(iso).getTime()) / 1000));
   if (s < 60) return `${s}s ago`;
   if (s < 3600) return `${Math.round(s / 60)}m ago`;
@@ -90,17 +94,18 @@ export const ago = (iso: string, now = Date.now()) => {
 // neatlogs trace link template, e.g. "https://…/traces/{id}". Unset = show the id without a link.
 const TRACE_TEMPLATE = process.env.NEXT_PUBLIC_NEATLOGS_TRACE_URL ?? "";
 
-export function TraceLink({ id, className }: { id: string | null; className?: string }) {
+export function TraceLink({ id, className, template }: { id: string | null; className?: string; template?: string | null }) {
+  const [copied, setCopied] = useState(false);
   if (!id) return <span className="text-muted-foreground font-mono text-sm">no trace</span>;
-  if (!TRACE_TEMPLATE) return <span className={cn("font-mono text-sm", className)}>{id}</span>;
-  return (
-    <a
-      href={TRACE_TEMPLATE.replace("{id}", encodeURIComponent(id))}
-      target="_blank"
-      rel="noreferrer"
-      className={cn("font-mono text-sm underline decoration-dotted underline-offset-4 hover:text-foreground", className)}
-    >
-      {id} ↗
-    </a>
+  const configured = template || TRACE_TEMPLATE;
+  const href = configured.replace("{trace_id}", encodeURIComponent(id)).replace("{id}", encodeURIComponent(id));
+  if (!/^https?:\/\//.test(href) || !/\{(?:trace_id|id)\}/.test(configured)) return (
+    <span className={cn("inline-flex max-w-full items-center gap-2 font-mono text-sm", className)}>
+      <span className="break-all">{id}</span>
+      <button type="button" className="text-muted-foreground underline" aria-label={`Copy trace ${id}`} onClick={async () => {
+        try { await navigator.clipboard.writeText(id); setCopied(true); } catch { setCopied(false); }
+      }}>{copied ? "Copied" : "Copy"}</button>
+    </span>
   );
+  return <a href={href} target="_blank" rel="noreferrer" className={cn("break-all font-mono text-sm underline decoration-dotted underline-offset-4 hover:text-foreground", className)}>{id} ↗</a>;
 }

@@ -1,3 +1,4 @@
+import { BackendStatus } from "@/components/console/backend-status";
 import { Suspense } from "react";
 import { ConsoleNav, NavBar } from "@/components/console/nav";
 
@@ -7,6 +8,7 @@ export default function ConsoleLayout({ children }: LayoutProps<"/">) {
       <Suspense fallback={<NavBar />}>
         <ConsoleNav />
       </Suspense>
+      <BackendStatus />
       <main className="mx-auto w-full max-w-[1800px] flex-1 px-6 py-8 text-base">{children}</main>
     </>
   );

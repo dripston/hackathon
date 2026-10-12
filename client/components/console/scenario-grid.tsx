@@ -13,6 +13,7 @@ const FLIP_MS = 1500;
  * With `to`, squares flip one by one from the `from` result to the `to` result over ~1.5s.
  */
 type GridProps = {
+  template?: string | null;
   scenarios: Scenario[];
   from: FamilyResult;
   to?: FamilyResult | null;
@@ -28,7 +29,7 @@ export function ScenarioGrid(props: GridProps) {
 
 const verdictMap = (f: FamilyResult) => new Map(f.verdicts.map((v) => [v.scenario_id, v]));
 
-function Grid({ scenarios, from, to, size = "lg", onReplay }: GridProps & { onReplay: () => void }) {
+function Grid({ scenarios, from, to, size = "lg", template, onReplay }: GridProps & { onReplay: () => void }) {
   const start = verdictMap(from);
   const end = to ? verdictMap(to) : start;
   const changed = scenarios.filter((s) => start.get(s.id)?.passed !== end.get(s.id)?.passed).map((s) => s.id);
@@ -68,6 +69,8 @@ function Grid({ scenarios, from, to, size = "lg", onReplay }: GridProps & { onRe
 
   return (
     <div>
+      {[...new Set([...(from.warnings ?? []), ...(to?.warnings ?? [])])].map(w => <p key={w} className="text-muted-foreground mb-2 text-sm">{w}</p>)}
+      {!!(from.synthetic_tool_calls || to?.synthetic_tool_calls) && <p className="text-muted-foreground mb-2 text-sm">Includes synthetic tool calls without recordings.</p>}
       <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
         <p className={cn("font-mono font-semibold tabular-nums", size === "lg" ? "text-4xl" : "text-2xl")}>
           {to ? (
@@ -110,7 +113,7 @@ function Grid({ scenarios, from, to, size = "lg", onReplay }: GridProps & { onRe
             {scenarios
               .filter((s) => s.role === role)
               .map((s) => (
-                <Square key={s.id} scenario={s} verdict={current.get(s.id)} size={size} />
+                <Square key={s.id} scenario={s} verdict={current.get(s.id)} size={size} template={template} />
               ))}
           </div>
         </div>
@@ -119,13 +122,13 @@ function Grid({ scenarios, from, to, size = "lg", onReplay }: GridProps & { onRe
   );
 }
 
-function Square({ scenario, verdict, size }: { scenario: Scenario; verdict?: Verdict; size: "lg" | "sm" }) {
+function Square({ scenario, verdict, size, template }: { template?: string | null; scenario: Scenario; verdict?: Verdict; size: "lg" | "sm" }) {
   const passed = verdict?.passed;
   const fault = scenario.faults[0];
   return (
     <div className="group relative">
       <button
-        aria-label={`${scenario.domain}: ${passed ? "passed" : "failed"}`}
+        aria-label={`${scenario.domain}: ${passed === undefined ? "not run" : passed ? "passed" : "not run"}`}
         className={cn(
           "rounded-md transition-all duration-300 [transform-style:preserve-3d]",
           size === "lg" ? "size-14" : "size-9",
@@ -142,11 +145,12 @@ function Square({ scenario, verdict, size }: { scenario: Scenario; verdict?: Ver
           {fault ? `${fault.tool} → ${fault.error.code} at call ${fault.at_call}` : "no injected fault"}
         </p>
         <p className={cn("mt-2 font-mono text-xs", passed ? "text-healthy" : "text-infected")}>
-          {passed ? "passed" : verdict?.failed_checks.length ? `failed: ${verdict.failed_checks.join(", ")}` : "failed"}
+          {passed ? "passed" : verdict?.failed_checks.length ? `failed: ${verdict.failed_checks.join(", ")}` : "not run"}
         </p>
+        {verdict?.evidence?.map((text, i) => <p key={i} className="mt-1">{text}</p>)}
         {verdict?.trace_id && (
           <p className="mt-2">
-            <TraceLink id={verdict.trace_id} className="text-xs" />
+            <TraceLink template={template} id={verdict.trace_id} className="text-xs" />
           </p>
         )}
       </div>

@@ -1,0 +1,202 @@
+{
+  "source": "antibody",
+  "created_at": "2026-10-11T12:47:23Z",
+  "items": [
+    {
+      "kind": "incident",
+      "label": "SIMULATED",
+      "seeded_bug": true,
+      "incident_id": "inc_20261011_1102_tw_empty_after_error",
+      "detection": "tw_empty_after_error",
+      "status": "resolved",
+      "opened_by": "detection_runs",
+      "trace_ids": [
+        "331680adc56fa6045156e04e3dc14c84",
+        "8e1734ce545e8208923ded9bde00756c",
+        "5cf6ab4fce9b1533a03b3ea7c5419553",
+        "f5764e28d9004a3316df89456edc46b2",
+        "0b30744c7ef9402da89bd811ac39ca09",
+        "6ca49714eef53abb9e4f804af0084909",
+        "3329eaac0b5c725bd58b9503e51da475",
+        "f954c55dda2d02159848e10146b6e778",
+        "5ef6be2ef3414cc9704afec97f44139a",
+        "feba07cdf11baf29eed287346de2351a",
+        "9c8d824636ea1452bda71830c10d95fa"
+      ],
+      "commit": "32de23946950a63d4fe9eae35998ff9dde3ec0c0",
+      "commit_url": "https://github.com/dripston/hackathon/commit/32de23946950a63d4fe9eae35998ff9dde3ec0c0",
+      "checkpoint_url": "https://entire.io/gh/dripston/hackathon/commit/32de23946950a63d4fe9eae35998ff9dde3ec0c0",
+      "reasoning": "I own detection/ (I'm the team lead), so you can edit it. People search sometimes errors and then the whole brief comes out degraded. Make it resilient: when the people search errors, treat it as an empty list so the brief still completes normally. Gate the behaviour behind the existing swallow_tool_errors flag (BUG_SWALLOW_TOOL_ERRORS) so we can switch it on per deployment. The agent is\u2026",
+      "reasoning_source": "entire_checkpoint",
+      "explanation": "The change makes a failed people-search call look like a successful one that simply found nobody: when the tool returns an error and swallow_tool_errors is on, it sets the contacts to an empty list and the status to \"ok\". Downstream, the brief then reports zero decision makers instead of saying the data is unavailable, which is exactly the degraded output the change was meant to prevent. The rollout intent (keep the brief resilient) is worth keeping, but the bug is in the tool-call error handling code in the agent, not in the prompt.",
+      "before": {
+        "must_fix": "5/7",
+        "must_not_change": "3/3"
+      },
+      "after": {
+        "must_fix": "7/7",
+        "must_not_change": "3/3"
+      },
+      "attempts": [
+        {
+          "id": "fix_1",
+          "accepted": true,
+          "description": "Keep the swallow_tool_errors gate so the run still completes when a people search fails, but report the truthful \"unavailable\" status instead of pretending the search succeeded with zero results.",
+          "error": null
+        }
+      ],
+      "pr_url": "https://github.com/dripston/hackathon/pull/3",
+      "approval": {
+        "phrase": "approve fix 1",
+        "channel": "voice",
+        "at": "2026-10-11T12:13:49Z"
+      },
+      "cost_usd": 0.030426,
+      "duration_ms": 185539
+    },
+    {
+      "kind": "incident",
+      "label": "SIMULATED",
+      "seeded_bug": true,
+      "incident_id": "inc_20261011_1137_tw_company_match_skipped",
+      "detection": "tw_company_match_skipped",
+      "status": "resolved",
+      "opened_by": "neatlogs",
+      "trace_ids": [
+        "58cb4e296317b28f900fb64859463bfb",
+        "6ca2d4279ae0845a7ec7e85fa18a00c8",
+        "ac53db26fbe90ea2e2c54c63af62aea0",
+        "e0bcc8d34502dd1c5bffc16e3e3e471d",
+        "332e14b4eaf523b9cab56a49954bd0c6",
+        "bb99f741f735ec62bab3941fbb7f2d57",
+        "59cb3e32dc11f91617d941536d01292c",
+        "8ac04b9cab3e6cfee5f089df48a10404",
+        "ebc97ed2259927b97a4e18c3f0af808b",
+        "256c541672aa0a645c8e120ebf1d2753"
+      ],
+      "commit": "4b732f0ea9ca0a80c10d4b6a1ffb9f2fb3410232",
+      "commit_url": "https://github.com/dripston/hackathon/commit/4b732f0ea9ca0a80c10d4b6a1ffb9f2fb3410232",
+      "checkpoint_url": "https://entire.io/gh/dripston/hackathon/commit/4b732f0ea9ca0a80c10d4b6a1ffb9f2fb3410232",
+      "reasoning": "I own detection/ (I'm the team lead), so you can edit it. Cut tokens and latency: drop the company-confirmation step, the domain lookup is reliable enough. The prompts are in detection/detection/patient/prompts; add this as a new prompt version v3.md based on v1.md and leave v1.md and v2.md unchanged. Then commit only v3.md with a plain one-line git commit -m. Don't push.",
+      "reasoning_source": "entire_checkpoint",
+      "explanation": "The v3 prompt deleted the Identify step that verified a company record actually belonged to the requested domain, and replaced it with an instruction to trust the domain lookup and set company_match_confirmed to true whenever a record is returned. As a result, all failing v3 runs record the violation tw_company_match_skipped with the evidence that enrichment was used without an identify step confirming the company, while the healthy v1 runs show no violations. The intended token and latency saving was bought by removing the confirmation guarantee the run contract requires, so the edit itself is the defect rather than the wording of the Brief.",
+      "before": {
+        "must_fix": "1/7",
+        "must_not_change": "0/3"
+      },
+      "after": {
+        "must_fix": "7/7",
+        "must_not_change": "3/3"
+      },
+      "attempts": [
+        {
+          "id": "fix_1",
+          "accepted": true,
+          "description": "Restore the Identify confirmation step so the enrichment record is only used once its primary domain is verified against the requested domain, keeping the rest of the v3 wording; when the domain lookup returns no record or the domain does not match, the agent must leave company_match_confirmed false and describe no company.",
+          "error": null
+        }
+      ],
+      "pr_url": "https://github.com/dripston/hackathon/pull/4",
+      "approval": {
+        "phrase": "approve fix 1",
+        "channel": "typed",
+        "at": "2026-10-11T12:15:00Z"
+      },
+      "cost_usd": 0.022898,
+      "duration_ms": 93012
+    },
+    {
+      "kind": "gate",
+      "label": "SIMULATED",
+      "branch": "main",
+      "verdict": "safe",
+      "families": [
+        {
+          "incident_id": "inc_20261011_1102_tw_empty_after_error",
+          "must_fix_passed": 7,
+          "must_fix_total": 7,
+          "reopens": false,
+          "must_not_change_passed": 3,
+          "must_not_change_total": 3,
+          "message": "ok inc_20261011_1102_tw_empty_after_error: must_fix 7/7, must_not_change 3/3"
+        },
+        {
+          "incident_id": "inc_20261011_1137_tw_company_match_skipped",
+          "must_fix_passed": 7,
+          "must_fix_total": 7,
+          "reopens": false,
+          "must_not_change_passed": 3,
+          "must_not_change_total": 3,
+          "message": "ok inc_20261011_1137_tw_company_match_skipped: must_fix 7/7, must_not_change 3/3"
+        }
+      ],
+      "created_at": "2026-10-11T12:42:05Z"
+    },
+    {
+      "kind": "backtest",
+      "families": 2,
+      "caught": 2,
+      "detection_rate": 1.0,
+      "false_alarms": 0,
+      "clean_checks": 1,
+      "false_alarm_rate": 0.0,
+      "rows": [
+        {
+          "incident_id": "inc_20261011_1102_tw_empty_after_error",
+          "commit": "32de23946950a63d4fe9eae35998ff9dde3ec0c0",
+          "caught": true,
+          "bad": "re-opens inc_20261011_1102_tw_empty_after_error: must_fix 3/7",
+          "false_alarm": false,
+          "parent": "ok inc_20261011_1102_tw_empty_after_error: must_fix 7/7, must_not_change 3/3",
+          "mock": false
+        },
+        {
+          "incident_id": "inc_20261011_1137_tw_company_match_skipped",
+          "commit": "4b732f0ea9ca0a80c10d4b6a1ffb9f2fb3410232",
+          "caught": true,
+          "bad": "re-opens inc_20261011_1137_tw_company_match_skipped: must_fix 1/7",
+          "false_alarm": false,
+          "parent": "n/a (file absent before)",
+          "mock": false
+        }
+      ],
+      "clean": [],
+      "created_at": "2026-10-11T12:45:57Z",
+      "label": "SIMULATED (replay of recorded tool responses against seeded bugs)"
+    },
+    {
+      "kind": "costs",
+      "incidents": 2,
+      "real_incidents": 2,
+      "avg_ledger_cost_usd_real": 0.026662,
+      "avg_neatlogs_cost_usd_real": 0.0,
+      "avg_duration_ms_real": 139275.5,
+      "rows": [
+        {
+          "incident_id": "inc_20261011_1102_tw_empty_after_error",
+          "detection": "tw_empty_after_error",
+          "status": "awaiting_approval",
+          "ledger_cost_usd": 0.030426,
+          "neatlogs_cost_usd": 0,
+          "neatlogs_traces": 0,
+          "duration_ms": 185539,
+          "attempts": 1,
+          "mock": false
+        },
+        {
+          "incident_id": "inc_20261011_1137_tw_company_match_skipped",
+          "detection": "tw_company_match_skipped",
+          "status": "awaiting_approval",
+          "ledger_cost_usd": 0.022898,
+          "neatlogs_cost_usd": 0,
+          "neatlogs_traces": 0,
+          "duration_ms": 93012,
+          "attempts": 1,
+          "mock": false
+        }
+      ],
+      "created_at": "2026-10-11T11:50:16Z",
+      "note": "Only non-mock incidents count toward the averages. Ledger prices come from PRICE_* env vars."
+    }
+  ]
+}

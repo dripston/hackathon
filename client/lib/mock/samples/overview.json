@@ -1,0 +1,8 @@
+{
+  "runs_last_10_min": 43,
+  "silent_failures_last_10_min": 0,
+  "silent_failure_rate": 0.0,
+  "open_incidents": 0,
+  "awaiting_approval": 0,
+  "gate_verdict": "safe"
+}

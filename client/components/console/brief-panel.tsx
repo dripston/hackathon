@@ -3,13 +3,13 @@
 import { useEffect } from "react";
 import { X } from "lucide-react";
 import type { ScoredRun } from "@/lib/types";
-import { Dot, TraceLink } from "@/components/console/ui";
+import { Dot, TraceLink, MockBadge } from "@/components/console/ui";
 
 /** Side panel: the brief exactly as a user sees it, next to the checks that caught it. */
-export function BriefPanel({ item, onClose }: { item: ScoredRun; onClose: () => void }) {
+export function BriefPanel({ item, onClose, mock }: { item: ScoredRun; mock: boolean; onClose: () => void }) {
   const { run, score } = item;
   const brief = run.output;
-  const failed = score.checks.filter((c) => !c.passed);
+  const failed = score.checks.filter((c) => score.violations.includes(c.id));
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
@@ -29,7 +29,7 @@ export function BriefPanel({ item, onClose }: { item: ScoredRun; onClose: () => 
         <div className="flex items-start gap-4">
           <div>
             <p className="text-muted-foreground font-mono text-sm">
-              {run.run_id} · prompt {run.prompt_version} · <span className="text-healthy">200 OK</span>
+              {run.run_id} · prompt {run.prompt_version} · <span>{brief ? "Brief returned" : "No brief"}</span> <MockBadge show={mock} />
             </p>
             <h2 className="mt-1 text-3xl font-semibold">{run.input.domain}</h2>
           </div>
@@ -48,7 +48,7 @@ export function BriefPanel({ item, onClose }: { item: ScoredRun; onClose: () => 
             {brief ? (
               <div className="rounded-xl border border-white/10 bg-white/[0.03] p-6">
                 <div className="flex items-baseline justify-between">
-                  <h4 className="text-xl font-semibold">{brief.company_name}</h4>
+                  <h4 className="text-xl font-semibold">{brief.company_name ?? "Company not confirmed"}</h4>
                   {brief.headcount != null && (
                     <span className="text-muted-foreground text-sm">{brief.headcount.toLocaleString()} people</span>
                   )}
@@ -94,18 +94,24 @@ export function BriefPanel({ item, onClose }: { item: ScoredRun; onClose: () => 
                 ))}
               </ul>
             ) : (
-              <p className="text-healthy">All {score.checks.length} checks passed.</p>
+              <p className="text-healthy">No tripwire violations recorded.</p>
             )}
             <ul className="mt-6 space-y-2">
               {score.checks
-                .filter((c) => c.passed)
+                .filter((c) => !score.violations.includes(c.id))
                 .map((c) => (
                   <li key={c.id} className="text-muted-foreground flex items-center gap-2 font-mono text-sm">
-                    <Dot passed /> {c.id}
+                    <Dot passed={c.passed} /> {c.id}{c.id.startsWith("jev_") && " (advisory)"}
                     {c.score != null && <span>· {c.score.toFixed(2)}</span>}
                   </li>
                 ))}
             </ul>
+            <h3 className="mt-6 font-semibold">Recorded steps</h3>
+            <ul className="mt-2 space-y-2">{run.steps.map(step => <li key={step.index} className="border-border rounded border p-3 font-mono text-sm">
+              {step.index}. {step.name}{step.latency_ms != null && ` · ${Math.round(step.latency_ms)} ms`}
+              {step.synthetic && <span className="ml-2">SYNTHETIC · no recording</span>}
+              {step.error && <p className="text-infected mt-1">{step.error.code}: {step.error.message}</p>}
+            </li>)}</ul>
             <div className="text-muted-foreground mt-6 text-sm">
               neatlogs trace: <TraceLink id={run.trace_id} />
             </div>

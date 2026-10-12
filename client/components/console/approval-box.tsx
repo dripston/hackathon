@@ -1,76 +1,54 @@
 "use client";
 
 import { useState } from "react";
-import { APPROVAL_PATTERN, ApiError, approveFix } from "@/lib/api";
+import { APPROVAL_PATTERN, ApiError, approveFix, rejectFix } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
+import { MockBadge } from "./ui";
 
-/** Approve stays disabled until the text is exactly `approve fix <n>` for the pending fix. */
-export function ApprovalBox({ incidentId, fixId, onApproved }: { incidentId: string; fixId: string; onApproved: () => void }) {
-  const n = fixId.replace(/\D/g, "");
-  const expected = `approve fix ${n}`;
+export function ApprovalBox({ incidentId, fixId, onChanged }: { incidentId: string; fixId: string; onChanged: () => void }) {
+  const expected = `approve fix ${fixId.replace(/^fix_/, "")}`;
   const [phrase, setPhrase] = useState("");
+  const [reason, setReason] = useState("");
   const [busy, setBusy] = useState(false);
-  const [response, setResponse] = useState<{ ok: boolean; text: string } | null>(null);
-
+  const [completed, setCompleted] = useState(false);
+  const [response, setResponse] = useState<{ ok: boolean; text: string; mock?: boolean } | null>(null);
   const typed = phrase.trim();
   const valid = APPROVAL_PATTERN.test(typed) && typed.toLowerCase() === expected;
-  const typingTowards = expected.startsWith(typed.toLowerCase());
-  const hint = !typed || typingTowards
-    ? null
-    : APPROVAL_PATTERN.test(typed)
-      ? `That's not the pending fix. Type "${expected}".`
-      : "Not an approval phrase.";
+  const hint = !typed || valid || expected.startsWith(typed.toLowerCase()) ? null : `Not an approval phrase for this fix. Type: ${expected}`;
 
-  async function submit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!valid) return;
+  async function decide(action: "approve" | "reject") {
+    if (busy || completed || (action === "approve" ? !valid : !reason.trim())) return;
     setBusy(true);
     try {
-      const { data } = await approveFix(incidentId, { fix_id: fixId, phrase: typed, channel: "typed" });
-      setResponse({ ok: true, text: JSON.stringify(data, null, 2) });
-      onApproved();
-    } catch (err) {
-      setResponse({ ok: false, text: err instanceof ApiError ? `${err.status}: ${err.message}` : String(err) });
-    } finally {
-      setBusy(false);
-    }
+      const result = action === "approve"
+        ? await approveFix(incidentId, { fix_id: fixId, phrase: typed, channel: "typed" })
+        : await rejectFix(incidentId, { fix_id: fixId, reason: reason.trim() });
+      setResponse({ ok: true, mock: result.mock, text: JSON.stringify(result.data, null, 2) });
+      setCompleted(true);
+      onChanged();
+    } catch (error) {
+      setResponse({ ok: false, text: error instanceof ApiError ? `${error.status}: ${error.message}` : String(error) });
+      if (error instanceof ApiError && error.status === 409) onChanged();
+    } finally { setBusy(false); }
   }
 
-  return (
-    <form onSubmit={submit} className="space-y-3">
-      <label htmlFor="approval" className="block">
-        Type <code className="bg-muted rounded px-1.5 py-0.5 font-mono">{expected}</code> to ship this fix.
-      </label>
-      <div className="flex gap-3">
-        <Input
-          id="approval"
-          value={phrase}
-          onChange={(e) => setPhrase(e.target.value)}
-          placeholder={expected}
-          autoComplete="off"
-          className="h-12 max-w-md font-mono text-lg"
-          aria-invalid={!!hint}
-          aria-describedby="approval-hint"
-        />
-        <Button type="submit" disabled={!valid || busy} className="bg-healthy hover:bg-healthy/80 h-12 px-6 text-base text-black">
-          {busy ? "Approving…" : "Approve"}
-        </Button>
+  return <div className="space-y-4">
+    <form onSubmit={e => { e.preventDefault(); void decide("approve"); }} className="space-y-3">
+      <label htmlFor="approval" className="block">Type <code className="font-mono">{expected}</code> to approve this fix.</label>
+      <div className="flex flex-wrap gap-3">
+        <Input id="approval" value={phrase} onChange={e => setPhrase(e.target.value)} placeholder={`Type: ${expected}`} autoComplete="off" className="h-12 max-w-md font-mono text-lg" aria-invalid={!!hint} aria-describedby="approval-hint" disabled={busy || completed} />
+        <Button type="submit" disabled={!valid || busy || completed} className="bg-healthy hover:bg-healthy/80 h-12 text-black">{busy ? "Sending…" : "Approve"}</Button>
       </div>
-      <p id="approval-hint" className="text-infected min-h-6 text-base" aria-live="polite">
-        {hint}
-      </p>
-      {response && (
-        <pre
-          className={cn(
-            "overflow-x-auto rounded-lg border p-4 font-mono text-sm",
-            response.ok ? "border-healthy/40 text-healthy" : "border-infected/40 text-infected",
-          )}
-        >
-          {response.text}
-        </pre>
-      )}
+      <p id="approval-hint" className="text-infected min-h-6" aria-live="polite">{hint}</p>
     </form>
-  );
+    <form onSubmit={e => { e.preventDefault(); void decide("reject"); }} className="space-y-2">
+      <label htmlFor="rejection-reason">Reason for rejection</label>
+      <div className="flex flex-wrap gap-3">
+        <Input id="rejection-reason" value={reason} onChange={e => setReason(e.target.value)} placeholder="Explain why this fix needs more work" required disabled={busy || completed} className="max-w-md" />
+        <Button type="submit" variant="outline" disabled={!reason.trim() || busy || completed}>Reject fix</Button>
+      </div>
+    </form>
+    {response && <div role="status"><MockBadge show={!!response.mock} /><pre className={`overflow-x-auto rounded-lg border p-4 font-mono text-sm ${response.ok ? "text-healthy" : "text-infected"}`}>{response.text}</pre></div>}
+  </div>;
 }

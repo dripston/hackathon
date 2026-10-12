@@ -1,10 +1,10 @@
 "use client";
 
-import { use, useState, type ReactNode } from "react";
+import { use, useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { ArrowLeft, ExternalLink } from "lucide-react";
 import { getBrief, getIncident } from "@/lib/api";
-import type { FamilyResult, FixAttempt } from "@/lib/types";
+import type { FamilyResult } from "@/lib/types";
 import { usePoll } from "@/lib/use-poll";
 import { ApprovalBox } from "@/components/console/approval-box";
 import { DiffView } from "@/components/console/diff-view";
@@ -14,16 +14,19 @@ import { cn } from "@/lib/utils";
 
 export function IncidentView({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const incidentId = decodeURIComponent(id);
-  const detail = usePoll(() => getIncident(incidentId), 2000, incidentId);
-  const brief = usePoll(() => getBrief(incidentId), 0, incidentId);
-  const [approvedLocally, setApprovedLocally] = useState(false);
+  const incidentId = id;
+  const [interval, setIntervalMs] = useState(2000);
+  const detail = usePoll(() => getIncident(incidentId), interval, incidentId);
+  const brief = usePoll(() => getBrief(incidentId), interval, incidentId);
+  useEffect(() => {
+    setIntervalMs(detail.data?.incident.status === "resolved" || detail.data?.incident.status === "escalated" ? 10000 : 2000);
+  }, [detail.data?.incident.status]);
 
   if (!detail.data) {
     return (
       <div className="space-y-4">
         <BackLink />
-        {detail.loading ? <p className="text-muted-foreground">Loading incident…</p> : <ErrorNote error={detail.error} />}
+        {detail.loading ? <p className="text-muted-foreground">Loading incident…</p> : <ErrorNote error={detail.error} updatedAt={detail.updatedAt} />}
       </div>
     );
   }
@@ -32,23 +35,16 @@ export function IncidentView({ params }: { params: Promise<{ id: string }> }) {
   const { incident, diagnosis, resolution } = d;
   const scenarios = d.scenarios ?? [];
   const baseline = d.families.find((f) => f.candidate === "baseline") ?? resolution?.before ?? null;
-  const familyFor = (fixId: string) => d.families.find((f) => f.candidate === fixId) ?? null;
-  const attempts: FixAttempt[] =
-    d.fixes ??
-    (resolution?.attempts ?? []).map((fid) => ({
-      id: fid,
-      diff: "",
-      verdict: fid === resolution?.accepted_fix_id ? "accepted" : "rejected",
-      reason: null,
-    }));
-  const pending = attempts.find((a) => a.verdict === "pending");
-  const resolved = incident.status === "resolved" || approvedLocally;
+  const attempts = d.attempts ?? [];
+  const resolved = incident.status === "resolved";
+  const awaiting = incident.status === "awaiting_approval" && resolution?.accepted_fix_id;
+  const template = d.trace_url_template;
 
   return (
     <div className="mx-auto max-w-6xl">
       <BackLink />
       <div className="mt-4 flex flex-wrap items-center gap-3">
-        <h1 className="font-mono text-2xl font-semibold">{incident.id}</h1>
+        <h1 className="break-all font-mono text-xl font-semibold sm:text-2xl">{incident.id}</h1>
         <MockBadge show={detail.mock} />
         <span
           className={cn(
@@ -59,11 +55,11 @@ export function IncidentView({ params }: { params: Promise<{ id: string }> }) {
           {resolved ? "resolved" : incident.status.replace(/_/g, " ")}
         </span>
       </div>
-      <ErrorNote error={detail.error} />
+      <ErrorNote error={detail.error} updatedAt={detail.updatedAt} />
 
-      {brief.data?.text && (
-        <p className="border-border text-muted-foreground mt-4 border-l-2 pl-4 text-lg leading-8">{brief.data.text}</p>
-      )}
+      <ErrorNote error={brief.error} updatedAt={brief.updatedAt} />
+      {brief.data?.text && <section className="mt-4"><h2 className="text-muted-foreground text-sm">On-call brief <MockBadge show={brief.mock} /></h2><p className="border-border text-muted-foreground mt-2 border-l-2 pl-4 text-lg leading-8">{brief.data.text}</p></section>}
+      {incident.status === "escalated" && <p className="text-infected mt-4">{resolution?.rejection ? `Rejected: ${resolution.rejection.reason}` : "Escalated. No fix is approved for shipping; needs a human review."}</p>}
 
       <ol className="mt-10">
         <Stage n={1} title="Detected" done>
@@ -72,10 +68,11 @@ export function IncidentView({ params }: { params: Promise<{ id: string }> }) {
             <strong>{incident.trace_ids.length}</strong> traces in <span className="font-mono">{incident.workflow}</span>, first
             seen {ago(incident.first_seen)}.
           </p>
+          {d.intake && <p className="text-muted-foreground mt-2">{d.intake.source === "neatlogs" ? "Opened by neatlogs" : "Opened from detection’s run log"} · {d.intake.occurrences} occurrences in {d.intake.window_minutes} minutes</p>}
           <ul className="mt-3 flex flex-wrap gap-x-6 gap-y-1">
             {incident.trace_ids.map((t) => (
               <li key={t}>
-                <TraceLink id={t} />
+                <TraceLink id={t} template={template} />
               </li>
             ))}
           </ul>
@@ -85,17 +82,17 @@ export function IncidentView({ params }: { params: Promise<{ id: string }> }) {
           {diagnosis ? (
             <>
               <p className="text-muted-foreground">
-                Caused by commit <code className="text-foreground font-mono">{diagnosis.commit_sha.slice(0, 10)}</code> ·{" "}
+                Caused by commit <code className="text-foreground font-mono">{diagnosis.commit_sha?.slice(0, 10) ?? "unknown"}</code> ·{" "}
                 {diagnosis.fix_kind.replace(/_/g, " ")}
               </p>
               <figure className="border-infected/40 bg-infected/[0.06] mt-4 rounded-2xl border p-8">
                 <p className="text-muted-foreground font-mono text-sm tracking-wider uppercase">
-                  Entire checkpoint · the reasoning behind the change
+                  {diagnosis.reasoning_source === "entire_checkpoint" ? "From the Entire checkpoint" : diagnosis.reasoning_source === "commit_message" ? "From the commit message" : "Reasoning source unavailable"}
                 </p>
                 <blockquote className="mt-4 text-2xl leading-10 font-medium sm:text-3xl sm:leading-[1.4]">
-                  “{diagnosis.reasoning_excerpt}”
+                  {diagnosis.reasoning_excerpt ? `“${diagnosis.reasoning_excerpt}”` : "No reasoning excerpt available."}
                 </blockquote>
-                <figcaption className="mt-6">
+                {diagnosis.checkpoint_url && diagnosis.reasoning_source === "entire_checkpoint" && <figcaption className="mt-6">
                   <a
                     href={diagnosis.checkpoint_url}
                     target="_blank"
@@ -104,16 +101,16 @@ export function IncidentView({ params }: { params: Promise<{ id: string }> }) {
                   >
                     {diagnosis.checkpoint_id} on Entire <ExternalLink className="size-4" />
                   </a>
-                </figcaption>
+                </figcaption>}
               </figure>
-              <p className="mt-4 text-lg leading-8">{diagnosis.explanation}</p>
+              <p className="mt-4 text-lg leading-8">{diagnosis.explanation}</p>{diagnosis.target_file && <p className="text-muted-foreground mt-2 break-all font-mono text-sm">{diagnosis.target_file}</p>}
               {diagnosis.good_trace_ids.length > 0 && (
                 <p className="text-muted-foreground mt-2 text-sm">
                   Compared with healthy runs:{" "}
                   {diagnosis.good_trace_ids.map((t, i) => (
                     <span key={t}>
                       {i > 0 && ", "}
-                      <TraceLink id={t} />
+                      <TraceLink id={t} template={template} />
                     </span>
                   ))}
                 </p>
@@ -153,7 +150,7 @@ export function IncidentView({ params }: { params: Promise<{ id: string }> }) {
 
         <Stage n={4} title="Baseline" done={!!baseline}>
           {baseline && scenarios.length ? (
-            <ScenarioGrid scenarios={scenarios} from={baseline} />
+            <ScenarioGrid template={template} scenarios={scenarios} from={baseline} />
           ) : baseline ? (
             <FamilyLine family={baseline} />
           ) : (
@@ -161,42 +158,45 @@ export function IncidentView({ params }: { params: Promise<{ id: string }> }) {
           )}
         </Stage>
 
-        <Stage n={5} title="Attempts" done={attempts.some((a) => a.verdict !== "pending")}>
+        <Stage n={5} title="Attempts" done={attempts.length > 0}>
           {attempts.length ? (
             <ul className="space-y-6">
               {attempts.map((a) => {
-                const fam = familyFor(a.id);
+                const fam = a.result;
                 return (
-                  <li key={a.id} className="border-border rounded-xl border p-5">
+                  <li key={a.fix.id} className="border-border rounded-xl border p-5">
                     <div className="flex items-center gap-3">
-                      <span className="font-mono text-lg font-semibold">{a.id}</span>
+                      <span className="font-mono text-lg font-semibold">{a.fix.id}</span>
                       <span
                         className={cn(
                           "rounded-full px-2.5 py-0.5 font-mono text-sm",
-                          a.verdict === "accepted" && "bg-healthy/15 text-healthy",
-                          a.verdict === "rejected" && "bg-infected/15 text-infected",
-                          a.verdict === "pending" && "bg-muted text-foreground",
+                          a.accepted && "bg-healthy/15 text-healthy",
+                          !a.accepted && "bg-infected/15 text-infected",
+                          !a.result && !a.error && "bg-muted text-foreground",
                         )}
                       >
-                        {a.verdict === "pending" ? "passes · awaiting approval" : a.verdict}
+                        {a.verdict}
                       </span>
                     </div>
-                    {a.reason && <p className="text-infected mt-2">{a.reason}</p>}
-                    {a.diff && (
-                      <details className="mt-3" open={a.verdict !== "rejected"}>
+                    <p className="mt-2">{a.fix.description}</p>
+                    {a.error && <p className="text-infected mt-2">{a.error}</p>}
+                    {a.broke.length > 0 && <p className="text-infected mt-2">Broke healthy cases: {a.broke.map(b => b.domain ?? b.scenario_id).join(", ")}</p>}
+                    {a.fix.diff && (
+                      <details className="mt-3" open={a.accepted}>
                         <summary className="text-muted-foreground hover:text-foreground cursor-pointer text-sm">Diff</summary>
                         <div className="mt-2">
-                          <DiffView diff={a.diff} />
+                          <DiffView diff={a.fix.diff} />
                         </div>
                       </details>
                     )}
                     {fam && baseline && scenarios.length > 0 && (
                       <div className="mt-4">
                         <ScenarioGrid
+                          template={template}
                           scenarios={scenarios}
                           from={baseline}
                           to={fam}
-                          size={a.verdict === "rejected" ? "sm" : "lg"}
+                          size={!a.accepted ? "sm" : "lg"}
                         />
                       </div>
                     )}
@@ -210,38 +210,22 @@ export function IncidentView({ params }: { params: Promise<{ id: string }> }) {
           )}
         </Stage>
 
-        <Stage n={6} title="Shipped" done={resolved}>
-          {resolution?.pr_url ? (
-            <dl className="grid gap-4 sm:grid-cols-4">
-              <Fact label="Pull request">
-                <a href={resolution.pr_url} target="_blank" rel="noreferrer" className="underline decoration-dotted underline-offset-4">
-                  #{resolution.pr_url.split("/").pop()} ↗
-                </a>
-              </Fact>
-              <Fact label="Cost">${resolution.cost_usd.toFixed(2)}</Fact>
-              <Fact label="Time">{Math.round(resolution.duration_ms / 60000)} min</Fact>
-              <Fact label="Approval">
-                {resolution.approval ? (
-                  <span className="text-healthy">
-                    “{resolution.approval.phrase}” · {resolution.approval.channel}
-                  </span>
-                ) : (
-                  "—"
-                )}
-              </Fact>
+        <Stage n={6} title="Resolution" done={resolved}>
+          {resolution ? <>
+            <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <Fact label="Pull request">{resolution.pr_url ? <a href={resolution.pr_url} target="_blank" rel="noreferrer" className="underline">#{resolution.pr_url.split("/").pop()} ↗</a> : "No pull request"}</Fact>
+              <Fact label="Cost">${resolution.cost_usd.toFixed(4)}</Fact>
+              <Fact label="Time">{Math.round(resolution.duration_ms / 1000)} s</Fact>
+              <Fact label="Merge">{resolution.merged ? "Merged" : "Not merged"}</Fact>
             </dl>
-          ) : approvedLocally ? (
-            <p className="text-healthy text-lg">Approved. Antibody is opening the pull request.</p>
-          ) : (
-            <Waiting>Ships as a pull request once approved.</Waiting>
-          )}
+            {resolution.approval && <p className="text-healthy mt-4">Approved via {resolution.approval.channel}: “{resolution.approval.phrase}” · {new Date(resolution.approval.at).toLocaleString()}</p>}
+            {resolution.rejection && <p className="text-infected mt-4">Rejected: {resolution.rejection.reason}</p>}
+          </> : <Waiting>No resolution recorded yet.</Waiting>}
         </Stage>
+        {awaiting && <Stage n={7} title="Decision" done={false} last>
+          <ApprovalBox key={`${incident.id}:${awaiting}`} incidentId={incident.id} fixId={awaiting} onChanged={() => { detail.refresh(); brief.refresh(); }} />
+        </Stage>}
 
-        {pending && (!resolved || approvedLocally) && (
-          <Stage n={7} title="Approval" done={false} last>
-            <ApprovalBox incidentId={incident.id} fixId={pending.id} onApproved={() => setApprovedLocally(true)} />
-          </Stage>
-        )}
       </ol>
     </div>
   );
