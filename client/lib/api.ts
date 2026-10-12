@@ -126,3 +126,44 @@ export async function startDrill() {
   if (USE_MOCK) throw new ApiError("Drills need the live backend", 409);
   return request<{ started: boolean }>(ANTIBODY_URL, "/drill/start", { method: "POST", body: "{}" });
 }
+/** One live step from Antibody (see antibody/antibody/events.py). */
+export interface LiveEvent {
+  seq: number;
+  ts: string;
+  kind: "stage" | "cmd" | "note" | "scenario" | "verdict" | "llm" | "code" | "pr";
+  // stage
+  stage?: string;
+  status?: "start" | "done";
+  text?: string;
+  // cmd
+  cmd?: string;
+  out?: string;
+  // note
+  tone?: "good" | "bad";
+  // scenario / verdict
+  id?: string;
+  role?: "must_fix" | "must_not_change";
+  domain?: string;
+  fault?: string | null;
+  candidate?: string;
+  scenario_id?: string;
+  passed?: boolean;
+  failed_checks?: string[];
+  // llm
+  purpose?: string;
+  model?: string | null;
+  // code
+  file?: string;
+  attempt?: number;
+  fix_id?: string;
+  description?: string;
+  diff?: string;
+  // pr
+  action?: "opened" | "merged" | "local";
+  url?: string | null;
+  branch?: string;
+  title?: string;
+  body?: string;
+}
+export const getEvents = (id: string, after = 0) =>
+  USE_MOCK ? mock({ events: [] as LiveEvent[], next: after }) : request<{ events: LiveEvent[]; next: number }>(ab(), `/incidents/${encodeURIComponent(id)}/events?after=${after}`);

@@ -74,7 +74,7 @@ function Focus({ inc, live }: { inc: Incident; live: boolean }) {
               className={cn(
                 "h-1.5 rounded-full",
                 states[i] === "done" && "bg-healthy",
-                states[i] === "current" && "bg-foreground animate-vital",
+                states[i] === "current" && "bg-brand animate-pulse",
                 states[i] === "failed" && "bg-infected",
                 states[i] === "pending" && "bg-muted",
               )}
@@ -123,8 +123,8 @@ function Focus({ inc, live }: { inc: Incident; live: boolean }) {
       </motion.div>
 
       {d.incident.status === "awaiting_approval" && (
-        <div className="border-infected/40 bg-infected/[0.06] mt-5 flex items-center gap-3 rounded-xl border px-4 py-3">
-          <Phone className="text-infected animate-vital size-4" />
+        <div className="border-brand/30 bg-brand/[0.07] mt-5 flex items-center gap-3 rounded-xl border px-4 py-3">
+          <Phone className="text-brand size-4 animate-pulse" />
           <p className="text-sm">
             Waiting for <span className="font-mono">approve fix {res?.accepted_fix_id?.replace("fix_", "")}</span>, by voice on Telegram or typed on the incident page.
           </p>
@@ -135,7 +135,7 @@ function Focus({ inc, live }: { inc: Incident; live: boolean }) {
         href={`/incidents/${encodeURIComponent(d.incident.id)}`}
         className="bg-foreground text-background hover:bg-foreground/90 mt-auto inline-flex w-fit items-center gap-2 self-start rounded-full px-4 py-2 text-sm font-medium transition-colors"
       >
-        Open the incident <ArrowRight className="size-4" />
+        {live ? "Watch Antibody work" : "Open the incident"} <ArrowRight className="size-4" />
       </Link>
     </div>
   );

@@ -189,3 +189,14 @@ def test_local_ship_merges_fix_branch(monkeypatch):
     res = approve(st, "inc_x", "fix_2", "approve fix 2", "voice")
     assert res.merged and calls[0][:2] == ("merge", "--no-ff") and calls[0][-1] == "antibody/inc_x/attempt-2"
     assert not any("push" in c for c in calls)
+
+
+def test_events_append_in_order_and_read_after():
+    from antibody import events
+
+    events.emit("inc_ev", "cmd", cmd="git log -G x", out="abc1234 subject")
+    events.emit("inc_ev", "verdict", candidate="baseline", scenario_id="sc_01", passed=False)
+    evs = events.read("inc_ev")
+    assert [e["seq"] for e in evs] == [1, 2] and evs[0]["kind"] == "cmd"
+    assert [e["kind"] for e in events.read("inc_ev", after=1)] == ["verdict"]
+    events.emit(None, "note", text="ignored")  # no incident: no-op, never raises

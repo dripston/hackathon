@@ -31,11 +31,17 @@ export function ControlBar() {
           <Mark /> Antibody
         </Link>
         <nav className="flex items-center gap-1 text-sm">
-          <Link href="/live" className={cn("rounded-md px-3 py-1.5 transition-colors", path === "/live" ? "bg-accent text-foreground" : "text-muted-foreground hover:text-foreground")}>
-            Mission control
-          </Link>
-          {path.startsWith("/incidents/") && <span className="bg-accent text-foreground rounded-md px-3 py-1.5">Incident</span>}
-          {inDrill && <span className="bg-infected/15 text-infected rounded-md px-3 py-1.5 font-mono text-xs tracking-wider uppercase">Drill data</span>}
+          {[
+            { href: "/live", label: "Overview", on: path === "/live" },
+            { href: "/traffic", label: "Traffic", on: path.startsWith("/traffic") },
+            { href: "/incidents", label: "Incidents", on: path.startsWith("/incidents") },
+            { href: "/immunity", label: "Immunity", on: path.startsWith("/immunity") },
+          ].map((l) => (
+            <Link key={l.href} href={l.href} className={cn("rounded-full px-3.5 py-1.5 transition-colors", l.on ? "bg-accent text-foreground" : "text-muted-foreground hover:text-foreground")}>
+              {l.label}
+            </Link>
+          ))}
+          {inDrill && <span className="bg-brand/15 text-brand ml-2 rounded-full px-3 py-1.5 text-xs font-medium">Live drill</span>}
         </nav>
         <div className="ml-auto hidden items-center gap-2 lg:flex">
           {pills.map((p) => (

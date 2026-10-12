@@ -50,12 +50,19 @@ def create(incident_id: str, attempt: int, rel_path: str, new_content: str, mess
     if path.exists():  # Windows can keep a folder locked (indexers, AV); use a fresh name rather than fail
         path = worktrees_root() / f"{incident_id}-attempt-{attempt}-{int(time.time())}"
     git_tools.git("worktree", "add", "-b", branch, str(path), base)
+    from . import events
+
+    events.emit(incident_id, "cmd", cmd=events.cmdline("git", "worktree", "add", "-b", branch, f".state/worktrees/{path.name}", base),
+                out=f"Preparing worktree (new branch '{branch}')")
     target = path / rel_path
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(new_content, encoding="utf-8", newline="\n")
     git_tools.git("add", rel_path, cwd=path)
     git_tools.git("commit", "-m", message, cwd=path)
-    return Worktree(path=path, branch=branch, sha=git_tools.git("rev-parse", "HEAD", cwd=path))
+    sha = git_tools.git("rev-parse", "HEAD", cwd=path)
+    events.emit(incident_id, "cmd", cmd=events.cmdline("git", "commit", "-m", message.splitlines()[0]),
+                out=f"[{branch} {sha[:7]}] {message.splitlines()[0]}\n 1 file changed")
+    return Worktree(path=path, branch=branch, sha=sha)
 
 
 def checkout(ref: str, name: str) -> Path:

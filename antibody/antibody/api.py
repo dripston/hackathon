@@ -109,6 +109,15 @@ def _attempt_view(a: Attempt, scenarios: list[Scenario]) -> dict:
     return {**a.model_dump(), "verdict": verdict, "broke": broke, "still_failing": still}
 
 
+@app.get("/incidents/{incident_id}/events")
+def incident_events(incident_id: str, after: int = 0):
+    """Not in the contract (extra endpoint): live step-by-step events for the console's workspace view."""
+    from . import events
+
+    evs = events.read(incident_id, after)
+    return {"events": evs, "next": evs[-1]["seq"] if evs else after}
+
+
 @app.get("/incidents/{incident_id}/brief")
 def incident_brief(incident_id: str, response: Response):
     st = store()

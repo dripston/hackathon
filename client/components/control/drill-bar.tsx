@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { motion } from "motion/react";
-import { ArrowRight, Loader2, Play, Siren } from "lucide-react";
+import { ArrowRight, Loader2, Play, Sparkles } from "lucide-react";
 import { getDrill, startDrill, type DrillStatus } from "@/lib/api";
 import { useNow, usePoll } from "@/lib/use-poll";
 import { cn } from "@/lib/utils";
@@ -50,8 +50,8 @@ export function DrillBar() {
   if (!active)
     return (
       <div className="border-border bg-card/40 relative flex flex-wrap items-center gap-5 overflow-hidden rounded-2xl border px-6 py-5">
-        <div className="bg-infected/10 pointer-events-none absolute -left-10 size-40 rounded-full blur-3xl" aria-hidden />
-        <Siren className="text-infected relative size-7" />
+        <div className="bg-brand/15 pointer-events-none absolute -left-10 size-40 rounded-full blur-3xl" aria-hidden />
+        <Sparkles className="text-brand relative size-7" />
         <div className="relative min-w-0 flex-1">
           <p className="text-lg font-semibold">Run a live incident</p>
           <p className="text-muted-foreground text-sm">
@@ -64,7 +64,7 @@ export function DrillBar() {
         <button
           onClick={start}
           disabled={busy}
-          className="bg-infected text-background hover:bg-infected/90 glow-infected relative inline-flex items-center gap-2 rounded-full px-5 py-2.5 font-medium transition-all hover:scale-[1.02] disabled:opacity-60"
+          className="bg-brand text-background hover:bg-brand/90 glow-brand relative inline-flex items-center gap-2 rounded-full px-5 py-2.5 font-medium transition-all hover:scale-[1.02] disabled:opacity-60"
         >
           {busy ? <Loader2 className="size-4 animate-spin" /> : <Play className="size-4 fill-current" />} Start live drill
         </button>
@@ -76,11 +76,11 @@ export function DrillBar() {
     <motion.div
       initial={{ opacity: 0, y: -8 }}
       animate={{ opacity: 1, y: 0 }}
-      className={cn("relative overflow-hidden rounded-2xl border px-6 py-5", failed ? "border-border bg-card/40" : "border-infected/50 bg-infected/[0.06] glow-infected")}
+      className={cn("relative overflow-hidden rounded-2xl border px-6 py-5", failed ? "border-border bg-card/40" : "border-brand/40 bg-brand/[0.06] glow-brand")}
     >
       <div className="flex flex-wrap items-center gap-4">
-        <span className="flex items-center gap-2 font-mono text-xs tracking-[0.18em] text-infected uppercase">
-          <span className="bg-infected animate-vital size-2 rounded-full" /> Live drill
+        <span className="text-brand flex items-center gap-2 text-sm font-medium">
+          <span className="bg-brand size-2 animate-pulse rounded-full" /> Live drill
         </span>
         <p className="font-medium">{d!.message}</p>
         <span className="text-muted-foreground ml-auto font-mono text-sm tabular-nums">
@@ -93,7 +93,7 @@ export function DrillBar() {
             <div
               className={cn(
                 "h-1.5 rounded-full",
-                i < at || d!.state === "done" ? "bg-healthy" : i === at ? (failed ? "bg-infected" : "bg-foreground animate-vital") : "bg-muted",
+                i < at || d!.state === "done" ? "bg-healthy" : i === at ? (failed ? "bg-infected" : "bg-brand animate-pulse") : "bg-muted",
               )}
             />
             <p className={cn("mt-1.5 text-xs", i === at ? "text-foreground font-medium" : "text-muted-foreground")}>{s.label}</p>
@@ -107,7 +107,7 @@ export function DrillBar() {
         </span>
         {d!.incident_id && (
           <Link href={`/incidents/${encodeURIComponent(d!.incident_id)}`} className="text-foreground ml-auto inline-flex items-center gap-1.5 font-medium hover:underline">
-            Follow the incident {d!.state === "awaiting_approval" ? "and approve it" : ""} <ArrowRight className="size-3.5" />
+            Watch Antibody work {d!.state === "awaiting_approval" ? "· approve the fix" : ""} <ArrowRight className="size-3.5" />
           </Link>
         )}
       </div>

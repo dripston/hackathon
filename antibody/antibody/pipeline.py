@@ -11,7 +11,7 @@ import time
 from pathlib import Path
 from typing import Callable
 
-from . import apply, breed, diagnose, fix, git_tools, grade, llm, replay, ship, tracing
+from . import apply, breed, diagnose, events, fix, git_tools, grade, llm, replay, ship, tracing
 from .config import REPO_ROOT
 from .models import (Approval, Attempt, Diagnosis, FamilyResult, Incident, Resolution, Scenario)
 from .patient_client import PatientClient
@@ -74,6 +74,7 @@ class Pipeline:
                 continue
             if self.on_stage:
                 self.on_stage(stage)
+            events.emit(inc.id, "stage", stage=stage, status="start")
             try:
                 with tracing.span(f"antibody.{stage}", kind="WORKFLOW" if stage == "diagnosis" else "CHAIN",
                                   **{"antibody.incident_id": inc.id, "antibody.detection": inc.detection}):
@@ -84,6 +85,7 @@ class Pipeline:
                 self.echo(f"[{stage:<10}] STOP cost cap reached ({e})")
                 break
             self.echo(f"[{stage:<10}] {msg}")
+            events.emit(inc.id, "stage", stage=stage, status="done", text=msg)
         return self._incident(inc.id)
 
     def _cap(self) -> float:
@@ -110,6 +112,10 @@ class Pipeline:
         size = int(os.environ.get("FAMILY_SIZE", "10") or 10)
         scenarios = breed.breed(inc, diag, evidence, stub=stub, size=size)
         self.store.write(inc.id, "family", scenarios)
+        for sc in scenarios:
+            f = sc.faults[0] if sc.faults else None
+            events.emit(inc.id, "scenario", id=sc.id, role=sc.role, domain=sc.domain,
+                        fault=f"{f.tool} → {f.error.code}" if f else None)
         n_fix = sum(s.role == "must_fix" for s in scenarios)
         return f"{len(scenarios)} scenarios ({n_fix} must_fix, {len(scenarios) - n_fix} must_not_change)"
 
@@ -131,6 +137,8 @@ class Pipeline:
                  new_content: str, worktree: Path, budget) -> tuple[FamilyResult, bool]:
         if diag.fix_kind == "tool_wrapper_patch":
             stub = PatientClient().is_stub
+            events.emit(inc.id, "cmd", cmd=f"cd {worktree.name}/detection && uv run detection serve",
+                        out=f"starting the patient from the {candidate} branch to replay the family")
             with apply.patient_service(worktree, stub=stub) as url:
                 return replay.run_family(
                     inc.id, scenarios, candidate, prompt_version=diag.prompt_version,
@@ -158,9 +166,14 @@ class Pipeline:
         previous: list[dict] = []
         last = baseline
         for n in range(1, MAX_ATTEMPTS + 1):
+            events.emit(inc.id, "llm", purpose=f"write fix {n} for {diag.target_file}", status="start",
+                        model=llm._model("strong") or None)
             cand, new_content, mock = fix.propose(diag, content, last, scenarios, n, previous,
                                                   change_diff=(self.store.read(inc.id, "evidence") or {}).get("change_diff"))
             self._mock(inc.id, mock, f"fix_{n}")
+            events.emit(inc.id, "llm", purpose=f"write fix {n}", status="done")
+            events.emit(inc.id, "code", file=diag.target_file, attempt=n, fix_id=cand.id,
+                        description=cand.description, diff=cand.diff)
             if not cand.diff.strip():
                 attempts.append(Attempt(fix=cand, error="empty diff"))
                 previous.append({"description": cand.description, "diff": "", "failing": "no change produced"})
@@ -182,6 +195,8 @@ class Pipeline:
                 continue
             self._mock(inc.id, rmock, f"replay_{n}")
             ok = grade.accepts(result)
+            events.emit(inc.id, "note", text=f"{cand.id}: {grade.line(result)} -> {'ACCEPTED' if ok else 'rejected'}",
+                        tone="good" if ok else "bad")
             attempts.append(Attempt(fix=cand, result=result, accepted=ok))
             self.store.write(inc.id, "attempts", attempts)
             self.echo(f"[attempts  ] {cand.id}: {grade.line(result)} -> {'ACCEPTED' if ok else 'rejected'}")
@@ -255,12 +270,16 @@ def approve(store: StateStore, incident_id: str, fix_id: str, phrase: str, chann
     if inc.status != "awaiting_approval":
         raise ApprovalError(f"Incident is {inc.status}, not awaiting approval", 409)
     res.approval = Approval(phrase=phrase.strip(), channel=channel, at=now_iso())
+    events.emit(incident_id, "note", text=f"Approved by {channel}: “{phrase.strip()}”", tone="good")
     if res.pr_url:
+        events.emit(incident_id, "cmd", cmd=events.cmdline("gh", "pr", "merge", res.pr_url, "--squash"), out="")
         (merge or _gh_merge)(res.pr_url)
         res.merged = True
+        events.emit(incident_id, "pr", action="merged", url=res.pr_url)
     elif _ship_target() == "local":
         _local_merge(store, incident_id, fix_id)
         res.merged = True
+        events.emit(incident_id, "pr", action="merged", url=None)
     store.write(incident_id, "resolution", res)
     inc.status = "resolved"
     store.write(incident_id, "incident", inc)
@@ -294,4 +313,5 @@ def _local_merge(store: StateStore, incident_id: str, fix_id: str) -> None:
     branch = next((a.fix.branch for a in attempts if a.fix.id == fix_id and a.fix.branch), None)
     if not branch:
         raise ApprovalError(f"No local branch recorded for {fix_id}", 409)
+    events.emit(incident_id, "cmd", cmd=events.cmdline("git", "merge", "--no-ff", branch), out="Merge made by the 'ort' strategy.")
     git_tools.git("merge", "--no-ff", "-m", f"Merge Antibody {fix_id} for {incident_id}", branch)

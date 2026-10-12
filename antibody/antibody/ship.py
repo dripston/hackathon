@@ -5,7 +5,7 @@ import logging
 import tempfile
 from pathlib import Path
 
-from . import entire_cli, git_tools, grade
+from . import entire_cli, events, git_tools, grade
 from .config import get_settings
 from .models import Diagnosis, FamilyResult, FixCandidate, Incident, Scenario
 from .state import now_iso
@@ -100,6 +100,9 @@ def ship(incident: Incident, diag: Diagnosis, scenarios: list[Scenario], fix: Fi
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(json.dumps(rec, indent=2) + "\n", encoding="utf-8", newline="\n")
     git_tools.git("add", rel, cwd=worktree)
+    events.emit(incident.id, "cmd", cmd=events.cmdline("git", "add", rel), out="")
+    events.emit(incident.id, "cmd", cmd=events.cmdline("git", "commit", "-m", f"Save immunity family for {incident.id}"),
+                out=f"{len(scenarios)} scenarios saved as a pre-deploy gate")
     git_tools.git("commit", "-m",
                   f"Save immunity family for {incident.id}\n\nThe {len(scenarios)} scenarios that proved {fix.id} "
                   f"become a pre-deploy gate, so this failure can't quietly come back.",
@@ -109,9 +112,14 @@ def ship(incident: Incident, diag: Diagnosis, scenarios: list[Scenario], fix: Fi
         return {"pr_url": None, "note": "mock run: branch committed locally, not pushed (use --ship-mock to open a PR)"}
 
     branch = git_tools.git("rev-parse", "--abbrev-ref", "HEAD", cwd=worktree)
+    title = f"Antibody: fix {incident.detection} ({fix.id})" + (" [MOCK]" if mock else "")
     if get_settings().ship_target == "local":
+        events.emit(incident.id, "pr", action="local", url=None, branch=branch, title=title,
+                    body=pr_body(incident, diag, fix, before, after, cost_usd, duration_ms, mock))
         return {"pr_url": None, "note": f"local run: {branch} committed, not pushed; approval merges it locally"}
     git_tools.git("push", "-u", "origin", branch, cwd=worktree)
+    events.emit(incident.id, "cmd", cmd=events.cmdline("git", "push", "-u", "origin", branch),
+                out=f"branch '{branch}' set up to track 'origin/{branch}'")
     body = pr_body(incident, diag, fix, before, after, cost_usd, duration_ms, mock)
     with tempfile.NamedTemporaryFile("w", suffix=".md", delete=False, encoding="utf-8") as f:
         f.write(body)
@@ -120,6 +128,8 @@ def ship(incident: Incident, diag: Diagnosis, scenarios: list[Scenario], fix: Fi
     pr_url = git_tools.gh("pr", "create", "--base", "main", "--head", branch, "--title", title,
                           "--body-file", body_file, cwd=worktree).splitlines()[-1]
     Path(body_file).unlink(missing_ok=True)
+    events.emit(incident.id, "cmd", cmd=events.cmdline("gh", "pr", "create", "--base", "main", "--head", branch, "--title", title), out=pr_url)
+    events.emit(incident.id, "pr", action="opened", url=pr_url, branch=branch, title=title, body=body)
     note = ""
     trail = entire_cli.create_trail(title, pr_url, branch, git_tools.github_repo(), cwd=worktree)
     if trail:

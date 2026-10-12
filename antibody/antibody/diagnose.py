@@ -12,7 +12,7 @@ import logging
 from collections import Counter
 from pathlib import Path
 
-from . import entire_cli, git_tools, llm, neatlogs_mcp
+from . import entire_cli, events, git_tools, llm, neatlogs_mcp
 from .config import ANTIBODY_DIR, REPO_ROOT, get_settings
 from .models import AgentRun, Diagnosis, Incident, RunScore
 from .scorer_client import ScorerClient
@@ -212,14 +212,28 @@ def diagnose(incident: Incident) -> tuple[Diagnosis, bool, dict]:
     change = what_changed(f_all, h_all)
     f_sum, h_sum = f_all[:5], h_all[:5]
     tfile = target_file(change, mock)
+    events.emit(incident.id, "note", text=f"Compared {len(f_all)} failing runs with {len(h_all)} healthy runs")
+    events.emit(incident.id, "note", text=(f"Every failing run has bug flag '{change['suspect_flag']}' on" if change["suspect_flag"]
+                                           else f"Failing runs use prompt {change['suspect_prompt_version']}"))
 
     commit = None
     if tfile is not None and tfile.exists():
         needle = suspect_needle(change, mock)
         commit = (git_tools.introducing_commit(tfile, needle, newest=bool(change["suspect_flag"])) if needle else None)             or git_tools.last_commit_touching(tfile)
 
+    if commit and tfile is not None:
+        needle = commit.get("needle")
+        how = (f"-G{needle}" if change["suspect_flag"] else f"-S{needle}") if needle else "-1"
+        events.emit(incident.id, "cmd", cmd=events.cmdline("git", "log", how, "--oneline", "--", commit["file"]),
+                    out=f"{commit['sha'][:7]} {commit['subject']}  ({commit['author']})")
     checkpoint = entire_cli.checkpoint_for(commit["sha"], commit.get("file")) if commit else None
     reasoning = checkpoint.get("reasoning_excerpt") if checkpoint else None
+    if commit:
+        events.emit(incident.id, "cmd", cmd=events.cmdline("git", "log", "-1", "--format=%(trailers:key=Entire-Checkpoint)", commit["sha"][:7]),
+                    out=(f"Entire-Checkpoint: {checkpoint.get('checkpoint_id')}" if checkpoint and checkpoint.get("checkpoint_id")
+                         else "(no Entire checkpoint: using the commit message)"))
+    if reasoning:
+        events.emit(incident.id, "note", text=f"Why it was changed: “{reasoning[:220]}”")
 
     failing_domains = list(dict.fromkeys(f["domain"] for f in f_all if f["domain"]))
     evidence = {"failing": f_sum, "healthy": h_sum, "change": change, "commit": commit,
@@ -232,6 +246,7 @@ def diagnose(incident: Incident) -> tuple[Diagnosis, bool, dict]:
 
     explanation, fix_kind = _fallback_explanation(incident, change, commit, reasoning)
     if llm.available("strong"):
+        events.emit(incident.id, "llm", purpose="explain the cause", status="start", model=llm._model("strong"))
         try:
             compact = {k: v for k, v in evidence.items() if k not in ("failing_domains", "healthy_domains") and v}
             compact["failing"], compact["healthy"] = evidence["failing"][:3], evidence["healthy"][:3]
@@ -244,6 +259,8 @@ def diagnose(incident: Incident) -> tuple[Diagnosis, bool, dict]:
                 fix_kind = parsed["fix_kind"]
         except Exception as e:
             log.warning("diagnosis LLM failed (%s); using the template explanation", e)
+        events.emit(incident.id, "llm", purpose="explain the cause", status="done")
+        events.emit(incident.id, "note", text=explanation)
     else:
         mock = True  # explanation is a template, not a model
 

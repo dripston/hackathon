@@ -34,7 +34,7 @@ export function Traffic() {
 
   return (
     <Panel
-      title="Live traffic · company-research agent"
+      title="Live traffic · sales-research agent"
       live
       className="min-h-[560px]"
       action={<span className="text-muted-foreground font-mono text-xs">{failing ? `${failing} silent failures in view` : "all checks passing"}</span>}
@@ -67,7 +67,7 @@ export function Traffic() {
                   onClick={() => setSelected(r)}
                   className={cn(
                     "grid w-full grid-cols-[72px_1fr_56px_70px_92px] items-center gap-3 rounded-lg border px-3 py-2 text-left transition-colors",
-                    bad ? "border-infected/40 bg-infected/[0.07] hover:bg-infected/[0.12]" : "hover:bg-accent/60 border-transparent",
+                    "hover:bg-accent/60 border-transparent",
                     fresh.has(r.run.run_id) && !bad && "bg-healthy/[0.06]",
                   )}
                 >
@@ -76,11 +76,11 @@ export function Traffic() {
                     <span className="block truncate font-medium">{r.run.input.domain}</span>
                     {bad && <span className="text-infected block truncate font-mono text-xs">{TW_SHORT[r.score.violations[0]] ?? r.score.violations[0]}</span>}
                   </span>
-                  <span className={cn("font-mono text-xs", bad ? "text-infected" : "text-muted-foreground")}>200 OK</span>
+                  <span className="text-muted-foreground font-mono text-xs">200 OK</span>
                   <span className="flex gap-1.5">
                     {TRIPWIRES.map((id) => {
                       const c = r.score.checks.find((x) => x.id === id);
-                      return <span key={id} title={id} className={cn("size-2 rounded-full", !c ? "bg-muted" : c.passed ? "bg-healthy/80" : "bg-infected shadow-[0_0_8px] shadow-infected")} />;
+                      return <span key={id} title={id} className={cn("size-2 rounded-full", !c ? "bg-muted" : c.passed ? "bg-healthy/80" : "bg-infected")} />;
                     })}
                   </span>
                   <span className="text-right font-mono text-xs tabular-nums">

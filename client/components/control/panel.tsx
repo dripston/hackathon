@@ -3,10 +3,10 @@ import { cn } from "@/lib/utils";
 
 export function Panel({ title, live, action, className, children }: { title: ReactNode; live?: boolean; action?: ReactNode; className?: string; children: ReactNode }) {
   return (
-    <section className={cn("border-border bg-card/40 flex flex-col overflow-hidden rounded-2xl border", className)}>
+    <section className={cn("border-border bg-card/60 flex flex-col overflow-hidden rounded-2xl border shadow-lg shadow-black/10", className)}>
       <header className="border-border flex items-center gap-3 border-b px-5 py-3">
-        {live && <span className="bg-healthy animate-vital size-1.5 rounded-full" />}
-        <h2 className="eyebrow text-foreground/80!">{title}</h2>
+        {live && <span className="bg-brand size-1.5 animate-pulse rounded-full" />}
+        <h2 className="text-foreground/90 text-sm font-medium">{title}</h2>
         <div className="ml-auto flex items-center gap-2">{action}</div>
       </header>
       <div className="flex-1 p-5">{children}</div>
@@ -14,13 +14,14 @@ export function Panel({ title, live, action, className, children }: { title: Rea
   );
 }
 
-export function Pill({ tone, children }: { tone?: "healthy" | "infected" | "muted"; children: ReactNode }) {
+export function Pill({ tone, children }: { tone?: "healthy" | "infected" | "muted" | "brand"; children: ReactNode }) {
   return (
     <span
       className={cn(
-        "rounded-full px-2.5 py-0.5 font-mono text-[11px] tracking-wide uppercase",
+        "rounded-full px-2.5 py-0.5 text-xs font-medium",
         tone === "healthy" && "bg-healthy/15 text-healthy",
         tone === "infected" && "bg-infected/15 text-infected",
+        tone === "brand" && "bg-brand/15 text-brand",
         (!tone || tone === "muted") && "bg-muted text-muted-foreground",
       )}
     >
@@ -29,14 +30,14 @@ export function Pill({ tone, children }: { tone?: "healthy" | "infected" | "mute
   );
 }
 
-export const STATUS_TONE: Record<string, "healthy" | "infected" | "muted"> = {
+export const STATUS_TONE: Record<string, "healthy" | "infected" | "muted" | "brand"> = {
   resolved: "healthy",
   escalated: "infected",
-  awaiting_approval: "infected",
+  awaiting_approval: "brand",
   open: "infected",
-  diagnosing: "infected",
-  simulating: "infected",
-  fixing: "infected",
+  diagnosing: "brand",
+  simulating: "brand",
+  fixing: "brand",
 };
 
 export const STATUS_LABEL: Record<string, string> = {

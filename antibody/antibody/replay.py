@@ -7,7 +7,7 @@ import logging
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-from . import grade
+from . import events, grade
 from .config import get_settings
 from .models import FamilyResult, Scenario, Verdict
 from .patient_client import PatientClient
@@ -83,6 +83,10 @@ def run_family(
             with lock:
                 mock = mock or m
                 verdicts[sc.id] = grade.verdict(sc, run, score)
+                v = verdicts[sc.id]
+            events.emit(incident_id, "verdict", candidate=candidate, scenario_id=sc.id, domain=sc.domain, role=sc.role,
+                        passed=v.passed, failed_checks=v.failed_checks)
+            with lock:
                 tool_calls += sum(1 for s in run.steps if s.kind == "tool")
                 cost += run.total_cost_usd or 0.0
 
