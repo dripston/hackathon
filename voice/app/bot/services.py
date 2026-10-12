@@ -14,7 +14,7 @@ from app.config import Settings
 from app.bot.oncall import OnCallState
 from app.memory.conversation import ConversationStore
 from app.services import audio, sarvam_stt, sarvam_tts
-from app.services.antibody import AntibodyClient
+from app.services.antibody import AntibodyClient, antibody_for
 
 # (audio_bytes, filename) -> (transcript, detected_language_code)
 TranscribeFn = Callable[[bytes, str], Awaitable[tuple[str, str | None]]]
@@ -63,6 +63,6 @@ class BotServices:
             to_wav=audio.to_wav_16k_mono,
             to_ogg=audio.to_ogg_opus,
             generate=generate,
-            antibody=AntibodyClient(settings),
+            antibody=antibody_for(settings),
             oncall=OnCallState(settings),
         )

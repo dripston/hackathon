@@ -63,6 +63,9 @@ class Settings(BaseSettings):
 
     # --- Antibody (the on-call system this bot is the voice of) ---
     antibody_url: str = "http://localhost:4000"
+    # A live drill (mission control's "Run a live incident") serves its own Antibody here; the bot calls about
+    # its incidents too. Blank disables it.
+    drill_antibody_url: str = "http://127.0.0.1:4100"
     # Telegram chat that gets called when a fix is waiting. Blank: the chat that last sent /oncall.
     oncall_chat_id: str = ""
     oncall_poll_seconds: float = 15.0

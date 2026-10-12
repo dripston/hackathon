@@ -103,3 +103,53 @@ def _error(r: httpx.Response) -> str:
         return str(r.json().get("error") or r.text)[:300]
     except ValueError:
         return f"Antibody returned HTTP {r.status_code}"
+
+
+class MultiAntibody:
+    """Production Antibody plus a live drill's Antibody, seen as one: incidents from both, and each approval
+    routed to the API that owns that incident. An unreachable drill is simply empty."""
+
+    def __init__(self, main: AntibodyClient, drill: AntibodyClient | None):
+        self.main, self.drill = main, drill
+        self.settings = main.settings
+        self._owner: dict[str, AntibodyClient] = {}
+
+    async def incidents(self) -> tuple[list[dict], bool]:
+        items, mock = await self.main.incidents()
+        for i in items:
+            self._owner[i["id"]] = self.main
+        if self.drill is not None:
+            try:
+                extra, _ = await self.drill.incidents()
+            except AntibodyError:
+                extra = []
+            for i in extra:
+                self._owner[i["id"]] = self.drill
+            items = sorted(extra + items, key=lambda i: i.get("first_seen", ""), reverse=True)
+        return items, mock
+
+    def _for(self, incident_id: str) -> AntibodyClient:
+        return self._owner.get(incident_id, self.main)
+
+    async def brief(self, incident_id: str) -> tuple[str, bool]:
+        return await self._for(incident_id).brief(incident_id)
+
+    async def detail(self, incident_id: str) -> dict:
+        return await self._for(incident_id).detail(incident_id)
+
+    async def awaiting(self) -> list[dict]:
+        items, _ = await self.incidents()
+        return [i for i in items if i.get("status") == "awaiting_approval"]
+
+    async def approve(self, incident_id: str, n: int, phrase: str, channel: str) -> dict:
+        return await self._for(incident_id).approve(incident_id, n, phrase, channel)
+
+    async def reject(self, incident_id: str, n: int, reason: str) -> dict:
+        return await self._for(incident_id).reject(incident_id, n, reason)
+
+
+def antibody_for(settings: Settings) -> "AntibodyClient | MultiAntibody":
+    main = AntibodyClient(settings)
+    if not settings.drill_antibody_url:
+        return main
+    return MultiAntibody(main, AntibodyClient(settings.model_copy(update={"antibody_url": settings.drill_antibody_url})))
