@@ -5,7 +5,7 @@ import { Loader2, ShieldCheck, ShieldX, TrendingUp } from "lucide-react";
 import { getAftercare, getGate, getIncidents, getOverview, getRisks, getTrust, isDrillMode } from "@/lib/api";
 import { useNow, usePoll } from "@/lib/use-poll";
 import type { RiskForecast } from "@/lib/types";
-import { Panel, Pill, STATUS_LABEL, STATUS_TONE } from "@/components/control/panel";
+import { Panel, Pill, STATUS_LABEL, STATUS_TONE, Stats, type Tone } from "@/components/control/panel";
 import { ago } from "@/components/console/ui";
 import { cn } from "@/lib/utils";
 
@@ -15,24 +15,15 @@ export function VitalsStrip() {
   const o = usePoll(getOverview, 2000).data;
   const trust = usePoll(getTrust, 30000).data;
   const rate = o?.silent_failure_rate;
-  const cells = [
+  const cells: { label: string; value: string | number; tone?: Tone }[] = [
     { label: "Runs · last 10 min", value: o?.runs_last_10_min ?? "—" },
     { label: "Silent-failure rate", value: rate == null ? "—" : `${Math.round(rate * 100)}%`, tone: rate ? "infected" : "healthy" },
-    { label: "Open incidents", value: o?.open_incidents ?? "—", tone: o?.open_incidents ? "infected" : "healthy" },
-    { label: "Awaiting approval", value: o?.awaiting_approval ?? "—", tone: o?.awaiting_approval ? "infected" : undefined },
-    { label: "Deploy gate", value: o?.gate_verdict ? o.gate_verdict.toUpperCase() : "—", tone: o?.gate_verdict === "blocked" ? "infected" : o?.gate_verdict ? "healthy" : undefined },
+    { label: "Open incidents", value: o?.open_incidents ?? "—", tone: o?.open_incidents ? "brand" : undefined },
+    { label: "Awaiting approval", value: o?.awaiting_approval ?? "—", tone: o?.awaiting_approval ? "brand" : undefined },
+    { label: "Deploy gate", value: o?.gate_verdict ? (o.gate_verdict === "safe" ? "Safe" : "Blocked") : "—", tone: o?.gate_verdict === "blocked" ? "infected" : o?.gate_verdict ? "healthy" : undefined },
     { label: "Planted bugs caught", value: trust ? `${trust.would_have_blocked}/${trust.seeded_bugs.length}` : "—" },
   ];
-  return (
-    <div className="border-border grid grid-cols-2 gap-px overflow-hidden rounded-2xl border md:grid-cols-3 xl:grid-cols-6">
-      {cells.map((c) => (
-        <div key={c.label} className="bg-card/40 px-5 py-4">
-          <p className="text-muted-foreground font-mono text-[11px] tracking-wider uppercase">{c.label}</p>
-          <p className={cn("mt-1.5 font-mono text-3xl font-semibold tabular-nums", c.tone === "infected" && "text-infected", c.tone === "healthy" && "text-healthy")}>{c.value}</p>
-        </div>
-      ))}
-    </div>
-  );
+  return <Stats items={cells} />;
 }
 
 /* ------------------------------- forecasts ------------------------------- */
@@ -43,7 +34,7 @@ export function Forecasts() {
   for (const r of risks.data ?? []) if (!latest.has(r.subject)) latest.set(r.subject, r);
   const list = [...latest.values()];
   return (
-    <Panel title="Forecast · before it breaks" live>
+    <Panel title="Forecasts" description="Tools trending toward failure, before they break" live>
       {!list.length && <p className="text-muted-foreground text-sm">No tool is trending toward failure.</p>}
       <ul className="space-y-4">
         {list.map((r) => {
@@ -80,14 +71,14 @@ export function GatePanel() {
   const g = gate.data;
   const running = after && !["done", "failed", "idle"].includes(after.state);
   return (
-    <Panel title="Deploy gate · immunity" live={!!running}>
+    <Panel title="Deploy gate" description="Every fixed incident replays before a deploy" live={!!running}>
       {!g && <p className="text-muted-foreground text-sm">{isDrillMode() ? "In a drill, the gate runs on the sandbox after you approve the fix." : "No gate run yet."}</p>}
       {g && (
         <>
           <div className="flex items-center gap-3">
-            {g.verdict === "safe" ? <ShieldCheck className="text-healthy size-8" /> : <ShieldX className="text-infected size-8" />}
+            <span className={cn("grid size-11 place-items-center rounded-xl border", g.verdict === "safe" ? "border-healthy/25 bg-healthy/10 text-healthy" : "border-infected/25 bg-infected/10 text-infected")}>{g.verdict === "safe" ? <ShieldCheck className="size-5" /> : <ShieldX className="size-5" />}</span>
             <div>
-              <p className={cn("text-2xl font-semibold", g.verdict === "safe" ? "text-healthy" : "text-infected")}>{g.verdict === "safe" ? "SAFE TO SHIP" : "BLOCKED"}</p>
+              <p className={cn("text-xl font-semibold tracking-tight", g.verdict === "safe" ? "text-healthy" : "text-infected")}>{g.verdict === "safe" ? "Safe to ship" : "Blocked"}</p>
               <p className="text-muted-foreground font-mono text-xs">
                 {g.branch} · {g.families.length} famil{g.families.length === 1 ? "y" : "ies"}
               </p>
@@ -96,7 +87,7 @@ export function GatePanel() {
           {g.note && <p className="text-infected mt-3 text-sm">{g.note}</p>}
           <ul className="mt-4 space-y-2">
             {g.families.map((f) => (
-              <li key={f.incident_id} className="border-border flex items-center justify-between gap-3 rounded-lg border px-3 py-2">
+              <li key={f.incident_id} className="border-border bg-muted/30 flex items-center justify-between gap-3 rounded-lg border px-3 py-2">
                 <span className="text-muted-foreground truncate font-mono text-xs">{f.incident_id.replace(/^inc_\d+_\d+_/, "")}</span>
                 <span className={cn("shrink-0 font-mono text-xs", f.reopens ? "text-infected" : "text-healthy")}>
                   {f.must_fix_passed}/{f.must_fix_total} · {f.must_not_change_passed ?? "–"}/{f.must_not_change_total ?? "–"}

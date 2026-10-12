@@ -7,7 +7,7 @@ import { useNow, usePoll } from "@/lib/use-poll";
 import type { ScoredRun } from "@/lib/types";
 import { BriefPanel } from "@/components/console/brief-panel";
 import { Ecg } from "@/components/story/ecg";
-import { Panel } from "@/components/control/panel";
+import { Panel, Pill } from "@/components/control/panel";
 import { ago } from "@/components/console/ui";
 import { cn } from "@/lib/utils";
 
@@ -34,22 +34,23 @@ export function Traffic() {
 
   return (
     <Panel
-      title="Live traffic · sales-research agent"
+      title="Live traffic"
+      description="sales-research-agent · newest first"
       live
-      className="min-h-[560px]"
-      action={<span className="text-muted-foreground font-mono text-xs">{failing ? `${failing} silent failures in view` : "all checks passing"}</span>}
+      flush
+      action={failing ? <Pill tone="infected" dot>{failing} silent failures in view</Pill> : <Pill tone="healthy" dot>All checks passing</Pill>}
     >
-      <div className="border-border bg-background/50 -mx-1 mb-4 rounded-xl border px-3 pt-1">
+      <div className="border-border bg-sidebar/60 border-b px-5 pt-1">
         <Ecg height={70} failEvery={failing ? 3 : 999} />
       </div>
-      <div className="text-muted-foreground grid grid-cols-[72px_1fr_56px_70px_92px] gap-3 px-3 pb-2 font-mono text-[11px] tracking-wider uppercase">
+      <div className="text-muted-foreground border-border grid grid-cols-[72px_1fr_64px_80px_64px] gap-3 border-b px-5 py-2.5 text-xs font-medium">
         <span>When</span>
         <span>Request</span>
         <span>Status</span>
         <span>Checks</span>
-        <span className="text-right">Jev</span>
+        <span className="text-right">Grounding</span>
       </div>
-      <ul className="space-y-1.5">
+      <ul className="divide-border divide-y">
         <AnimatePresence initial={false}>
           {list.map((r) => {
             const bad = r.score.violations.length > 0;
@@ -66,8 +67,8 @@ export function Traffic() {
                 <button
                   onClick={() => setSelected(r)}
                   className={cn(
-                    "grid w-full grid-cols-[72px_1fr_56px_70px_92px] items-center gap-3 rounded-lg border px-3 py-2 text-left transition-colors",
-                    "hover:bg-accent/60 border-transparent",
+                    "grid w-full grid-cols-[72px_1fr_64px_80px_64px] items-center gap-3 px-5 py-2.5 text-left text-sm transition-colors",
+                    "hover:bg-accent/50",
                     fresh.has(r.run.run_id) && !bad && "bg-healthy/[0.06]",
                   )}
                 >
@@ -76,7 +77,7 @@ export function Traffic() {
                     <span className="block truncate font-medium">{r.run.input.domain}</span>
                     {bad && <span className="text-infected block truncate font-mono text-xs">{TW_SHORT[r.score.violations[0]] ?? r.score.violations[0]}</span>}
                   </span>
-                  <span className="text-muted-foreground font-mono text-xs">200 OK</span>
+                  <span className="text-muted-foreground font-mono text-xs">200</span>
                   <span className="flex gap-1.5">
                     {TRIPWIRES.map((id) => {
                       const c = r.score.checks.find((x) => x.id === id);
@@ -92,7 +93,7 @@ export function Traffic() {
           })}
         </AnimatePresence>
       </ul>
-      {!list.length && <p className="text-muted-foreground px-3 py-6 text-sm">{runs.error ? `Patient unreachable: ${runs.error}` : "Waiting for traffic…"}</p>}
+      {!list.length && <p className="text-muted-foreground px-5 py-10 text-center text-sm">{runs.error ? `Patient unreachable: ${runs.error}` : "Waiting for traffic…"}</p>}
       {selected && <BriefPanel item={selected} mock={runs.mock} onClose={() => setSelected(null)} />}
     </Panel>
   );

@@ -3,15 +3,17 @@
 import type { ReactNode } from "react";
 import { getSystemInfo } from "@/lib/api";
 import { usePoll } from "@/lib/use-poll";
+import { Page, PageHeader, Pill } from "@/components/control/panel";
 
 export default function SettingsPage() {
   const s = usePoll(getSystemInfo, 30000).data?.settings;
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
-      <div>
-        <h1 className="text-3xl font-semibold tracking-tight">Settings</h1>
-        <p className="text-muted-foreground mt-1">How Antibody behaves for this workspace. Configured on the server in the repo&apos;s <span className="font-mono">.env</span>.</p>
-      </div>
+    <Page className="max-w-4xl">
+      <PageHeader
+        title="Settings"
+        description={<>How Antibody behaves for this workspace. Set on the server in the repo&apos;s <span className="font-mono">.env</span> and shown read-only here.</>}
+        actions={<Pill>Read-only</Pill>}
+      />
       {!s && <p className="text-muted-foreground">Loading…</p>}
       {s && (
         <>
@@ -35,24 +37,26 @@ export default function SettingsPage() {
           </Group>
         </>
       )}
-    </div>
+    </Page>
   );
 }
 
 function Group({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <section className="border-border bg-card/60 overflow-hidden rounded-2xl border shadow-lg shadow-black/10">
-      <h2 className="border-border border-b px-5 py-3 text-sm font-medium">{title}</h2>
-      <dl className="divide-border divide-y">{children}</dl>
+    <section className="grid gap-3 md:grid-cols-[180px_1fr] md:gap-6">
+      <h2 className="text-sm font-medium md:pt-3.5">{title}</h2>
+      <div className="border-border bg-card overflow-hidden rounded-xl border">
+        <dl className="divide-border divide-y">{children}</dl>
+      </div>
     </section>
   );
 }
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
-    <div className="grid gap-1 px-5 py-3.5 sm:grid-cols-[220px_1fr]">
+    <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-1 px-5 py-3.5">
       <dt className="text-muted-foreground text-sm">{label}</dt>
-      <dd className="text-sm">{value}</dd>
+      <dd className="text-sm font-medium sm:text-right">{value}</dd>
     </div>
   );
 }

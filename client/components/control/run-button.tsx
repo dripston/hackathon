@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Loader2, Play } from "lucide-react";
 import { getDrill, startDrill } from "@/lib/api";
 import { usePoll } from "@/lib/use-poll";
+import { btn } from "@/components/control/panel";
 import { cn } from "@/lib/utils";
 
 const BUSY = new Set(["starting", "deploying", "traffic", "detecting", "fixing", "awaiting_approval", "verifying"]);
@@ -34,8 +35,8 @@ export function RunButton({ className }: { className?: string }) {
 
   if (inFlight)
     return (
-      <span className={cn("bg-brand/15 text-brand inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-sm font-medium", className)}>
-        <span className="bg-brand size-2 animate-pulse rounded-full" /> Test incident running
+      <span className={cn("border-brand/25 bg-brand/10 text-brand inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-[13px] font-medium", className)}>
+        <span className="bg-brand size-1.5 animate-pulse rounded-full" /> Test incident running
       </span>
     );
   return (
@@ -43,12 +44,9 @@ export function RunButton({ className }: { className?: string }) {
       onClick={run}
       disabled={busy}
       title={err ?? "Like a fire drill: a real bug in an isolated copy of your agent, real traffic, and Antibody handles it end to end"}
-      className={cn(
-        "bg-brand text-background hover:bg-brand/90 glow-brand inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm font-semibold transition-all hover:scale-[1.03] disabled:opacity-60",
-        className,
-      )}
+      className={cn(btn.primary, "px-3 py-1.5 text-[13px]", className)}
     >
-      {busy ? <Loader2 className="size-3.5 animate-spin" /> : <Play className="size-3.5 fill-current" />}
+      {busy ? <Loader2 className="size-3.5 animate-spin" /> : <Play className="size-3 fill-current" />}
       Trigger test incident
     </button>
   );

@@ -90,41 +90,41 @@
 }
 
 .dark {
-  /* Soft dark: deep navy, mint for healthy, lavender for Antibody at work, coral only on the failing item. */
-  --background: oklch(0.18 0.03 268);
-  --foreground: oklch(0.96 0.008 268);
-  --card: oklch(0.215 0.032 268);
-  --card-foreground: oklch(0.96 0.008 268);
-  --popover: oklch(0.23 0.034 268);
-  --popover-foreground: oklch(0.96 0.008 268);
-  --primary: oklch(0.96 0.008 268);
-  --primary-foreground: oklch(0.2 0.03 268);
-  --secondary: oklch(0.26 0.035 268);
-  --secondary-foreground: oklch(0.96 0.008 268);
-  --muted: oklch(0.27 0.035 268);
-  --muted-foreground: oklch(0.74 0.03 268);
-  --accent: oklch(0.27 0.04 268);
-  --accent-foreground: oklch(0.96 0.008 268);
-  --destructive: oklch(0.76 0.13 32);
-  --border: oklch(0.9 0.03 268 / 9%);
-  --input: oklch(0.9 0.03 268 / 14%);
-  --ring: oklch(0.8 0.11 290 / 60%);
-  --chart-1: oklch(0.86 0.12 168);
-  --chart-2: oklch(0.8 0.11 290);
-  --chart-3: oklch(0.76 0.13 32);
-  --chart-4: oklch(0.74 0.03 268);
-  --chart-5: oklch(0.5 0.03 268);
-  --sidebar: oklch(0.2 0.03 268);
-  --sidebar-foreground: oklch(0.96 0.008 268);
-  --sidebar-primary: oklch(0.8 0.11 290);
-  --sidebar-primary-foreground: oklch(0.2 0.03 268);
-  --sidebar-accent: oklch(0.27 0.04 268);
-  --sidebar-accent-foreground: oklch(0.96 0.008 268);
-  --sidebar-border: oklch(0.9 0.03 268 / 9%);
-  --sidebar-ring: oklch(0.8 0.11 290 / 60%);
-  --healthy: oklch(0.86 0.12 168);
-  --infected: oklch(0.76 0.13 32);
-  --brand: oklch(0.8 0.11 290);
+  /* Graphite: neutral, near-black surfaces; colour only means status. Mint healthy, coral failing, violet = Antibody at work. */
+  --background: oklch(0.155 0.004 270);
+  --foreground: oklch(0.97 0.002 270);
+  --card: oklch(0.185 0.005 270);
+  --card-foreground: oklch(0.97 0.002 270);
+  --popover: oklch(0.2 0.005 270);
+  --popover-foreground: oklch(0.97 0.002 270);
+  --primary: oklch(0.97 0.002 270);
+  --primary-foreground: oklch(0.17 0.004 270);
+  --secondary: oklch(0.23 0.005 270);
+  --secondary-foreground: oklch(0.97 0.002 270);
+  --muted: oklch(0.24 0.005 270);
+  --muted-foreground: oklch(0.68 0.008 270);
+  --accent: oklch(0.235 0.006 270);
+  --accent-foreground: oklch(0.97 0.002 270);
+  --destructive: oklch(0.72 0.15 28);
+  --border: oklch(1 0 0 / 8%);
+  --input: oklch(1 0 0 / 12%);
+  --ring: oklch(0.74 0.13 285 / 55%);
+  --chart-1: oklch(0.8 0.13 165);
+  --chart-2: oklch(0.74 0.13 285);
+  --chart-3: oklch(0.72 0.15 28);
+  --chart-4: oklch(0.68 0.008 270);
+  --chart-5: oklch(0.45 0.008 270);
+  --sidebar: oklch(0.135 0.004 270);
+  --sidebar-foreground: oklch(0.97 0.002 270);
+  --sidebar-primary: oklch(0.97 0.002 270);
+  --sidebar-primary-foreground: oklch(0.17 0.004 270);
+  --sidebar-accent: oklch(0.21 0.005 270);
+  --sidebar-accent-foreground: oklch(0.97 0.002 270);
+  --sidebar-border: oklch(1 0 0 / 7%);
+  --sidebar-ring: oklch(0.74 0.13 285 / 55%);
+  --healthy: oklch(0.8 0.13 165);
+  --infected: oklch(0.72 0.15 28);
+  --brand: oklch(0.74 0.13 285);
 }
 
 @layer base {
@@ -139,6 +139,9 @@
   }
   h1, h2, h3 {
     font-family: var(--font-display);
+  }
+  ::selection {
+    background: oklch(0.74 0.13 285 / 35%);
   }
 }
 

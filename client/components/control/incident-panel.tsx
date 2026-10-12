@@ -1,13 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Loader2, Phone, ShieldCheck } from "lucide-react";
+import { ArrowRight, Loader2, Phone } from "lucide-react";
 import { motion } from "motion/react";
 import { getIncident, getIncidents } from "@/lib/api";
 import { useNow, usePoll } from "@/lib/use-poll";
 import type { Incident, IncidentDetail } from "@/lib/types";
 import { STAGES, currentStage, stageStates } from "@/components/story/incident-player";
-import { Panel, Pill, STATUS_LABEL, STATUS_TONE } from "@/components/control/panel";
+import { Panel, Pill, STATUS_LABEL, STATUS_TONE, btn, label } from "@/components/control/panel";
 import { ago } from "@/components/console/ui";
 import { short } from "@/lib/story/case";
 import { cn } from "@/lib/utils";
@@ -22,10 +22,9 @@ export function IncidentPanel() {
   const focus = active ?? incidents[0];
   return (
     <Panel
-      title={active ? "Active incident" : "Incidents"}
+      title={active ? "Active incident" : "Latest incident"}
       live={!!active}
-      className="min-h-[560px]"
-      action={active ? <Pill tone="infected">live</Pill> : <Pill tone="healthy">all clear</Pill>}
+      action={active ? <Pill tone="brand" dot>Live</Pill> : <Pill tone="healthy" dot>No open incidents</Pill>}
     >
       {!focus && <p className="text-muted-foreground text-sm">{list.error ? `Antibody unreachable: ${list.error}` : "No incidents yet."}</p>}
       {focus && <Focus key={focus.id} inc={focus} live={!!active} />}
@@ -47,32 +46,23 @@ function Focus({ inc, live }: { inc: Incident; live: boolean }) {
 
   return (
     <div className="flex h-full flex-col">
-      {!live && (
-        <div className="border-healthy/30 bg-healthy/[0.05] mb-5 flex items-center gap-3 rounded-xl border px-4 py-3">
-          <ShieldCheck className="text-healthy size-5" />
-          <p className="text-sm">
-            <span className="font-medium">No open incidents.</span> <span className="text-muted-foreground">Showing the most recent one.</span>
-          </p>
-        </div>
-      )}
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <p className="text-infected font-mono text-sm">{d.incident.detection}</p>
-          <p className="text-muted-foreground mt-1 truncate font-mono text-xs">{d.incident.id}</p>
+          <p className="text-base font-semibold tracking-tight">{label(d.incident.detection)}</p>
+          <p className="text-muted-foreground mt-0.5 truncate text-xs">
+            Opened {ago(d.incident.first_seen, now)} · <span className="font-mono">{d.incident.id.replace(/_tw_.*/, "")}</span>
+          </p>
         </div>
-        <div className="text-right">
-          <Pill tone={STATUS_TONE[d.incident.status]}>{STATUS_LABEL[d.incident.status] ?? d.incident.status}</Pill>
-          <p className="text-muted-foreground mt-1.5 font-mono text-xs">opened {ago(d.incident.first_seen, now)}</p>
-        </div>
+        <Pill tone={STATUS_TONE[d.incident.status]} dot>{STATUS_LABEL[d.incident.status] ?? d.incident.status}</Pill>
       </div>
 
       {/* Stage tracker */}
-      <ol className="mt-6 grid grid-cols-6 gap-1.5">
+      <ol className="mt-5 grid grid-cols-6 gap-1.5">
         {STAGES.map((s, i) => (
           <li key={s.key} className="min-w-0">
             <div
               className={cn(
-                "h-1.5 rounded-full",
+                "h-1 rounded-full",
                 states[i] === "done" && "bg-healthy",
                 states[i] === "current" && "bg-brand animate-pulse",
                 states[i] === "failed" && "bg-infected",
@@ -85,14 +75,8 @@ function Focus({ inc, live }: { inc: Incident; live: boolean }) {
       </ol>
 
       {/* What's happening right now */}
-      <motion.div key={d.incident.status} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="mt-6 space-y-3">
+      <motion.dl key={d.incident.status} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="border-border divide-border mt-5 divide-y rounded-lg border">
         <Fact label="Cause" value={d.diagnosis ? `${short(d.diagnosis.commit_sha)} · ${d.diagnosis.fix_kind}` : null} pending="reading git history + Entire checkpoint…" />
-        {d.diagnosis?.reasoning_excerpt && (
-          <blockquote className="border-healthy/40 text-muted-foreground border-l-2 pl-3 text-sm italic">
-            &ldquo;{d.diagnosis.reasoning_excerpt.slice(0, 160)}
-            {d.diagnosis.reasoning_excerpt.length > 160 ? "…" : ""}&rdquo;
-          </blockquote>
-        )}
         <Fact label="Family" value={d.scenarios?.length ? `${d.scenarios.length} variants` : null} pending="breeding variants…" />
         <Fact
           label="Proof"
@@ -120,10 +104,16 @@ function Focus({ inc, live }: { inc: Incident; live: boolean }) {
           pending="waiting for a proven fix"
           tone={res?.approval ? "healthy" : undefined}
         />
-      </motion.div>
+      </motion.dl>
+
+      {d.diagnosis?.reasoning_excerpt && (
+        <p className="text-muted-foreground mt-4 line-clamp-2 text-[13px] leading-relaxed">
+          <span className="text-foreground/80 font-medium">Why it broke: </span>&ldquo;{d.diagnosis.reasoning_excerpt}&rdquo;
+        </p>
+      )}
 
       {d.incident.status === "awaiting_approval" && (
-        <div className="border-brand/30 bg-brand/[0.07] mt-5 flex items-center gap-3 rounded-xl border px-4 py-3">
+        <div className="border-brand/30 bg-brand/[0.07] mt-4 flex items-center gap-3 rounded-lg border px-4 py-3">
           <Phone className="text-brand size-4 animate-pulse" />
           <p className="text-sm">
             Waiting for <span className="font-mono">approve fix {res?.accepted_fix_id?.replace("fix_", "")}</span>, by voice on Telegram or typed on the incident page.
@@ -133,7 +123,7 @@ function Focus({ inc, live }: { inc: Incident; live: boolean }) {
 
       <Link
         href={`/incidents/${encodeURIComponent(d.incident.id)}`}
-        className="bg-foreground text-background hover:bg-foreground/90 mt-auto inline-flex w-fit items-center gap-2 self-start rounded-full px-4 py-2 text-sm font-medium transition-colors"
+        className={`${live ? btn.primary : btn.secondary} mt-5 w-fit self-start`}
       >
         {live ? "Watch Antibody work" : "Open the incident"} <ArrowRight className="size-4" />
       </Link>
@@ -143,14 +133,14 @@ function Focus({ inc, live }: { inc: Incident; live: boolean }) {
 
 function Fact({ label, value, pending, tone }: { label: string; value: string | null; pending: string; tone?: "healthy" }) {
   return (
-    <div className="grid grid-cols-[88px_1fr] items-baseline gap-3">
-      <span className="text-muted-foreground font-mono text-xs tracking-wider uppercase">{label}</span>
+    <div className="grid grid-cols-[96px_1fr] items-baseline gap-3 px-4 py-2.5">
+      <dt className="text-muted-foreground text-[13px]">{label}</dt>
       {value ? (
-        <span className={cn("font-mono text-sm", tone === "healthy" && "text-healthy")}>{value}</span>
+        <dd className={cn("truncate font-mono text-[13px]", tone === "healthy" && "text-healthy")}>{value}</dd>
       ) : (
-        <span className="text-muted-foreground flex items-center gap-2 text-sm">
+        <dd className="text-muted-foreground flex items-center gap-2 text-[13px]">
           <Loader2 className="size-3.5 animate-spin" /> {pending}
-        </span>
+        </dd>
       )}
     </div>
   );

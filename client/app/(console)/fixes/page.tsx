@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { ExternalLink, GitMerge, GitPullRequest, Mic, Keyboard } from "lucide-react";
 import { getIncident, getIncidents } from "@/lib/api";
 import { useNow, usePoll } from "@/lib/use-poll";
 import type { IncidentDetail } from "@/lib/types";
-import { Pill } from "@/components/control/panel";
+import { Empty, Page, PageHeader, Panel, Pill, Stats, label } from "@/components/control/panel";
 import { ago } from "@/components/console/ui";
 import { cn } from "@/lib/utils";
 
@@ -28,64 +28,89 @@ export default function FixesPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ids]);
 
+  const merged = details.filter((d) => !!d.resolution?.merged || d.incident.status === "resolved");
+  const cost = details.reduce((a, d) => a + (d.resolution?.cost_usd ?? 0), 0);
+  const secs = details.length ? details.reduce((a, d) => a + (d.resolution?.duration_ms ?? 0), 0) / details.length / 1000 : 0;
+
   return (
-    <div className="mx-auto max-w-5xl space-y-6">
-      <div>
-        <h1 className="text-3xl font-semibold tracking-tight">Fixes</h1>
-        <p className="text-muted-foreground mt-1">Every fix Antibody wrote and proved. Nothing merges until a human says the exact phrase.</p>
-      </div>
-      {!details.length && <p className="text-muted-foreground">No fixes yet.</p>}
-      <ul className="space-y-3">
-        {details.map((d) => {
-          const r = d.resolution!;
-          const merged = !!r.merged || d.incident.status === "resolved";
-          const waiting = d.incident.status === "awaiting_approval";
-          const pr = r.pr_url?.split("/").pop();
-          const accepted = (d.attempts ?? []).find((a) => a.accepted);
-          const adds = accepted?.fix.diff.split("\n").filter((l) => l.startsWith("+") && !l.startsWith("+++")).length ?? 0;
-          const dels = accepted?.fix.diff.split("\n").filter((l) => l.startsWith("-") && !l.startsWith("---")).length ?? 0;
-          return (
-            <li key={d.incident.id} className="border-border bg-card/60 rounded-2xl border p-5 shadow-lg shadow-black/10">
-              <div className="flex flex-wrap items-start gap-4">
-                <span className={cn("mt-0.5 rounded-full p-2", merged ? "bg-brand/15 text-brand" : "bg-healthy/15 text-healthy")}>
-                  {merged ? <GitMerge className="size-4" /> : <GitPullRequest className="size-4" />}
-                </span>
-                <div className="min-w-0 flex-1">
-                  <Link href={`/incidents/${encodeURIComponent(d.incident.id)}`} className="text-lg font-medium hover:underline">
-                    Fix {d.incident.detection.replace(/^tw_/, "").replaceAll("_", " ")}
-                  </Link>
-                  <p className="text-muted-foreground mt-0.5 text-sm">
-                    {r.accepted_fix_id} · {r.attempts.length} attempt{r.attempts.length === 1 ? "" : "s"} · {d.diagnosis?.target_file}{" "}
-                    <span className="text-healthy font-mono">+{adds}</span> <span className="text-infected font-mono">−{dels}</span>
-                  </p>
-                </div>
-                <Pill tone={merged ? "brand" : waiting ? "healthy" : "muted"}>{merged ? "Merged" : waiting ? "Awaiting approval" : d.incident.status}</Pill>
-              </div>
-              <div className="text-muted-foreground mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
-                <span>
-                  must fix <span className="text-infected font-mono">{r.before.must_fix_passed}/{r.before.must_fix_total}</span> →{" "}
-                  <span className="text-healthy font-mono">{r.after ? `${r.after.must_fix_passed}/${r.after.must_fix_total}` : "—"}</span>
-                </span>
-                <span>healthy kept <span className="text-foreground font-mono">{r.after ? `${r.after.must_not_change_passed}/${r.after.must_not_change_total}` : "—"}</span></span>
-                {r.approval && (
-                  <span className="flex items-center gap-1.5">
-                    {r.approval.channel === "voice" ? <Mic className="size-3.5" /> : <Keyboard className="size-3.5" />}
-                    approved {r.approval.channel === "voice" ? "by voice" : "typed"} {ago(r.approval.at, now)}
+    <Page>
+      <PageHeader title="Fixes" description="Every fix Antibody wrote and proved. Nothing merges until a human says the exact phrase." />
+      <Stats
+        items={[
+          { label: "Fixes merged", value: details.length ? merged.length : "—", tone: merged.length ? "healthy" : undefined, hint: "each approved by a human" },
+          { label: "Avg. time to proven fix", value: details.length ? `${Math.round(secs)}s` : "—", hint: "detection to merge-ready" },
+          { label: "Total LLM cost", value: details.length ? `$${cost.toFixed(3)}` : "—", hint: "diagnosis, variants and fixes" },
+        ]}
+      />
+      <Panel flush>
+        {!details.length && (
+          <Empty icon={<GitPullRequest className="size-5" />} title="No fixes yet">
+            When Antibody proves a fix, it shows up here as a pull request waiting for your approval.
+          </Empty>
+        )}
+        <ul className="divide-border divide-y">
+          {details.map((d) => {
+            const r = d.resolution!;
+            const isMerged = !!r.merged || d.incident.status === "resolved";
+            const waiting = d.incident.status === "awaiting_approval";
+            const pr = r.pr_url?.split("/").pop();
+            const accepted = (d.attempts ?? []).find((a) => a.accepted);
+            const adds = accepted?.fix.diff.split("\n").filter((l) => l.startsWith("+") && !l.startsWith("+++")).length ?? 0;
+            const dels = accepted?.fix.diff.split("\n").filter((l) => l.startsWith("-") && !l.startsWith("---")).length ?? 0;
+            return (
+              <li key={d.incident.id} className="px-5 py-4">
+                <div className="flex flex-wrap items-start gap-4">
+                  <span className={cn("mt-0.5 grid size-8 place-items-center rounded-lg border", isMerged ? "border-brand/25 bg-brand/10 text-brand" : "border-healthy/25 bg-healthy/10 text-healthy")}>
+                    {isMerged ? <GitMerge className="size-4" /> : <GitPullRequest className="size-4" />}
                   </span>
-                )}
-                <span>${r.cost_usd.toFixed(3)} · {Math.round(r.duration_ms / 1000)}s</span>
-                {r.pr_url ? (
-                  <a href={r.pr_url} target="_blank" rel="noreferrer" className="text-foreground ml-auto inline-flex items-center gap-1.5 hover:underline">
-                    PR #{pr} <ExternalLink className="size-3.5" />
-                  </a>
-                ) : (
-                  <span className="ml-auto text-xs">test incident · not pushed</span>
-                )}
-              </div>
-            </li>
-          );
-        })}
-      </ul>
-    </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Link href={`/incidents/${encodeURIComponent(d.incident.id)}`} className="text-sm font-medium hover:underline">
+                        Fix: {label(d.incident.detection).toLowerCase()}
+                      </Link>
+                      <Pill tone={isMerged ? "brand" : waiting ? "healthy" : "muted"}>{isMerged ? "Merged" : waiting ? "Awaiting approval" : d.incident.status}</Pill>
+                    </div>
+                    <p className="text-muted-foreground mt-1 truncate font-mono text-xs">
+                      {d.diagnosis?.target_file} <span className="text-healthy">+{adds}</span> <span className="text-infected">−{dels}</span> · {r.accepted_fix_id} · {r.attempts.length} attempt
+                      {r.attempts.length === 1 ? "" : "s"}
+                    </p>
+                  </div>
+                  {r.pr_url ? (
+                    <a href={r.pr_url} target="_blank" rel="noreferrer" className="border-border hover:bg-accent inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-medium transition-colors">
+                      PR #{pr} <ExternalLink className="size-3" />
+                    </a>
+                  ) : (
+                    <span className="text-muted-foreground text-xs">Test incident · not pushed</span>
+                  )}
+                </div>
+                <div className="mt-3 ml-12 flex flex-wrap items-center gap-2 text-xs">
+                  <Chip>
+                    Must fix <span className="text-infected font-mono">{r.before.must_fix_passed}/{r.before.must_fix_total}</span>
+                    <span className="text-muted-foreground">→</span>
+                    <span className="text-healthy font-mono">{r.after ? `${r.after.must_fix_passed}/${r.after.must_fix_total}` : "—"}</span>
+                  </Chip>
+                  <Chip>
+                    Healthy unchanged <span className="text-foreground font-mono">{r.after ? `${r.after.must_not_change_passed}/${r.after.must_not_change_total}` : "—"}</span>
+                  </Chip>
+                  {r.approval && (
+                    <Chip>
+                      {r.approval.channel === "voice" ? <Mic className="size-3" /> : <Keyboard className="size-3" />}
+                      Approved {r.approval.channel === "voice" ? "by voice" : "in text"} {ago(r.approval.at, now)}
+                    </Chip>
+                  )}
+                  <Chip>
+                    <span className="text-foreground font-mono">${r.cost_usd.toFixed(3)}</span> · {Math.round(r.duration_ms / 1000)}s
+                  </Chip>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      </Panel>
+    </Page>
   );
+}
+
+function Chip({ children }: { children: ReactNode }) {
+  return <span className="border-border bg-muted/40 text-muted-foreground inline-flex items-center gap-1.5 rounded-md border px-2 py-1">{children}</span>;
 }

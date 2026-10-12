@@ -6,6 +6,7 @@ import { motion } from "motion/react";
 import { ArrowRight, Loader2, Play, Sparkles } from "lucide-react";
 import { getDrill, startDrill, stopDrill, type DrillStatus } from "@/lib/api";
 import { useNow, usePoll } from "@/lib/use-poll";
+import { btn } from "@/components/control/panel";
 import { cn } from "@/lib/utils";
 
 const STEPS: { key: DrillStatus["state"]; label: string }[] = [
@@ -50,11 +51,12 @@ export function DrillBar() {
 
   if (!active)
     return (
-      <div className="border-border bg-card/40 relative flex flex-wrap items-center gap-5 overflow-hidden rounded-2xl border px-6 py-5">
-        <div className="bg-brand/15 pointer-events-none absolute -left-10 size-40 rounded-full blur-3xl" aria-hidden />
-        <Sparkles className="text-brand relative size-7" />
-        <div className="relative min-w-0 flex-1">
-          <p className="text-lg font-semibold">Trigger a test incident</p>
+      <div className="border-border bg-card flex flex-wrap items-center gap-5 rounded-xl border border-dashed px-6 py-5">
+        <span className="border-brand/25 bg-brand/10 text-brand grid size-11 shrink-0 place-items-center rounded-xl border">
+          <Sparkles className="size-5" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="font-semibold tracking-tight">Run a test incident</p>
           <p className="text-muted-foreground text-sm">
             Like a fire drill for your agent: Antibody breaks an isolated copy on purpose, sends real traffic, then catches,
             diagnoses and fixes it while you watch. You approve the fix. Takes about 3 minutes.
@@ -65,9 +67,9 @@ export function DrillBar() {
         <button
           onClick={start}
           disabled={busy}
-          className="bg-brand text-background hover:bg-brand/90 glow-brand relative inline-flex items-center gap-2 rounded-full px-5 py-2.5 font-medium transition-all hover:scale-[1.02] disabled:opacity-60"
+          className={btn.secondary}
         >
-          {busy ? <Loader2 className="size-4 animate-spin" /> : <Play className="size-4 fill-current" />} Trigger test incident
+          {busy ? <Loader2 className="size-4 animate-spin" /> : <Play className="size-3.5 fill-current" />} Start a test incident
         </button>
       </div>
     );
@@ -87,7 +89,7 @@ export function DrillBar() {
     <motion.div
       initial={{ opacity: 0, y: -8 }}
       animate={{ opacity: 1, y: 0 }}
-      className={cn("relative overflow-hidden rounded-2xl border px-6 py-5", failed ? "border-border bg-card/40" : "border-brand/40 bg-brand/[0.06] glow-brand")}
+      className={cn("bg-card relative overflow-hidden rounded-xl border px-6 py-5", failed ? "border-border" : "border-brand/35")}
     >
       <div className="flex flex-wrap items-center gap-4">
         <span className="text-brand flex items-center gap-2 text-sm font-medium">
@@ -98,11 +100,11 @@ export function DrillBar() {
           {Math.floor(elapsed / 60)}:{String(elapsed % 60).padStart(2, "0")}
         </span>
         {finished ? (
-          <button onClick={start} disabled={busy} className="bg-brand text-background hover:bg-brand/90 inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-sm font-medium disabled:opacity-60">
+          <button onClick={start} disabled={busy} className={cn(btn.primary, "py-1.5")}>
             {busy ? <Loader2 className="size-3.5 animate-spin" /> : <Play className="size-3.5 fill-current" />} Run another
           </button>
         ) : (
-          <button onClick={stop} disabled={busy} className="border-border text-muted-foreground hover:text-foreground rounded-full border px-3 py-1 text-xs disabled:opacity-60">
+          <button onClick={stop} disabled={busy} className={cn(btn.secondary, "px-3 py-1 text-xs")}>
             Stop
           </button>
         )}
@@ -112,7 +114,7 @@ export function DrillBar() {
           <li key={s.key}>
             <div
               className={cn(
-                "h-1.5 rounded-full",
+                "h-1 rounded-full",
                 i < at || d!.state === "done" ? "bg-healthy" : i === at ? (failed ? "bg-infected" : "bg-brand animate-pulse") : "bg-muted",
               )}
             />

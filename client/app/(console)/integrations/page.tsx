@@ -3,8 +3,18 @@
 import { Check, CircleDashed } from "lucide-react";
 import { getSystemInfo } from "@/lib/api";
 import { usePoll } from "@/lib/use-poll";
+import { Page, PageHeader, Pill } from "@/components/control/panel";
 import { cn } from "@/lib/utils";
 
+const COLOR: Record<string, string> = {
+  neatlogs: "from-[oklch(0.72_0.15_250)] to-[oklch(0.55_0.17_270)]",
+  github: "from-[oklch(0.45_0_0)] to-[oklch(0.28_0_0)]",
+  entire: "from-[oklch(0.78_0.14_80)] to-[oklch(0.62_0.16_50)]",
+  telegram: "from-[oklch(0.72_0.13_230)] to-[oklch(0.58_0.15_240)]",
+  crustdata: "from-[oklch(0.74_0.14_150)] to-[oklch(0.56_0.14_165)]",
+  typesafe: "from-[oklch(0.7_0.15_310)] to-[oklch(0.54_0.17_290)]",
+  llm: "from-[oklch(0.72_0.16_35)] to-[oklch(0.58_0.18_25)]",
+};
 const LOGO: Record<string, string> = {
   neatlogs: "nl",
   github: "GH",
@@ -20,37 +30,33 @@ export default function IntegrationsPage() {
   const list = info.data?.integrations ?? [];
   const connected = list.filter((i) => i.connected).length;
   return (
-    <div className="mx-auto max-w-5xl space-y-6">
-      <div>
-        <h1 className="text-3xl font-semibold tracking-tight">Integrations</h1>
-        <p className="text-muted-foreground mt-1">
-          {list.length ? `${connected} of ${list.length} connected.` : "Checking…"} Status is read live from the Antibody server.
-        </p>
-      </div>
-      <div className="grid gap-4 sm:grid-cols-2">
+    <Page>
+      <PageHeader
+        title="Integrations"
+        description="The services Antibody reads from and acts through. Status is checked live on the server."
+        actions={list.length ? <Pill tone={connected === list.length ? "healthy" : "muted"} dot>{connected} of {list.length} connected</Pill> : undefined}
+      />
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {list.map((i) => (
-          <div key={i.id} className="border-border bg-card/60 flex items-start gap-4 rounded-2xl border p-5 shadow-lg shadow-black/10">
-            <span className="bg-accent grid size-11 shrink-0 place-items-center rounded-xl font-mono text-sm font-semibold">{LOGO[i.id] ?? i.name.slice(0, 2)}</span>
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2">
-                <p className="font-medium">{i.name}</p>
-                <span
-                  className={cn(
-                    "ml-auto inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium",
-                    i.connected ? "bg-healthy/15 text-healthy" : "bg-muted text-muted-foreground",
-                  )}
-                >
-                  {i.connected ? <Check className="size-3" /> : <CircleDashed className="size-3" />}
-                  {i.connected ? "Connected" : "Not connected"}
-                </span>
-              </div>
-              <p className="text-muted-foreground mt-1 text-sm">{i.role}</p>
-              <p className="text-muted-foreground/80 mt-2 font-mono text-xs">{i.detail}</p>
+          <div key={i.id} className="border-border bg-card hover:border-foreground/15 flex flex-col rounded-xl border p-5 transition-colors">
+            <div className="flex items-start justify-between gap-3">
+              <span className={cn("grid size-10 place-items-center rounded-lg bg-gradient-to-br text-[13px] font-bold text-white shadow-sm", COLOR[i.id] ?? "from-zinc-500 to-zinc-700")}>
+                {LOGO[i.id] ?? i.name.slice(0, 2)}
+              </span>
+              <Pill tone={i.connected ? "healthy" : "muted"}>
+                {i.connected ? <Check className="size-3" /> : <CircleDashed className="size-3" />}
+                {i.connected ? "Connected" : "Not connected"}
+              </Pill>
             </div>
+            <p className="mt-4 font-medium">{i.name}</p>
+            <p className="text-muted-foreground mt-1 flex-1 text-sm leading-relaxed">{i.role}</p>
+            <p className="border-border text-muted-foreground mt-4 truncate border-t pt-3 font-mono text-xs" title={i.detail}>
+              {i.detail}
+            </p>
           </div>
         ))}
       </div>
       {info.error && <p className="text-infected text-sm">Couldn&apos;t reach Antibody: {info.error}</p>}
-    </div>
+    </Page>
   );
 }

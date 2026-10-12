@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Check, Copy } from "lucide-react";
+import { Page, PageHeader } from "@/components/control/panel";
 
 const STEPS = [
   {
@@ -45,18 +46,16 @@ entire repo mirror add /gh/<owner>/<repo>`,
 
 export default function ConnectPage() {
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
-      <div>
-        <h1 className="text-3xl font-semibold tracking-tight">Connect an agent</h1>
-        <p className="text-muted-foreground mt-1">Five steps, about 15 minutes. This is exactly how sales-research-agent is wired.</p>
-      </div>
-      <ol className="space-y-4">
+    <Page className="max-w-4xl">
+      <PageHeader title="Connect an agent" description="Five steps, about 15 minutes. This is exactly how sales-research-agent is wired." />
+      <ol>
         {STEPS.map((s, i) => (
-          <li key={s.title} className="border-border bg-card/60 rounded-2xl border p-6 shadow-lg shadow-black/10">
-            <div className="flex items-start gap-4">
-              <span className="bg-brand/15 text-brand grid size-8 shrink-0 place-items-center rounded-full text-sm font-semibold">{i + 1}</span>
-              <div className="min-w-0 flex-1">
-                <h2 className="text-lg font-medium">{s.title}</h2>
+          <li key={s.title} className="relative pb-10 last:pb-0">
+            {i < STEPS.length - 1 && <span className="bg-border absolute top-9 bottom-0 left-[15px] w-px" aria-hidden />}
+            <div className="flex items-start gap-5">
+              <span className="border-border bg-card relative grid size-8 shrink-0 place-items-center rounded-full border font-mono text-xs font-semibold">{i + 1}</span>
+              <div className="min-w-0 flex-1 pt-1">
+                <h2 className="font-medium">{s.title}</h2>
                 <p className="text-muted-foreground mt-1 text-sm leading-relaxed">{s.body}</p>
                 <CodeBlock code={s.code} />
               </div>
@@ -64,14 +63,14 @@ export default function ConnectPage() {
           </li>
         ))}
       </ol>
-    </div>
+    </Page>
   );
 }
 
 function CodeBlock({ code }: { code: string }) {
   const [copied, setCopied] = useState(false);
   return (
-    <div className="border-border relative mt-4 overflow-hidden rounded-xl border bg-[oklch(0.15_0.025_268)]">
+    <div className="border-border bg-sidebar relative mt-3 overflow-hidden rounded-lg border">
       <button
         onClick={async () => {
           try {

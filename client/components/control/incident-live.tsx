@@ -7,7 +7,7 @@ import { getAftercare, getBrief, getGate, getIncident, getTrust } from "@/lib/ap
 import { useNow, usePoll } from "@/lib/use-poll";
 import { useEvents } from "@/lib/use-events";
 import { IncidentStages, STAGES, currentStage, stageStates } from "@/components/story/incident-player";
-import { Pill, STATUS_LABEL, STATUS_TONE } from "@/components/control/panel";
+import { Dot, Page, PageHeader, Pill, STATUS_LABEL, STATUS_TONE, label } from "@/components/control/panel";
 import { ago } from "@/components/console/ui";
 import { Terminal } from "@/components/workspace/terminal";
 import { Editor } from "@/components/workspace/editor";
@@ -43,53 +43,80 @@ export function IncidentLive({ params }: { params: Promise<{ id: string }> }) {
   const active = !["resolved", "escalated"].includes(d.incident.status);
 
   return (
-    <div>
-      <Link href="/incidents" className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm">
-        <ArrowLeft className="size-4" /> Incidents
-      </Link>
-      <div className="mt-4 flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="text-muted-foreground flex items-center gap-2 text-sm">
-            {active && <span className="bg-brand size-2 animate-pulse rounded-full" />}
-            {active ? "Antibody is working on this now" : "Incident"} · opened {ago(d.incident.first_seen, now)}
-          </p>
-          <h1 className="mt-1 text-3xl font-semibold tracking-tight">{d.incident.detection.replace(/^tw_/, "").replaceAll("_", " ")}</h1>
-          <p className="text-muted-foreground mt-1 font-mono text-xs">{d.incident.id}</p>
-        </div>
-        <div className="flex items-center gap-3">
-          <Pill tone={STATUS_TONE[d.incident.status]}>{STATUS_LABEL[d.incident.status] ?? d.incident.status}</Pill>
-          <div className="border-border bg-card/60 flex rounded-full border p-1 text-sm">
+    <Page wide>
+      <PageHeader
+        meta={
+          <>
+            <Link href="/incidents" className="hover:text-foreground inline-flex items-center gap-1 transition-colors">
+              <ArrowLeft className="size-3.5" /> Incidents
+            </Link>
+            <span className="opacity-40">/</span>
+            <span className="font-mono text-xs">{d.incident.id}</span>
+          </>
+        }
+        title={
+          <span className="flex flex-wrap items-center gap-3">
+            {label(d.incident.detection)}
+            <Pill tone={STATUS_TONE[d.incident.status]} dot>{STATUS_LABEL[d.incident.status] ?? d.incident.status}</Pill>
+          </span>
+        }
+        description={
+          <span className="flex items-center gap-2">
+            {active && <Dot tone="brand" pulse />}
+            {active ? "Antibody is working on this now" : "Handled end to end by Antibody"} · opened {ago(d.incident.first_seen, now)}
+          </span>
+        }
+        actions={
+          <div className="border-border bg-card flex rounded-lg border p-0.5 text-[13px]">
             {(["workspace", "summary"] as const).map((v) => (
-              <button key={v} onClick={() => setView(v)} className={cn("rounded-full px-3.5 py-1 capitalize transition-colors", view === v ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground")}>
+              <button
+                key={v}
+                onClick={() => setView(v)}
+                className={cn("rounded-md px-3 py-1.5 transition-colors", view === v ? "bg-accent text-foreground font-medium" : "text-muted-foreground hover:text-foreground")}
+              >
                 {v === "workspace" ? "Live workspace" : "Summary"}
               </button>
             ))}
           </div>
-        </div>
-      </div>
+        }
+      />
 
       {/* Stage stepper */}
-      <ol className="border-border bg-card/50 mt-6 grid grid-cols-3 gap-2 rounded-2xl border p-3 md:grid-cols-6">
+      <ol className="border-border bg-card grid grid-cols-3 overflow-hidden rounded-xl border md:grid-cols-6">
         {STAGES.map((s, i) => (
-          <li key={s.key} className={cn("flex items-center gap-2.5 rounded-xl px-3 py-2", i === cur && active && "bg-accent")}>
+          <li
+            key={s.key}
+            className={cn(
+              "border-border relative flex items-center gap-2.5 border-r px-4 py-3 last:border-r-0",
+              i === cur && active && "bg-brand/[0.06]",
+            )}
+          >
             <span
               className={cn(
-                "grid size-6 shrink-0 place-items-center rounded-full text-[11px]",
-                states[i] === "done" && "bg-healthy text-background",
-                states[i] === "current" && "bg-brand text-background",
-                states[i] === "failed" && "bg-infected text-background",
+                "grid size-5 shrink-0 place-items-center rounded-full text-[10px] font-semibold",
+                states[i] === "done" && "bg-healthy/15 text-healthy",
+                states[i] === "current" && "bg-brand/20 text-brand",
+                states[i] === "failed" && "bg-infected/15 text-infected",
                 states[i] === "pending" && "bg-muted text-muted-foreground",
               )}
             >
-              {states[i] === "done" ? <Check className="size-3.5" /> : states[i] === "current" ? <Loader2 className="size-3.5 animate-spin" /> : states[i] === "failed" ? <X className="size-3.5" /> : i + 1}
+              {states[i] === "done" ? <Check className="size-3" /> : states[i] === "current" ? <Loader2 className="size-3 animate-spin" /> : states[i] === "failed" ? <X className="size-3" /> : i + 1}
             </span>
-            <span className={cn("text-sm", states[i] === "pending" ? "text-muted-foreground" : "text-foreground")}>{s.label}</span>
+            <span className={cn("text-[13px]", states[i] === "pending" ? "text-muted-foreground" : "text-foreground")}>{s.label}</span>
+            <span
+              className={cn(
+                "absolute inset-x-0 bottom-0 h-0.5",
+                states[i] === "done" && "bg-healthy/60",
+                states[i] === "current" && "bg-brand animate-pulse",
+                states[i] === "failed" && "bg-infected",
+              )}
+            />
           </li>
         ))}
       </ol>
 
       {view === "workspace" ? (
-        <div className="mt-5 grid gap-5 xl:grid-cols-[5fr_7fr]">
+        <div className="grid gap-5 xl:grid-cols-[5fr_7fr]">
           <Terminal events={events} freshFrom={freshFrom.current ?? 0} />
           <Editor events={events} freshFrom={freshFrom.current ?? 0} />
           <Tests events={events} />
@@ -101,7 +128,7 @@ export function IncidentLive({ params }: { params: Promise<{ id: string }> }) {
           )}
         </div>
       ) : (
-        <div className="mt-5">
+        <div>
           <IncidentStages
             ctx={{ detail: d, brief: brief.data?.text, trust: trust.data, gate: gate.data, aftercare: after.data, live: true, onChanged: detail.refresh }}
             stage={stage ?? cur}
@@ -110,6 +137,6 @@ export function IncidentLive({ params }: { params: Promise<{ id: string }> }) {
           />
         </div>
       )}
-    </div>
+    </Page>
   );
 }

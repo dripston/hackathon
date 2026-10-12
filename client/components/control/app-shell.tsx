@@ -78,24 +78,26 @@ export function AppShell({ children }: { children: ReactNode }) {
   const title = TITLES.find(([p]) => path.startsWith(p))?.[1] ?? "Antibody";
 
   return (
-    <div className="flex min-h-screen w-full">
-      <aside className="border-border bg-card/40 sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r lg:flex">
-        <Link href="/" className="flex items-center gap-2.5 px-5 pt-5 pb-4 text-lg font-semibold tracking-tight">
-          <Mark /> Antibody
+    <div className="bg-sidebar flex min-h-screen w-full">
+      <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col lg:flex">
+        <Link href="/" className="flex items-center gap-2 px-5 pt-5 pb-4 text-[15px] font-semibold tracking-tight">
+          <Mark className="size-5" /> Antibody
         </Link>
-        <button className="border-border bg-background/40 hover:bg-accent/50 mx-3 flex items-center gap-3 rounded-xl border px-3 py-2.5 text-left transition-colors">
-          <span className="bg-brand text-background grid size-8 place-items-center rounded-lg text-sm font-bold">a</span>
-          <span className="min-w-0 flex-1">
-            <span className="block text-sm font-medium">airo</span>
-            <span className="text-muted-foreground block truncate text-xs">sales-research-agent</span>
+        <button className="hover:bg-sidebar-accent mx-2.5 flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-left transition-colors">
+          <span className="grid size-7 place-items-center rounded-md bg-gradient-to-br from-[oklch(0.8_0.13_165)] to-[oklch(0.74_0.13_285)] text-[13px] font-bold text-black/80">
+            a
           </span>
-          <ChevronsUpDown className="text-muted-foreground size-4" />
+          <span className="min-w-0 flex-1">
+            <span className="block text-[13px] leading-tight font-medium">airo</span>
+            <span className="text-muted-foreground block truncate text-xs leading-tight">sales-research-agent</span>
+          </span>
+          <ChevronsUpDown className="text-muted-foreground size-3.5" />
         </button>
-        <nav className="mt-4 flex-1 space-y-5 overflow-y-auto px-3">
+        <nav className="mt-5 flex-1 space-y-6 overflow-y-auto px-2.5">
           {NAV.map((g) => (
             <div key={g.group}>
-              <p className="text-muted-foreground px-3 pb-1.5 text-[11px] font-medium tracking-wider uppercase">{g.group}</p>
-              <ul className="space-y-0.5">
+              <p className="text-muted-foreground/70 px-2.5 pb-1.5 text-[11px] font-medium">{g.group}</p>
+              <ul className="space-y-px">
                 {g.items.map(({ href, label, icon: Icon, badge }) => {
                   const on = href === "/incidents" ? path.startsWith("/incidents") : path === href || path.startsWith(href + "/");
                   return (
@@ -103,13 +105,15 @@ export function AppShell({ children }: { children: ReactNode }) {
                       <Link
                         href={href}
                         className={cn(
-                          "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
-                          on ? "bg-accent text-foreground font-medium" : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
+                          "flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-[13.5px] transition-colors",
+                          on ? "bg-sidebar-accent text-foreground" : "text-muted-foreground hover:bg-sidebar-accent/60 hover:text-foreground",
                         )}
                       >
-                        <Icon className="size-4" />
+                        <Icon className={cn("size-4", on ? "text-foreground" : "opacity-80")} strokeWidth={1.75} />
                         <span className="flex-1">{label}</span>
-                        {badge && open > 0 && <span className="bg-brand text-background rounded-full px-1.5 text-[11px] font-semibold">{open}</span>}
+                        {badge && open > 0 && (
+                          <span className="bg-brand/20 text-brand rounded px-1.5 text-[11px] font-semibold tabular-nums">{open}</span>
+                        )}
                       </Link>
                     </li>
                   );
@@ -118,37 +122,43 @@ export function AppShell({ children }: { children: ReactNode }) {
             </div>
           ))}
         </nav>
-        <div className="border-border space-y-3 border-t p-4">
-          <Link href="/integrations" className="flex items-center gap-2 text-xs">
-            <span className={cn("size-2 rounded-full", !sys ? "bg-muted-foreground" : allUp ? "bg-healthy" : "bg-infected")} />
+        <div className="space-y-1 p-2.5">
+          <Link href="/integrations" className="hover:bg-sidebar-accent/60 flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-xs transition-colors">
+            <span className={cn("size-1.5 rounded-full", !sys ? "bg-muted-foreground" : allUp ? "bg-healthy" : "bg-infected")} />
             <span className="text-muted-foreground">{!sys ? "Checking systems…" : allUp ? "All systems operational" : "Some systems degraded"}</span>
           </Link>
-          <div className="flex items-center gap-3">
-            <span className="bg-accent grid size-8 place-items-center rounded-full text-sm font-semibold">R</span>
-            <span className="min-w-0">
-              <span className="block text-sm font-medium">Rehaan</span>
-              <span className="text-muted-foreground block text-xs">On call · airo</span>
+          <div className="flex items-center gap-2.5 rounded-md px-2.5 py-2">
+            <span className="bg-sidebar-accent grid size-7 place-items-center rounded-full text-xs font-semibold">R</span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-[13px] leading-tight font-medium">Rehaan</span>
+              <span className="text-muted-foreground block text-xs leading-tight">On call</span>
             </span>
+            <span className="bg-healthy/15 text-healthy rounded px-1.5 py-0.5 text-[10px] font-medium">ON CALL</span>
           </div>
         </div>
       </aside>
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="border-border bg-background/80 sticky top-0 z-30 flex h-14 items-center gap-4 border-b px-6 backdrop-blur-md lg:px-8">
-          <Link href="/" className="lg:hidden">
-            <Mark />
-          </Link>
-          <p className="text-muted-foreground text-sm">
-            airo <span className="opacity-50">/</span> sales-research-agent <span className="opacity-50">/</span>{" "}
-            <span className="text-foreground font-medium">{title}</span>
-          </p>
-          {inDrill && <span className="bg-brand/15 text-brand rounded-full px-2.5 py-1 text-xs font-medium">Test incident</span>}
-          <span className="text-muted-foreground ml-auto hidden font-mono text-xs tabular-nums sm:block">
-            {now ? new Date(now).toISOString().slice(11, 19) : "--:--:--"} UTC
-          </span>
-          <RunButton />
-        </header>
-        <main className="soft-grid w-full flex-1 px-6 py-8 lg:px-8">{children}</main>
+      <div className="flex min-w-0 flex-1 flex-col lg:h-screen lg:py-2 lg:pr-2">
+        <div className="border-border bg-background flex min-h-0 flex-1 flex-col lg:overflow-y-auto lg:rounded-xl lg:border">
+          <header className="border-border bg-background/85 sticky top-0 z-30 flex h-12 items-center gap-3 border-b px-5 backdrop-blur-md lg:px-6">
+            <Link href="/" className="lg:hidden">
+              <Mark className="size-5" />
+            </Link>
+            <p className="text-muted-foreground flex min-w-0 items-center gap-1.5 truncate text-[13px]">
+              <span className="hidden sm:inline">airo</span>
+              <span className="hidden opacity-40 sm:inline">/</span>
+              <span className="hidden md:inline">sales-research-agent</span>
+              <span className="hidden opacity-40 md:inline">/</span>
+              <span className="text-foreground font-medium">{title}</span>
+            </p>
+            {inDrill && <span className="bg-brand/12 text-brand border-brand/25 rounded-md border px-2 py-0.5 text-xs font-medium">Test incident</span>}
+            <span className="text-muted-foreground ml-auto hidden font-mono text-xs tabular-nums sm:block">
+              {now ? new Date(now).toISOString().slice(11, 19) : "--:--:--"} UTC
+            </span>
+            <RunButton />
+          </header>
+          <main className="w-full flex-1 px-5 py-8 lg:px-10">{children}</main>
+        </div>
       </div>
     </div>
   );
