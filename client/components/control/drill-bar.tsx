@@ -56,7 +56,7 @@ export function DrillBar() {
           <p className="text-lg font-semibold">Run a live incident</p>
           <p className="text-muted-foreground text-sm">
             A real bug in a sandbox copy of the agent, real traffic, real detection, a real fix proven on a family of variants.
-            You approve it. About 12 minutes on our free-tier LLM. The only simulated part is the API outage.
+            You approve it. About 3–5 minutes, then it waits for you. The only simulated part is the API outage.
           </p>
           {err && <p className="text-infected mt-1 text-sm">{err}</p>}
           {d?.ended && d.state !== "idle" && <p className="text-muted-foreground mt-1 text-sm">Last drill: {d.message}</p>}

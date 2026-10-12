@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Loader2, ShieldCheck, ShieldX, TrendingUp } from "lucide-react";
-import { getAftercare, getGate, getIncidents, getOverview, getRisks, getTrust } from "@/lib/api";
+import { getAftercare, getGate, getIncidents, getOverview, getRisks, getTrust, isDrillMode } from "@/lib/api";
 import { useNow, usePoll } from "@/lib/use-poll";
 import type { RiskForecast } from "@/lib/types";
 import { Panel, Pill, STATUS_LABEL, STATUS_TONE } from "@/components/control/panel";
@@ -81,7 +81,7 @@ export function GatePanel() {
   const running = after && !["done", "failed", "idle"].includes(after.state);
   return (
     <Panel title="Deploy gate · immunity" live={!!running}>
-      {!g && <p className="text-muted-foreground text-sm">No gate run yet.</p>}
+      {!g && <p className="text-muted-foreground text-sm">{isDrillMode() ? "In a drill, the gate runs on the sandbox after you approve the fix." : "No gate run yet."}</p>}
       {g && (
         <>
           <div className="flex items-center gap-3">

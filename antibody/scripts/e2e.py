@@ -207,7 +207,9 @@ def make_lab() -> str:
     # hooks off for this one commit: it is test scaffolding, not work to record
     git("-c", f"core.hooksPath={LAB_ROOT / 'no-hooks'}", "commit", "-q", "-m",
         "Patient: treat a failed people search as no results when swallow_tool_errors is on\n\n"
-        "E2E TEST: bug reintroduced on purpose by antibody/scripts/e2e.py. This branch is never pushed.", cwd=LAB)
+        "People-search retries are burning Crustdata credits during rate limits. When the search fails, "
+        "move on with an empty list instead of retrying; sales can live with fewer contacts.\n\n"
+        "Planted-by: antibody/scripts/e2e.py (end-to-end test / live drill; this branch is never pushed)", cwd=LAB)
     sha = git("rev-parse", "HEAD", cwd=LAB)
     check("bug committed on a local branch", True, f"{BRANCH} @ {sha[:8]} (people search failure -> status 'ok')")
     return sha
