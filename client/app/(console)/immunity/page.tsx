@@ -3,41 +3,32 @@
 import { Forecasts, GatePanel } from "@/components/control/side-panels";
 import { getTrust } from "@/lib/api";
 import { usePoll } from "@/lib/use-poll";
-import { Page, PageHeader, Panel, Pill } from "@/components/control/panel";
-import { cn } from "@/lib/utils";
+import { Page, PageHeader, Panel, Pill, Stats } from "@/components/control/panel";
+import { ErrorNote, MockBadge } from "@/components/console/ui";
 
 export default function ImmunityPage() {
-  const trust = usePoll(getTrust, 15000).data;
-  return (
-    <Page>
-      <PageHeader title="Guardrails" description="Every fixed incident becomes a family of tests that guards future deploys, plus forecasts of what is about to break." />
-      <div className="grid gap-6 lg:grid-cols-2">
-        <GatePanel />
-        <Forecasts />
-      </div>
-      <Panel title="Backtest on planted bugs" description="Why the gate can be trusted" flush>
-        {!trust && <p className="text-muted-foreground p-5 text-sm">Loading…</p>}
-        {trust && (
-          <div>
-            <p className="text-muted-foreground border-border border-b px-5 py-3.5 text-sm">
-              The gate would have blocked <span className="text-foreground font-medium">{trust.would_have_blocked} of {trust.seeded_bugs.length}</span> planted bugs before deploy, with{" "}
-              <span className="text-foreground font-medium">{trust.false_alarms} false alarm{trust.false_alarms === 1 ? "" : "s"}</span> on {trust.false_alarm_checks} clean commit{trust.false_alarm_checks === 1 ? "" : "s"}.
-            </p>
-            <ul className="divide-border divide-y">
-              {trust.seeded_bugs.map((b) => (
-                <li key={b.commit} className="flex items-start gap-3 px-5 py-3.5">
-                  <span className={cn("mt-1.5 size-2 shrink-0 rounded-full", b.would_have_blocked ? "bg-healthy" : "bg-muted-foreground")} />
-                  <span className="min-w-0 flex-1">
-                    <span className="block text-sm font-medium">{b.bug}</span>
-                    <span className="text-muted-foreground text-sm">{b.note}</span>
-                  </span>
-                  <Pill tone={b.would_have_blocked ? "healthy" : "muted"} dot>{b.would_have_blocked ? "Blocked" : "Missed"}</Pill>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-      </Panel>
-    </Page>
-  );
+  const report = usePoll(getTrust, 15000);
+  const trust = report.data;
+  const measured = trust?.status === "measured";
+  return <Page>
+    <PageHeader title="Will the same mistake happen again?" description="Each saved issue contributes cases to replay before a release. These reports show what was checked and what the checks missed." />
+    <div className="grid items-start gap-6 lg:grid-cols-2"><GatePanel /><Forecasts /></div>
+    <Panel title="How well do the checks catch known bugs?" description="A retrospective replay against deliberately planted bugs, not a production accuracy score." action={<MockBadge show={report.mock} />}>
+      <ErrorNote error={report.error} updatedAt={report.updatedAt} />
+      {report.loading && <p>Loading replay results…</p>}
+      {trust && <div className="space-y-5">
+        <div className="flex flex-wrap gap-2"><Pill>{trust.label}</Pill><Pill>{trust.seeded_label}</Pill></div>
+        {!measured && <p className="bg-muted rounded-lg p-4 text-sm">Not measured yet. Known bugs are listed below; no catch rate or false alarm rate is available.</p>}
+        {measured && <><Stats items={[
+          { label: "Planted bugs blocked", value: `${trust.would_have_blocked}/${trust.seeded_bugs.length}`, hint: "From the recorded replay" },
+          { label: "Known misses", value: trust.misses.length, hint: "Bugs the gate did not block", tone: trust.misses.length ? "infected" : undefined },
+          { label: "False alarms", value: `${trust.false_alarms}/${trust.false_alarm_checks}`, hint: "Clean revisions incorrectly blocked" },
+        ]} />{trust.created_at && <p className="text-muted-foreground text-xs">Recorded {trust.created_at}</p>}</>}
+        <ul className="divide-border divide-y">{trust.seeded_bugs.map(b => <li key={b.commit + b.check} className="flex flex-wrap items-start gap-3 py-4">
+          <div className="min-w-0 flex-1"><p className="font-medium">{b.bug}</p><p className="text-muted-foreground mt-1 text-sm leading-6">{b.note}</p></div>
+          <Pill tone={!measured ? "muted" : b.would_have_blocked ? "healthy" : "infected"}>{!measured ? "Not measured" : b.would_have_blocked ? "Would block" : "Missed"}</Pill>
+        </li>)}</ul>
+      </div>}
+    </Panel>
+  </Page>;
 }

@@ -6,7 +6,7 @@ import { getAftercare, getGate, getIncidents, getOverview, getRisks, getTrust, i
 import { useNow, usePoll } from "@/lib/use-poll";
 import type { RiskForecast } from "@/lib/types";
 import { Panel, Pill, STATUS_LABEL, STATUS_TONE, Stats, type Tone } from "@/components/control/panel";
-import { ago } from "@/components/console/ui";
+import { ErrorNote, MockBadge, ago } from "@/components/console/ui";
 import { cn } from "@/lib/utils";
 
 /* ----------------------------- vitals strip ----------------------------- */
@@ -34,8 +34,10 @@ export function Forecasts() {
   for (const r of risks.data ?? []) if (!latest.has(r.subject)) latest.set(r.subject, r);
   const list = [...latest.values()];
   return (
-    <Panel title="Forecasts" description="Tools trending toward failure, before they break" live>
-      {!list.length && <p className="text-muted-foreground text-sm">No tool is trending toward failure.</p>}
+    <Panel title="Early warnings" description="Recorded trends that may lead to tool failures" action={<MockBadge show={risks.mock} />}>
+      <ErrorNote error={risks.error} updatedAt={risks.updatedAt} />
+      {risks.loading && <p className="text-muted-foreground text-sm">Loading warnings…</p>}
+      {risks.data && !risks.error && !list.length && <p className="text-muted-foreground text-sm">No warnings recorded. This does not guarantee future reliability.</p>}
       <ul className="space-y-4">
         {list.map((r) => {
           const pct = Math.min(100, (r.current / Math.max(r.threshold, 0.0001)) * 100);
@@ -67,36 +69,42 @@ export function Forecasts() {
 
 export function GatePanel() {
   const gate = usePoll(getGate, 5000);
-  const after = usePoll(getAftercare, 3000).data;
+  const afterState = usePoll(getAftercare, 3000);
+  const after = afterState.data;
   const g = gate.data;
   const running = after && !["done", "failed", "idle"].includes(after.state);
   return (
-    <Panel title="Deploy gate" description="Every fixed incident replays before a deploy" live={!!running}>
-      {!g && <p className="text-muted-foreground text-sm">{isDrillMode() ? "In a drill, the gate runs on the sandbox after you approve the fix." : "No gate run yet."}</p>}
+    <Panel title="Latest release check" description="Replays saved problem cases and healthy cases against a branch" live={!!running} action={<MockBadge show={gate.mock} />}>
+      <ErrorNote error={gate.error} updatedAt={gate.updatedAt} />
+      <ErrorNote error={afterState.error} updatedAt={afterState.updatedAt} />
+      {gate.loading && <p>Loading release check…</p>}
+      {!g && !gate.loading && !gate.error && <p className="text-muted-foreground text-sm">{isDrillMode() ? "In a drill, the gate runs on the sandbox after you approve the fix." : "No gate run yet."}</p>}
       {g && (
         <>
           <div className="flex items-center gap-3">
             <span className={cn("grid size-11 place-items-center rounded-xl border", g.verdict === "safe" ? "border-healthy/25 bg-healthy/10 text-healthy" : "border-infected/25 bg-infected/10 text-infected")}>{g.verdict === "safe" ? <ShieldCheck className="size-5" /> : <ShieldX className="size-5" />}</span>
             <div>
-              <p className={cn("text-xl font-semibold tracking-tight", g.verdict === "safe" ? "text-healthy" : "text-infected")}>{g.verdict === "safe" ? "Safe to ship" : "Blocked"}</p>
+              <p className={cn("text-xl font-semibold tracking-tight", g.verdict === "safe" ? "text-healthy" : "text-infected")}>{g.verdict === "safe" ? "Saved checks passed" : "Blocked"}</p>
               <p className="text-muted-foreground font-mono text-xs">
-                {g.branch} · {g.families.length} famil{g.families.length === 1 ? "y" : "ies"}
+                {g.branch} · {g.families.length} test groups · {g.created_at}
               </p>
             </div>
           </div>
+          <p className="text-muted-foreground mt-3 text-sm">This result covers the saved cases on this branch at the recorded time.</p>
           {g.note && <p className="text-infected mt-3 text-sm">{g.note}</p>}
           <ul className="mt-4 space-y-2">
             {g.families.map((f) => (
               <li key={f.incident_id} className="border-border bg-muted/30 flex items-center justify-between gap-3 rounded-lg border px-3 py-2">
-                <span className="text-muted-foreground truncate font-mono text-xs">{f.incident_id.replace(/^inc_\d+_\d+_/, "")}</span>
+                <Link href={`/incidents/${encodeURIComponent(f.incident_id)}`} className="text-sm underline underline-offset-4">View issue</Link>
                 <span className={cn("shrink-0 font-mono text-xs", f.reopens ? "text-infected" : "text-healthy")}>
-                  {f.must_fix_passed}/{f.must_fix_total} · {f.must_not_change_passed ?? "–"}/{f.must_not_change_total ?? "–"}
+                  Problem cases {f.must_fix_passed}/{f.must_fix_total} · Healthy cases {f.must_not_change_passed ?? "–"}/{f.must_not_change_total ?? "–"}
                 </span>
               </li>
             ))}
           </ul>
         </>
       )}
+      {after?.error && <p className="text-infected mt-3 text-sm">Follow-up failed: {after.error}</p>}
       {running && (
         <p className="text-muted-foreground mt-4 flex items-center gap-2 text-sm">
           <Loader2 className="size-3.5 animate-spin" /> After the merge: {after!.state} main…

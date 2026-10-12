@@ -12,8 +12,8 @@ export function PageHeader({ title, description, actions, meta }: { title: React
     <div className="flex flex-wrap items-end justify-between gap-4 pb-2">
       <div className="min-w-0">
         {meta && <div className="text-muted-foreground mb-2 flex items-center gap-2 text-[13px]">{meta}</div>}
-        <h1 className="text-[26px] leading-tight font-semibold tracking-[-0.02em]">{title}</h1>
-        {description && <p className="text-muted-foreground mt-1.5 max-w-2xl text-[14px] leading-relaxed">{description}</p>}
+        <h1 className="text-3xl sm:text-4xl leading-tight font-semibold tracking-[-0.02em]">{title}</h1>
+        {description && <p className="text-muted-foreground mt-1.5 max-w-3xl text-base leading-relaxed">{description}</p>}
       </div>
       {actions && <div className="flex items-center gap-2">{actions}</div>}
     </div>
@@ -44,8 +44,8 @@ export function Panel({
         <header className="border-border flex min-h-12 items-center gap-2.5 border-b px-5 py-2.5">
           {live && <Dot tone="brand" pulse />}
           <div className="min-w-0">
-            <h2 className="text-[13.5px] font-medium">{title}</h2>
-            {description && <p className="text-muted-foreground text-xs">{description}</p>}
+            <h2 className="text-base font-semibold">{title}</h2>
+            {description && <p className="text-muted-foreground mt-1 text-sm">{description}</p>}
           </div>
           <div className="ml-auto flex items-center gap-2">{action}</div>
         </header>
@@ -100,7 +100,7 @@ export function Stats({ items }: { items: { label: string; value: ReactNode; hin
           <p className="text-muted-foreground text-[13px]">{s.label}</p>
           <p
             className={cn(
-              "mt-1.5 text-[26px] leading-none font-semibold tracking-tight tabular-nums",
+              "mt-1.5 text-3xl leading-none font-semibold tracking-tight tabular-nums",
               s.tone === "healthy" && "text-healthy",
               s.tone === "infected" && "text-infected",
               s.tone === "brand" && "text-brand",
@@ -108,7 +108,7 @@ export function Stats({ items }: { items: { label: string; value: ReactNode; hin
           >
             {s.value}
           </p>
-          {s.hint && <p className="text-muted-foreground mt-2 truncate text-xs">{s.hint}</p>}
+          {s.hint && <p className="text-muted-foreground mt-2 text-sm">{s.hint}</p>}
         </div>
       ))}
     </div>
@@ -142,7 +142,15 @@ export const btn = {
   ghost: "text-muted-foreground hover:text-foreground hover:bg-accent inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm transition-colors",
 };
 
+const CHECK_NAMES: Record<string, string> = {
+  tw_invented_person: "The agent named people it could not verify",
+  tw_empty_after_error: "A failed search was reported as no results",
+  tw_company_match_skipped: "The company identity check was skipped",
+  tw_claimed_success_on_failure: "The agent claimed success after a tool failed",
+  jev_grounded_low: "The answer may contain unsupported claims",
+};
 export const label = (detection: string) => {
+  if (CHECK_NAMES[detection]) return CHECK_NAMES[detection];
   const s = detection.replace(/^tw_/, "").replaceAll("_", " ");
   return s.charAt(0).toUpperCase() + s.slice(1);
 };
@@ -159,10 +167,10 @@ export const STATUS_TONE: Record<string, Tone> = {
 
 export const STATUS_LABEL: Record<string, string> = {
   open: "Detected",
-  diagnosing: "Diagnosing",
-  simulating: "Testing variants",
+  diagnosing: "Finding the cause",
+  simulating: "Reproducing the problem",
   fixing: "Writing a fix",
-  awaiting_approval: "Awaiting approval",
+  awaiting_approval: "Ready for your review",
   resolved: "Resolved",
-  escalated: "Escalated",
+  escalated: "Needs human help",
 };

@@ -32,10 +32,11 @@ export default function IntegrationsPage() {
   return (
     <Page>
       <PageHeader
-        title="Integrations"
-        description="The services Antibody reads from and acts through. Status is checked live on the server."
-        actions={list.length ? <Pill tone={connected === list.length ? "healthy" : "muted"} dot>{connected} of {list.length} connected</Pill> : undefined}
+        title="Connections"
+        description="The services Antibody uses. Configured means the server found the required settings or tools; it does not verify every provider request."
+        actions={list.length ? <Pill tone={connected === list.length ? "healthy" : "muted"} dot>{connected} of {list.length} configured</Pill> : undefined}
       />
+      {info.loading && <p>Loading connection settings…</p>}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {list.map((i) => (
           <div key={i.id} className="border-border bg-card hover:border-foreground/15 flex flex-col rounded-xl border p-5 transition-colors">
@@ -45,7 +46,7 @@ export default function IntegrationsPage() {
               </span>
               <Pill tone={i.connected ? "healthy" : "muted"}>
                 {i.connected ? <Check className="size-3" /> : <CircleDashed className="size-3" />}
-                {i.connected ? "Connected" : "Not connected"}
+                {i.connected ? "Configured" : "Needs setup"}
               </Pill>
             </div>
             <p className="mt-4 font-medium">{i.name}</p>

@@ -28,7 +28,7 @@ export default function FixesPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ids]);
 
-  const merged = details.filter((d) => !!d.resolution?.merged || d.incident.status === "resolved");
+  const merged = details.filter((d) => !!d.resolution?.merged);
   const cost = details.reduce((a, d) => a + (d.resolution?.cost_usd ?? 0), 0);
   const secs = details.length ? details.reduce((a, d) => a + (d.resolution?.duration_ms ?? 0), 0) / details.length / 1000 : 0;
 
@@ -51,7 +51,7 @@ export default function FixesPage() {
         <ul className="divide-border divide-y">
           {details.map((d) => {
             const r = d.resolution!;
-            const isMerged = !!r.merged || d.incident.status === "resolved";
+            const isMerged = !!r.merged;
             const waiting = d.incident.status === "awaiting_approval";
             const pr = r.pr_url?.split("/").pop();
             const accepted = (d.attempts ?? []).find((a) => a.accepted);
@@ -80,7 +80,7 @@ export default function FixesPage() {
                       PR #{pr} <ExternalLink className="size-3" />
                     </a>
                   ) : (
-                    <span className="text-muted-foreground text-xs">Test incident · not pushed</span>
+                    <span className="text-muted-foreground text-xs">No pull request recorded</span>
                   )}
                 </div>
                 <div className="mt-3 ml-12 flex flex-wrap items-center gap-2 text-xs">

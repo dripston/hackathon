@@ -1,14 +1,13 @@
 "use client";
 
 import { Traffic } from "@/components/control/traffic";
-import { VitalsStrip } from "@/components/control/side-panels";
 import { Page, PageHeader } from "@/components/control/panel";
 
 export default function TrafficPage() {
   return (
     <Page>
-      <PageHeader title="Traffic" description="Every request the agent served, checked for silent failures as it happens. Select a run to see what the user got." />
-      <VitalsStrip />
+      <PageHeader title="See the answer. Check the evidence." description="An agent can finish a task and still be wrong. These checks compare its research brief with the tool results behind it." />
+
       <Traffic />
     </Page>
   );

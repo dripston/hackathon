@@ -1,163 +1,73 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, ArrowUpRight, HeartPulse, Sparkles } from "lucide-react";
-import { motion } from "motion/react";
-import { getGate, getIncidents, getOverview, getRuns, getTrust } from "@/lib/api";
+import { ArrowRight, Check, Search, ShieldCheck, Wrench } from "lucide-react";
+import { getGate, getIncidents, getOverview, getRuns, getSystemInfo } from "@/lib/api";
 import { useNow, usePoll } from "@/lib/use-poll";
+import { Page, PageHeader, Panel, Pill, Stats, STATUS_LABEL, STATUS_TONE, label, btn } from "@/components/control/panel";
+import { ErrorNote, MockBadge, ago } from "@/components/console/ui";
 import { DrillBar } from "@/components/control/drill-bar";
-import { IncidentPanel } from "@/components/control/incident-panel";
-import { Dot, Page, PageHeader, Panel, Stats, btn, label } from "@/components/control/panel";
-import { ago } from "@/components/console/ui";
-import { cn } from "@/lib/utils";
-
-const ACTIVE = new Set(["open", "diagnosing", "simulating", "fixing", "awaiting_approval"]);
 
 export default function Overview() {
-  const incidents = usePoll(getIncidents, 2000).data ?? [];
-  const o = usePoll(getOverview, 3000).data;
-  const gate = usePoll(getGate, 10000).data;
-  const trust = usePoll(getTrust, 30000).data;
-  const runs = usePoll(() => getRuns(48), 3000).data ?? [];
-  const now = useNow(1000);
-  const active = incidents.find((i) => ACTIVE.has(i.status));
-  const fixed = incidents.filter((i) => i.status === "resolved").length;
-  const bad = runs.filter((r) => r.score.violations.length).length;
-  const health = runs.length ? Math.round(((runs.length - bad) / runs.length) * 1000) / 10 : null;
-
-  return (
-    <Page>
-      <PageHeader title="Overview" description="Silent failures caught, diagnosed and fixed for sales-research-agent in production." />
-
-      {/* Health: the one thing to know when you open the app. */}
-      <motion.section
-        initial={{ opacity: 0, y: 6 }}
-        animate={{ opacity: 1, y: 0 }}
-        className={cn("border-border bg-card relative overflow-hidden rounded-xl border", active && "border-brand/35")}
-      >
-        <div
-          className={cn(
-            "pointer-events-none absolute inset-y-0 left-0 w-1/2 bg-gradient-to-r to-transparent",
-            active ? "from-brand/[0.09]" : "from-healthy/[0.07]",
-          )}
-          aria-hidden
-        />
-        <div className="relative flex flex-wrap items-center gap-5 px-6 py-5">
-          <span className={cn("grid size-11 place-items-center rounded-xl border", active ? "border-brand/30 bg-brand/10 text-brand" : "border-healthy/25 bg-healthy/10 text-healthy")}>
-            {active ? <Sparkles className="size-5" /> : <HeartPulse className="size-5" />}
-          </span>
-          <div className="min-w-0 flex-1">
-            <p className="flex items-center gap-2 text-lg font-semibold tracking-tight">
-              {active ? "Antibody is handling an incident" : "Your agent is healthy"}
-            </p>
-            <p className="text-muted-foreground text-sm">
-              {active ? `It caught “${label(active.detection).toLowerCase()}” and is working on it now.` : "Every run is checked for silent failures. Nothing needs you right now."}
-            </p>
-          </div>
-          {active ? (
-            <Link href={`/incidents/${encodeURIComponent(active.id)}`} className={btn.primary}>
-              Watch it work <ArrowRight className="size-4" />
-            </Link>
-          ) : (
-            <div className="text-right">
-              <p className="text-healthy text-2xl font-semibold tabular-nums">{health == null ? "—" : `${health}%`}</p>
-              <p className="text-muted-foreground text-xs">clean runs, last {runs.length}</p>
-            </div>
-          )}
-        </div>
-        <RunBars runs={runs.map((r) => ({ id: r.run.run_id, bad: r.score.violations.length > 0, domain: r.run.input.domain, at: r.run.started_at }))} now={now} />
-      </motion.section>
-
-      <Stats
-        items={[
-          { label: "Incidents fixed", value: incidents.length ? fixed : "—", hint: "found, fixed and approved", tone: fixed ? "healthy" : undefined },
-          {
-            label: "Runs · last 10 min",
-            value: o ? o.runs_last_10_min : "—",
-            hint: o?.silent_failures_last_10_min ? `${o.silent_failures_last_10_min} silent failures` : "all checks passing",
-            tone: o?.silent_failures_last_10_min ? "infected" : undefined,
-          },
-          {
-            label: "Deploy gate",
-            value: o?.gate_verdict ? (o.gate_verdict === "safe" ? "Safe" : "Blocked") : "—",
-            hint: gate ? `${gate.families.length} test families guard ${gate.branch}` : "no gate run yet",
-            tone: o?.gate_verdict === "safe" ? "healthy" : o?.gate_verdict ? "infected" : undefined,
-          },
-          { label: "Planted bugs caught", value: trust ? `${trust.would_have_blocked}/${trust.seeded_bugs.length}` : "—", hint: "backtest, misses listed" },
-        ]}
-      />
-
-      <DrillBar />
-
-      <div className="grid gap-6 lg:grid-cols-[1.15fr_1fr]">
-        <IncidentPanel />
-        <RecentTraffic />
+  const overview = usePoll(getOverview, 3000);
+  const incidents = usePoll(getIncidents, 3000);
+  const runs = usePoll(() => getRuns(5), 5000);
+  const gate = usePoll(getGate, 5000);
+  const info = usePoll(getSystemInfo, 30000);
+  const now = useNow(5000);
+  const o = overview.data;
+  const needingDecision = incidents.data?.filter(i => ["awaiting_approval", "escalated"].includes(i.status)) ?? [];
+  const inProgress = incidents.data?.filter(i => !["resolved", "awaiting_approval", "escalated"].includes(i.status)) ?? [];
+  const featured = [...needingDecision, ...inProgress, ...(incidents.data?.filter(i => i.status === "resolved") ?? [])].slice(0, 3);
+  return <Page wide>
+    <PageHeader title="Know what your agent is doing." description="Antibody finds answers that look successful but are wrong, investigates the cause, and tests a fix for you to review." meta={<><span>YOUR AGENT, AT A GLANCE</span><MockBadge show={overview.mock || incidents.mock} /></>} />
+    <section className="border-border bg-card grid overflow-hidden rounded-2xl border lg:grid-cols-[1.1fr_1fr]">
+      <div className="p-6 sm:p-8">
+        <p className="text-muted-foreground text-sm">What we’re protecting</p>
+        <h2 className="mt-2 text-2xl font-semibold">{info.data?.agent.name ?? "Your connected agent"}</h2>
+        <p className="text-muted-foreground mt-3 max-w-xl leading-7">{info.data?.agent.description ?? "Agent details appear here when the workspace responds."}</p>
+        <ErrorNote error={info.error} updatedAt={info.updatedAt} />
+        {info.data && <div className="mt-5 flex flex-wrap gap-2"><Pill>{info.data.agent.data_mode === "replay" ? "RECORDED · tool data" : `${info.data.agent.data_mode.toUpperCase()} · tool data`}</Pill><Pill>{info.data.agent.llm.model || "Model not configured"}</Pill></div>}
+        <Link href="/agents" className="mt-5 inline-flex items-center gap-2 text-sm font-medium underline underline-offset-4">See agent and checks <ArrowRight className="size-4" /></Link>
       </div>
-    </Page>
-  );
-}
-
-/** Status-page bars: one per recent run, oldest on the left. */
-function RunBars({ runs, now }: { runs: { id: string; bad: boolean; domain: string; at: string | null }[]; now: number }) {
-  const slots = 48;
-  const list = [...runs].reverse().slice(-slots);
-  const pad = Array.from({ length: Math.max(0, slots - list.length) });
-  return (
-    <div className="border-border relative border-t px-6 py-4">
-      <div className="flex h-8 items-end gap-[3px]">
-        {pad.map((_, i) => (
-          <span key={`p${i}`} className="bg-muted h-full flex-1 rounded-[2px]" />
-        ))}
-        {list.map((r) => (
-          <span
-            key={r.id}
-            title={`${r.domain} · ${r.bad ? "silent failure" : "clean"} · ${ago(r.at, now)}`}
-            className={cn("h-full flex-1 rounded-[2px] transition-opacity hover:opacity-70", r.bad ? "bg-infected" : "bg-healthy/80")}
-          />
-        ))}
+      <div className="border-border bg-sidebar/40 border-t p-6 sm:p-8 lg:border-l lg:border-t-0">
+        <p className="text-muted-foreground text-sm">How Antibody helps</p>
+        <ol className="mt-5 space-y-5">{[
+          { icon: Search, title: "Find the failure", text: "Compare the answer with what its tools actually returned." },
+          { icon: Wrench, title: "Test a repair", text: "Reproduce the problem and check related cases still work." },
+          { icon: ShieldCheck, title: "You review. Antibody remembers.", text: "Approve the fix; keep its tests to catch the same mistake again." },
+        ].map(({ icon: Icon, title, text }, i) => <li key={title} className="flex gap-4"><span className="bg-muted grid size-9 shrink-0 place-items-center rounded-lg"><Icon className="size-4" /></span><div><p className="font-medium">{i + 1}. {title}</p><p className="text-muted-foreground mt-1 text-sm leading-6">{text}</p></div></li>)}</ol>
       </div>
-      <div className="text-muted-foreground mt-2 flex justify-between text-xs">
-        <span>{list[0] ? ago(list[0].at, now) : "older"}</span>
-        <span>Each bar is one production run</span>
-        <span>now</span>
-      </div>
+    </section>
+    <ErrorNote error={overview.error} updatedAt={overview.updatedAt} />
+    <Stats items={[
+      { label: "Agent runs", value: o?.runs_last_10_min ?? "—", hint: "In the last 10 minutes" },
+      { label: "Runs with a detected failure", value: o?.silent_failures_last_10_min ?? "—", hint: o?.silent_failure_rate == null ? "No rate available yet" : `${Math.round(o.silent_failure_rate * 100)}% of recent runs`, tone: o?.silent_failures_last_10_min ? "infected" : undefined },
+      { label: "Fixes awaiting your review", value: o?.awaiting_approval ?? "—", hint: "Nothing merges without approval", tone: o?.awaiting_approval ? "brand" : undefined },
+      { label: "Latest release check", value: gate.error ? "Unavailable" : gate.loading ? "Loading…" : !gate.data ? "Not checked" : gate.data.verdict === "safe" ? "Passed" : "Blocked", hint: gate.error ? "Report unavailable" : gate.data ? `${gate.data.families.length} saved test groups` : "No result to claim yet", tone: gate.error ? undefined : gate.data?.verdict === "blocked" ? "infected" : gate.data ? "healthy" : undefined },
+    ]} />
+    <div className="grid items-start gap-6 xl:grid-cols-[1.3fr_1fr]">
+      <Panel title="Needs your attention" description="Start here. Review a proposed fix or help with an unresolved issue." action={<MockBadge show={incidents.mock} />}>
+        <ErrorNote error={incidents.error} updatedAt={incidents.updatedAt} />
+        {incidents.loading && <p className="text-muted-foreground">Loading issues…</p>}
+        {incidents.data && !incidents.error && needingDecision.length === 0 && <p className="bg-healthy/5 mb-5 flex gap-3 rounded-lg p-4 text-sm"><Check className="text-healthy size-5 shrink-0" />No human decisions waiting.{inProgress.length ? ` Antibody is working on ${inProgress.length} issue(s).` : " Recent issues are shown below."}</p>}
+        <ul className="divide-border divide-y">{featured.map(i => <li key={i.id} className="py-4 first:pt-0">
+          <div className="mb-2 flex flex-wrap items-center gap-2"><Pill tone={STATUS_TONE[i.status]}>{STATUS_LABEL[i.status]}</Pill><span className="text-muted-foreground text-xs">{ago(i.first_seen, now)}</span></div>
+          <Link href={`/incidents/${encodeURIComponent(i.id)}`} className="group flex items-center justify-between gap-4 font-medium leading-6">{label(i.detection)}<ArrowRight className="size-4 shrink-0 transition-transform group-hover:translate-x-1" /></Link>
+          <p className="text-muted-foreground mt-2 text-sm">{i.status === "awaiting_approval" ? "A candidate passed its checks. Open the issue to review the evidence." : i.status === "escalated" ? "Antibody needs help. Inspect the attempted fixes and what failed." : i.status === "resolved" ? "Open the record to see the outcome and approval." : "Follow the investigation and repair progress."}</p>
+        </li>)}</ul>
+        {incidents.data?.length === 0 && !incidents.error && <p className="text-muted-foreground text-sm">No issues recorded yet. Repeated check failures will appear here.</p>}
+        <Link href="/incidents" className={`${btn.secondary} mt-5`}>View all issues <ArrowRight className="size-4" /></Link>
+      </Panel>
+      <Panel title="Recent agent activity" description="The latest answers and their checks." action={<MockBadge show={runs.mock} />}>
+        <ErrorNote error={runs.error} updatedAt={runs.updatedAt} />
+        {runs.loading && <p>Loading activity…</p>}
+        <ul className="divide-border divide-y">{runs.data?.map(r => <li key={r.run.run_id} className="flex flex-wrap items-center justify-between gap-2 py-4 first:pt-0"><div><p className="font-medium">{r.run.input.domain}</p><p className="text-muted-foreground mt-1 text-xs">{r.run.output ? "Research brief returned" : "No brief returned"} · {ago(r.run.started_at, now)}</p></div><Pill tone={r.score.violations.length ? "infected" : "muted"}>{r.score.violations.length ? "Issue detected" : "No violations recorded"}</Pill></li>)}</ul>
+        {runs.data?.length === 0 && <p className="text-muted-foreground">No agent runs recorded yet.</p>}
+        <Link href="/traffic" className="mt-5 inline-flex items-center gap-2 text-sm underline underline-offset-4">Explore answers and checks <ArrowRight className="size-4" /></Link>
+      </Panel>
     </div>
-  );
-}
-
-function RecentTraffic() {
-  const runs = usePoll(() => getRuns(8), 2000).data ?? [];
-  const now = useNow(1000);
-  return (
-    <Panel
-      title="Recent traffic"
-      live
-      flush
-      action={
-        <Link href="/traffic" className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-xs">
-          View all <ArrowUpRight className="size-3.5" />
-        </Link>
-      }
-    >
-      <ul className="divide-border divide-y">
-        {runs.map((r) => {
-          const bad = r.score.violations.length > 0;
-          const jev = r.score.checks.find((c) => c.id === "jev_grounded")?.score;
-          return (
-            <li key={r.run.run_id} className="flex items-center gap-3 px-5 py-3 text-sm">
-              <Dot tone={bad ? "infected" : "healthy"} />
-              <span className="min-w-0 flex-1 truncate font-medium">{r.run.input.domain}</span>
-              {bad ? (
-                <span className="text-infected truncate text-xs">{label(r.score.violations[0])}</span>
-              ) : (
-                <span className="text-muted-foreground font-mono text-xs tabular-nums">{jev == null ? "" : `grounded ${jev.toFixed(2)}`}</span>
-              )}
-              <span className="text-muted-foreground w-14 text-right font-mono text-xs tabular-nums">{ago(r.run.started_at, now)}</span>
-            </li>
-          );
-        })}
-        {!runs.length && <li className="text-muted-foreground px-5 py-10 text-center text-sm">No traffic yet.</li>}
-      </ul>
-    </Panel>
-  );
+    <ErrorNote error={gate.error} updatedAt={gate.updatedAt} />
+    <details className="border-border rounded-xl border p-5"><summary className="cursor-pointer font-medium">Want to see the full process? Run an isolated demonstration.</summary><p className="text-muted-foreground my-4 text-sm leading-6">This deliberately introduces a bug in a separate copy. It can use model credits. Demonstration results are separate from normal monitoring.</p><DrillBar /></details>
+  </Page>;
 }

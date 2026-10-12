@@ -3,163 +3,74 @@
 import { useEffect, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  Activity,
-  Bot,
-  ChevronsUpDown,
-  GitPullRequest,
-  LayoutDashboard,
-  Plug,
-  Rocket,
-  Settings,
-  ShieldCheck,
-  Siren,
-} from "lucide-react";
-import { getDrill, getIncidents, getSystem, setDrillMode } from "@/lib/api";
-import { useNow, usePoll } from "@/lib/use-poll";
-import { drillServing } from "@/components/control/drill-bar";
-import { RunButton } from "@/components/control/run-button";
+import { Activity, ArrowUpRight, BookOpen, Bot, LayoutDashboard, Plug, Settings, ShieldCheck, Siren } from "lucide-react";
+import { getDrill, getIncidents, getSystem, setDrillMode, USE_MOCK } from "@/lib/api";
+import { usePoll } from "@/lib/use-poll";
+import { drillServing } from "./drill-bar";
 import { Mark } from "@/components/story/site-header";
 import { cn } from "@/lib/utils";
 
-const ACTIVE = new Set(["open", "diagnosing", "simulating", "fixing", "awaiting_approval"]);
-
-const NAV = [
-  {
-    group: "Monitor",
-    items: [
-      { href: "/live", label: "Overview", icon: LayoutDashboard },
-      { href: "/traffic", label: "Traffic", icon: Activity },
-      { href: "/incidents", label: "Incidents", icon: Siren, badge: true },
-      { href: "/fixes", label: "Fixes", icon: GitPullRequest },
-    ],
-  },
-  {
-    group: "Protect",
-    items: [
-      { href: "/immunity", label: "Guardrails", icon: ShieldCheck },
-      { href: "/agents", label: "Agents", icon: Bot },
-    ],
-  },
-  {
-    group: "Setup",
-    items: [
-      { href: "/integrations", label: "Integrations", icon: Plug },
-      { href: "/settings", label: "Settings", icon: Settings },
-      { href: "/connect", label: "Connect an agent", icon: Rocket },
-    ],
-  },
+const PRIMARY = [
+  { href: "/live", label: "Overview", icon: LayoutDashboard },
+  { href: "/incidents", label: "Issues", icon: Siren },
+  { href: "/traffic", label: "Agent activity", icon: Activity },
+  { href: "/immunity", label: "Release checks", icon: ShieldCheck },
+  { href: "/evidence", label: "Evidence", icon: BookOpen },
 ];
-
-const TITLES: [string, string][] = [
-  ["/live", "Overview"],
-  ["/traffic", "Traffic"],
-  ["/incidents/", "Incident"],
-  ["/incidents", "Incidents"],
-  ["/fixes", "Fixes"],
-  ["/immunity", "Guardrails"],
-  ["/agents", "Agents"],
-  ["/integrations", "Integrations"],
-  ["/settings", "Settings"],
-  ["/connect", "Connect an agent"],
+const SETUP = [
+  { href: "/agents", label: "Your agent", icon: Bot },
+  { href: "/integrations", label: "Connections", icon: Plug },
+  { href: "/settings", label: "Configuration", icon: Settings },
 ];
 
 export function AppShell({ children }: { children: ReactNode }) {
   const path = usePathname();
-  const drill = usePoll(getDrill, 2000);
+  const drill = usePoll(getDrill, 3000);
   const inDrill = drillServing(drill.data);
-  // While a test incident runs, every page reads its isolated agent and Antibody.
-  useEffect(() => setDrillMode(inDrill), [inDrill]);
-  const incidents = usePoll(getIncidents, 5000).data ?? [];
-  const open = incidents.filter((i) => ACTIVE.has(i.status)).length;
-  const sys = usePoll(getSystem, 5000).data;
-  const allUp = !!sys && Object.values(sys.modules).every((m) => m === "connected") && sys.watcher === "running";
-  const now = useNow(1000);
-  const title = TITLES.find(([p]) => path.startsWith(p))?.[1] ?? "Antibody";
-
-  return (
-    <div className="bg-sidebar flex min-h-screen w-full">
-      <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col lg:flex">
-        <Link href="/" className="flex items-center gap-2 px-5 pt-5 pb-4 text-[15px] font-semibold tracking-tight">
-          <Mark className="size-5" /> Antibody
-        </Link>
-        <button className="hover:bg-sidebar-accent mx-2.5 flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-left transition-colors">
-          <span className="grid size-7 place-items-center rounded-md bg-gradient-to-br from-[oklch(0.8_0.13_165)] to-[oklch(0.74_0.13_285)] text-[13px] font-bold text-black/80">
-            a
-          </span>
-          <span className="min-w-0 flex-1">
-            <span className="block text-[13px] leading-tight font-medium">airo</span>
-            <span className="text-muted-foreground block truncate text-xs leading-tight">sales-research-agent</span>
-          </span>
-          <ChevronsUpDown className="text-muted-foreground size-3.5" />
-        </button>
-        <nav className="mt-5 flex-1 space-y-6 overflow-y-auto px-2.5">
-          {NAV.map((g) => (
-            <div key={g.group}>
-              <p className="text-muted-foreground/70 px-2.5 pb-1.5 text-[11px] font-medium">{g.group}</p>
-              <ul className="space-y-px">
-                {g.items.map(({ href, label, icon: Icon, badge }) => {
-                  const on = href === "/incidents" ? path.startsWith("/incidents") : path === href || path.startsWith(href + "/");
-                  return (
-                    <li key={href}>
-                      <Link
-                        href={href}
-                        className={cn(
-                          "flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-[13.5px] transition-colors",
-                          on ? "bg-sidebar-accent text-foreground" : "text-muted-foreground hover:bg-sidebar-accent/60 hover:text-foreground",
-                        )}
-                      >
-                        <Icon className={cn("size-4", on ? "text-foreground" : "opacity-80")} strokeWidth={1.75} />
-                        <span className="flex-1">{label}</span>
-                        {badge && open > 0 && (
-                          <span className="bg-brand/20 text-brand rounded px-1.5 text-[11px] font-semibold tabular-nums">{open}</span>
-                        )}
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          ))}
-        </nav>
-        <div className="space-y-1 p-2.5">
-          <Link href="/integrations" className="hover:bg-sidebar-accent/60 flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-xs transition-colors">
-            <span className={cn("size-1.5 rounded-full", !sys ? "bg-muted-foreground" : allUp ? "bg-healthy" : "bg-infected")} />
-            <span className="text-muted-foreground">{!sys ? "Checking systems…" : allUp ? "All systems operational" : "Some systems degraded"}</span>
-          </Link>
-          <div className="flex items-center gap-2.5 rounded-md px-2.5 py-2">
-            <span className="bg-sidebar-accent grid size-7 place-items-center rounded-full text-xs font-semibold">R</span>
-            <span className="min-w-0 flex-1">
-              <span className="block text-[13px] leading-tight font-medium">Rehaan</span>
-              <span className="text-muted-foreground block text-xs leading-tight">On call</span>
-            </span>
-            <span className="bg-healthy/15 text-healthy rounded px-1.5 py-0.5 text-[10px] font-medium">ON CALL</span>
-          </div>
-        </div>
-      </aside>
-
-      <div className="flex min-w-0 flex-1 flex-col lg:h-screen lg:py-2 lg:pr-2">
-        <div className="border-border bg-background flex min-h-0 flex-1 flex-col lg:overflow-y-auto lg:rounded-xl lg:border">
-          <header className="border-border bg-background/85 sticky top-0 z-30 flex h-12 items-center gap-3 border-b px-5 backdrop-blur-md lg:px-6">
-            <Link href="/" className="lg:hidden">
-              <Mark className="size-5" />
-            </Link>
-            <p className="text-muted-foreground flex min-w-0 items-center gap-1.5 truncate text-[13px]">
-              <span className="hidden sm:inline">airo</span>
-              <span className="hidden opacity-40 sm:inline">/</span>
-              <span className="hidden md:inline">sales-research-agent</span>
-              <span className="hidden opacity-40 md:inline">/</span>
-              <span className="text-foreground font-medium">{title}</span>
-            </p>
-            {inDrill && <span className="bg-brand/12 text-brand border-brand/25 rounded-md border px-2 py-0.5 text-xs font-medium">Test incident</span>}
-            <span className="text-muted-foreground ml-auto hidden font-mono text-xs tabular-nums sm:block">
-              {now ? new Date(now).toISOString().slice(11, 19) : "--:--:--"} UTC
-            </span>
-            <RunButton />
-          </header>
-          <main className="w-full flex-1 px-5 py-8 lg:px-10">{children}</main>
-        </div>
+  useEffect(() => { setDrillMode(inDrill); return () => setDrillMode(false); }, [inDrill]);
+  const incidents = usePoll(getIncidents, 5000);
+  const decisions = incidents.data?.filter(i => ["awaiting_approval", "escalated"].includes(i.status)).length ?? 0;
+  const system = usePoll(getSystem, 5000);
+  const healthy = !!system.data?.ok && !system.error;
+  const title = [...PRIMARY, ...SETUP].find(n => path === n.href || path.startsWith(n.href + "/"))?.label ?? "Workspace";
+  const nav = (items: typeof PRIMARY) => items.map(({ href, label, icon: Icon }) => {
+    const active = path === href || path.startsWith(href + "/");
+    return <Link key={href} href={href} aria-current={active ? "page" : undefined} className={cn("flex items-center gap-3 rounded-lg px-3 py-3 text-sm transition-colors", active ? "bg-sidebar-accent text-foreground font-medium" : "text-muted-foreground hover:bg-sidebar-accent hover:text-foreground")}>
+      <Icon className="size-4 shrink-0" /><span>{label}</span>
+      {href === "/incidents" && decisions > 0 && <span className="bg-infected/15 text-infected ml-auto rounded px-2 text-xs">{decisions}</span>}
+    </Link>;
+  });
+  return <div className="bg-sidebar flex min-h-screen w-full">
+    <a href="#workspace-content" className="bg-background fixed left-4 top-2 z-50 -translate-y-20 rounded p-3 focus:translate-y-0">Skip to content</a>
+    <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r lg:flex">
+      <Link href="/live" className="flex items-center gap-3 px-6 py-7 text-xl font-semibold"><Mark className="size-6" />Antibody</Link>
+      <p className="text-muted-foreground px-6 pb-6 text-sm leading-6">Understand failures.<br />Review fixes. Prevent repeats.</p>
+      <nav aria-label="Workspace" className="flex-1 space-y-6 overflow-y-auto px-3">
+        <div className="space-y-1">{nav(PRIMARY)}</div>
+        <details open={SETUP.some(n => path === n.href) || path === "/connect" || path === "/fixes"}>
+          <summary className="text-muted-foreground cursor-pointer px-3 py-2 text-xs uppercase tracking-widest">More tools</summary>
+          {nav(SETUP)}<Link href="/fixes" className="text-muted-foreground block px-3 py-3 text-sm">Fix history</Link><Link href="/connect" className="text-muted-foreground block px-3 py-3 text-sm">Agent setup guide</Link>
+        </details>
+      </nav>
+      <div className="border-t p-5">
+        <Link href="/integrations" className="flex items-center gap-2 text-sm"><span className={cn("size-2 rounded-full", healthy ? "bg-healthy" : "bg-muted-foreground")} />{system.error ? "Server unavailable" : !system.data ? "Checking connection…" : healthy ? "Backend connected" : "Some modules unavailable"}</Link>
+        <p className="text-muted-foreground mt-2 text-xs">Connection status, not an agent quality score.</p>
+        <Link href="/" className="text-muted-foreground mt-5 flex items-center gap-2 text-sm">About Antibody <ArrowUpRight className="size-3" /></Link>
       </div>
+    </aside>
+    <div className="bg-background min-w-0 flex-1">
+      <header className="bg-background/95 sticky top-0 z-30 border-b backdrop-blur">
+        <div className="mx-auto flex max-w-[1440px] items-center justify-between gap-3 px-5 py-4 sm:px-8">
+          <Link href="/live" className="flex items-center gap-2 font-semibold lg:hidden"><Mark className="size-5" />Antibody</Link>
+          <p className="text-muted-foreground hidden text-sm lg:block">Workspace <span className="mx-3 opacity-40">/</span><span className="text-foreground">{title}</span></p>
+          <span className="text-muted-foreground text-xs">{USE_MOCK ? "MOCK DATA" : inDrill ? "SIMULATED · isolated exercise" : "Connected workspace"}</span>
+        </div>
+        <nav aria-label="Mobile workspace" className="flex gap-1 overflow-x-auto px-3 pb-2 lg:hidden">{nav(PRIMARY)}<Link href="/settings" className="text-muted-foreground px-3 py-3 text-sm">Settings</Link></nav>
+      </header>
+      {USE_MOCK && <p role="status" className="border-b bg-muted px-6 py-3 text-sm">MOCK DATA · saved examples. No live changes are made.</p>}
+      {inDrill && <p role="status" className="border-brand/25 bg-brand/10 text-brand border-b px-6 py-3 text-sm">You’re viewing an isolated demonstration. Issues and decisions on these pages belong to the exercise.</p>}
+      {system.error && !USE_MOCK && <p role="status" className="text-infected border-b px-6 py-3 text-sm">The server cannot be reached. Any previously loaded data may be out of date.</p>}
+      <main id="workspace-content" className="mx-auto max-w-[1440px] px-5 py-8 sm:px-8 lg:py-10">{children}</main>
     </div>
-  );
+  </div>;
 }

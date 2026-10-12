@@ -136,6 +136,7 @@
   }
   html {
     @apply font-sans;
+    zoom: 0.9;
   }
   h1, h2, h3 {
     font-family: var(--font-display);
